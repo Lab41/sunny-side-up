@@ -1,6 +1,6 @@
 #!/bin/bash
 
-__image=lab41/neon
+__image=lab41/neon-cuda
 
 docker run  -it \
             --privileged \
