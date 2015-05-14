@@ -35,3 +35,4 @@ RUN git clone https://github.com/facebook/iTorch.git && \
 
 # expose iTorch notebook
 EXPOSE 8888
+CMD ["itorch","notebook","--ip='*'"]
