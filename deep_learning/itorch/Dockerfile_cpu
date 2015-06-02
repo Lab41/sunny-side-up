@@ -33,6 +33,11 @@ RUN git clone https://github.com/facebook/iTorch.git && \
     cd iTorch && \
     luarocks make
 
+# install unsupervised learning package
+RUN git clone https://github.com/koraykv/unsup.git && \
+    cd unsup && \
+    luarocks make
+
 # expose iTorch notebook
 EXPOSE 8888
 VOLUME /data
