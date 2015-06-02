@@ -35,4 +35,6 @@ RUN git clone https://github.com/facebook/iTorch.git && \
 
 # expose iTorch notebook
 EXPOSE 8888
+VOLUME /data
+WORKDIR /data
 CMD ["itorch","notebook","--ip='*'"]
