@@ -38,6 +38,17 @@ RUN git clone https://github.com/koraykv/unsup.git && \
     cd unsup && \
     luarocks make
 
+# setup graph package
+RUN apt-get install --assume-yes graphviz && \
+    git clone https://github.com/torch/graph.git && \
+    cd graph && \
+    luarocks make
+
+# setup nngraph package
+RUN git clone https://github.com/torch/nngraph.git && \
+    cd nngraph && \
+    luarocks make
+
 # expose iTorch notebook
 EXPOSE 8888
 VOLUME /data
