@@ -31,7 +31,7 @@ def word_feats(sentence, tokenizer=word_tokenize, remove_stopwords=False,
                 stemming word features.
 
         @Return:
-            List of features of the follwing form:
+            List of features of the following form:
                 {word_1: True, word_2: True, ... , word_n: True}
     '''
 
