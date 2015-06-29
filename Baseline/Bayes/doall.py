@@ -23,7 +23,7 @@ def main(argv):
             usage()
             sys.exit()
         elif opt == '-i':
-        	# Updates PATH to Stanford Tweet CSV data set
+            # Updates PATH to Stanford Tweet CSV data set
             if arg:
                 PATH = arg
             else:
