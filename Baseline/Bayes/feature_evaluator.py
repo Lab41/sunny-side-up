@@ -32,7 +32,7 @@ def evaluate_features(trained_classifier, test_data):
         testSets[predicted].add(i)
 
     # Prints metrics to show how well the feature selection did
-    print 'Test on {} instances'.format(len(test_data))
+    print 'Test on {} instances\n'.format(len(test_data))
     print 'accuracy:', nltk.classify.util.accuracy(trained_classifier,
                                                    test_data)
     print 'pos precision:', nltk.metrics.precision(referenceSets[pos],
