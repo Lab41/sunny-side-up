@@ -13,11 +13,12 @@ from ingest_twitter import split_tweets
 def main(argv):
     # Initial local path for Stanford Twitter Data
     PATH = './StanfordTweetData/training.1600000.processed.noemoticon.csv'
+    FEAT_PATH = './twitter_features.txt'
 
     # Parse command line arguments
     try:
         long_flags = ["help", "bernoulli", "multinomial", "gaussian"]
-        opts, args = getopt.getopt(argv, "hi:", long_flags)
+        opts, args = getopt.getopt(argv, "hi:f:", long_flags)
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -36,6 +37,8 @@ def main(argv):
                 print('Argument expected for the -i option\n')
                 usage()
                 sys.exit(2)
+        elif opt == '-f':
+            FEAT_PATH = arg
         elif opt in ("bernoulli", "multinomial", "gaussian"):
             print("WARNING: Chosen classifier increases testing time")
             pipeline = None
@@ -50,7 +53,14 @@ def main(argv):
     # Perform tweet parsing and learning
     print("Opening CSV file...")
     print("Extracting Features...")
-    all_data = open_stanford_twitter_csv(PATH, feat_extractor=word_feats)
+
+    all_data = list()
+    # Checks if all_data has already been set
+    if any([opt == '-f' for opt, arg in opts]):
+        tweet_feats = open(FEAT_PATH, 'r')
+        all_data = [eval(line) for line in tweet_feats]
+    else:
+        all_data = open_stanford_twitter_csv(PATH, feat_extractor=word_feats)
 
     print("CSV file opened and features extracted")
     train_set, dev_set, test_set = split_tweets(all_data, train=.9,
@@ -67,15 +77,17 @@ def main(argv):
 def usage():
     print('Usage: doall.py [-i file | -h]')
     print('Options and arguments:')
-    print('-h\t: print this help message and exit (also --help)')
-    print('-i file\t: specify path for StanfordTweet input CSV file\n')
+    print('-h\t\t: print this help message and exit (also --help)')
+    print('-i csv_file\t: specify path for StanfordTweet input CSV file')
+    print('-f txt_file\t: specify path for txt file containing tweet features')
+    print('')
     print('--bernoulli\t: specifies the use a Bernoulli Naive Bayes classifier')
     print('\t\t  from the nltk\'s scikit learn integration')
     print('--multinomial\t: specifies the use a Multinomial Naive Bayes')
     print('\t\t  classifier from the nltk\'s scikit learn integration')
     print('--gaussian\t: specifies the use a Gaussian Naive Bayes classifier')
     print('\t\t  from the nltk\'s scikit learn integration')
-    print('--help\t: print this help message and exit (also -h)\n')
+    print('--help\t\t: print this help message and exit (also -h)\n')
 
 if __name__ == '__main__':
     main(sys.argv[1:])
