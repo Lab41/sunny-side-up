@@ -13,7 +13,7 @@ def main(argv):
 
     # Parse command line arguments
     try:
-        opts, args = getopt.getopt(argv, "hi", ["help"])
+        opts, args = getopt.getopt(argv, "hi:", ["help"])
     except getopt.GetoptError:
         usage()
         sys.exit(2)

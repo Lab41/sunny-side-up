@@ -58,11 +58,11 @@ def open_stanford_twitter_csv(full_file_path, feat_extractor=None):
             # Gets tweets string from line in csv
             tweet_string = tweet[5]
             # Gets feature from Sentiment dictionary
-            sent = Sentiment(int(tweet[0]))
+            sent = Sentiment[int(tweet[0])]
             # If a feat_extractor function was provided, apply it to tweet
             if feat_extractor:
                 features = feat_extractor(tweet_string)
-                tweet_to_sentiment.append(features, sent)
+                tweet_to_sentiment.append((features, sent))
             else:
                 tweet_to_sentiment.append((tweet_string, sent))
     return tweet_to_sentiment
