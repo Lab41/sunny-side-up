@@ -1,6 +1,9 @@
 import sys
 import getopt
 from nltk import NaiveBayesClassifier
+from nltk.classify.scikitlearn import SklearnClassifier
+from sklearn.naive_bayes import BernoulliNB, MultinomialNB, GaussianNB
+from sklearn.pipeline import Pipeline
 from import_stanford_twitter import open_stanford_twitter_csv
 from feature_evaluator import evaluate_features
 from feature_extractors import word_feats
@@ -13,11 +16,14 @@ def main(argv):
 
     # Parse command line arguments
     try:
-        opts, args = getopt.getopt(argv, "hi:", ["help"])
+        long_flags = ["help", "bernoulli", "multinomial", "gaussian"]
+        opts, args = getopt.getopt(argv, "hi:", long_flags)
     except getopt.GetoptError:
         usage()
         sys.exit(2)
 
+    # Classifier variable. Used for training on tweet features below
+    classifier = NaiveBayesClassifier
     for opt, arg in opts:
         if opt in ('-h', '--help'):
             usage()
@@ -30,18 +36,31 @@ def main(argv):
                 print('Argument expected for the -i option\n')
                 usage()
                 sys.exit(2)
+        elif opt in ("bernoulli", "multinomial", "gaussian"):
+            print("WARNING: Chosen classifier increases testing time")
+            pipeline = None
+            if opt == "bernoulli":
+                pipeline = Pipeline([('nb', BernoulliNB())])
+            elif opt == "multinomial":
+                pipeline = Pipeline([('nb', MultinomialNB())])
+            elif opt == "gaussian":
+                pipeline = Pipeline([('nb', GaussianNB())])
+            classifier = SklearnClassifier(pipeline)
 
     # Perform tweet parsing and learning
     print("Opening CSV file...")
     print("Extracting Features...")
     all_data = open_stanford_twitter_csv(PATH, feat_extractor=word_feats)
+
     print("CSV file opened and features extracted")
     train_set, dev_set, test_set = split_tweets(all_data, train=.9,
                                                 dev=0, test=.1, shuffle=True)
     print("Data split into sets")
-    classifier = NaiveBayesClassifier.train(train_set)
+
+    classifier.train(train_set)
     print("Classifier trained")
-    print("Evaluating accuracy and other features")
+
+    print("Evaluating accuracy and other features\n")
     evaluate_features(classifier, test_set)
 
 
@@ -50,6 +69,12 @@ def usage():
     print('Options and arguments:')
     print('-h\t: print this help message and exit (also --help)')
     print('-i file\t: specify path for StanfordTweet input CSV file\n')
+    print('--bernoulli\t: specifies the use a Bernoulli Naive Bayes classifier')
+    print('\t\t  from the nltk\'s scikit learn integration')
+    print('--multinomial\t: specifies the use a Multinomial Naive Bayes')
+    print('\t\t  classifier from the nltk\'s scikit learn integration')
+    print('--gaussian\t: specifies the use a Gaussian Naive Bayes classifier')
+    print('\t\t  from the nltk\'s scikit learn integration')
     print('--help\t: print this help message and exit (also -h)\n')
 
 if __name__ == '__main__':
