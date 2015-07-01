@@ -40,7 +40,18 @@ def main(argv):
         elif opt == '-f':
             FEAT_PATH = arg
         elif opt in ("bernoulli", "multinomial", "gaussian"):
-            print("WARNING: Chosen classifier increases testing time")
+            ''' This section allows you to use scikit-learn packages for
+            text classification.
+
+            "NLTK’s SklearnClassifier makes the process much easier,
+            since you don’t have to convert feature dictionaries to
+            numpy arrays yourself, or keep track of all known features.
+            The Scikits classifiers also tend to be more memory efficient
+            than the standard NLTK classifiers, due to their use of sparse
+            arrays.
+
+            Credit to "Jacob" and his post on Steamhacker.com
+            '''
             pipeline = None
             if opt == "bernoulli":
                 pipeline = Pipeline([('nb', BernoulliNB())])
