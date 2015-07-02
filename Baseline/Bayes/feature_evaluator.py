@@ -12,12 +12,12 @@ def evaluate_features(trained_classifier, test_data):
 
         test_data:
                 Of the following form:
-                {
+                [
                         (feature set 1, label 1)
                         (feature set 2, label 2)
                         ....
                         (feature set n, label n)
-                }
+                ]
     '''
 
     # Data pre-processing for analysis
@@ -26,13 +26,14 @@ def evaluate_features(trained_classifier, test_data):
     pos = Sentiment[4]
     neg = Sentiment[0]
 
+    print("Classifying test data...")
     for i, (features, label) in enumerate(test_data):
         referenceSets[label].add(i)
         predicted = trained_classifier.classify(features)
         testSets[predicted].add(i)
 
     # Prints metrics to show how well the feature selection did
-    print 'Test on {} instances'.format(len(test_data))
+    print 'Test on {} instances\n'.format(len(test_data))
     print 'accuracy:', nltk.classify.util.accuracy(trained_classifier,
                                                    test_data)
     print 'pos precision:', nltk.metrics.precision(referenceSets[pos],
@@ -43,4 +44,10 @@ def evaluate_features(trained_classifier, test_data):
                                                    testSets[neg])
     print 'neg recall:', nltk.metrics.recall(referenceSets[neg],
                                              testSets[neg])
-    trained_classifier.show_most_informative_features(20)
+
+    # If trained_classifier is of nltk.classify.naivebayes.NaiveBayesClassifier
+    # then this method shows the most informative features
+    try:
+        trained_classifier.show_most_informative_features(20)
+    except Exception:
+        return

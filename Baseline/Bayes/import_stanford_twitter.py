@@ -3,6 +3,7 @@ import csv
 # Dictionary that defines the Sentiment features
 Sentiment = {0: 'neg', 2: 'neutral', 4: 'pos'}
 
+
 def latin_csv_reader(csv_data, dialect=csv.excel, **kwargs):
     ''' Function that takes an opened CSV file with
         ASCII or UTF-8 encoding and convert's to Latin-1
@@ -13,7 +14,7 @@ def latin_csv_reader(csv_data, dialect=csv.excel, **kwargs):
             dialect -- specifies the file dialect type
 
             **kwargs -- other typical arguments one would pass
-                into the csv.reader() function. 
+                into the csv.reader() function.
                 Ex: delimiter=','
 
         @Return:
@@ -34,7 +35,7 @@ def open_stanford_twitter_csv(full_file_path, feat_extractor=None):
         sentiments to a list
 
         @Arguments:
-            full_file_path -- full system file path to the 
+            full_file_path -- full system file path to the
                 training.1600000.processed.noemoticon.csv data set (or others of
                 a similar structure)
 
@@ -57,14 +58,15 @@ def open_stanford_twitter_csv(full_file_path, feat_extractor=None):
             # Gets tweets string from line in csv
             tweet_string = tweet[5]
             # Gets feature from Sentiment dictionary
-            sent = Sentiment(int(tweet[0]))
+            sent = Sentiment[int(tweet[0])]
             # If a feat_extractor function was provided, apply it to tweet
             if feat_extractor:
                 features = feat_extractor(tweet_string)
-                tweet_to_sentiment.append(features, sent)
+                tweet_to_sentiment.append((features, sent))
             else:
                 tweet_to_sentiment.append((tweet_string, sent))
     return tweet_to_sentiment
+
 
 def tweets_to_txt(read_path, write_path):
     ''' Function that takes in a path to the StanfordTweetData CSV
@@ -76,5 +78,4 @@ def tweets_to_txt(read_path, write_path):
         reader = latin_csv_reader(twitter_csv, delimiter=',')
         # For each line in CSV, write each tweet with a new line to the output
         for line in reader:
-        	output.write(line[5].encode('UTF-8') + '\n')
-
+            output.write(line[5].encode('UTF-8') + '\n')
