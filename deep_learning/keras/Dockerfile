@@ -29,6 +29,9 @@ RUN cd /tmp && \
     python setup.py install && \
     rm -rf /tmp/keras
 
+# Adding ipython
+RUN pip install ipython pyzmq jinja2 tornado jsonschema
+
 # setup data volume
 VOLUME ["/data"]
 
