@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # image name
-__image=lab41/keras
+__image=lab41/keras-cuda
 __volume_host=/opt
 __volume_cntr=/data
 
