@@ -1,4 +1,5 @@
 import csv
+import logging
 
 # Dictionary that defines the Sentiment features
 Sentiment = {0: 'neg', 2: 'neutral', 4: 'pos'}
@@ -29,7 +30,7 @@ def latin_csv_reader(csv_data, dialect=csv.excel, **kwargs):
         yield [unicode(cell, 'latin-1') for cell in row]
 
 
-def open_stanford_twitter_csv(full_file_path, feat_extractor=None):
+def open_stanford_twitter_csv(full_file_path, feat_extractor=None, verbose=False):
     ''' Function that takes in a path to the StanfordTweetData CSV
         file, opens it, and adds tweet strings and their respective
         sentiments to a list
@@ -54,7 +55,9 @@ def open_stanford_twitter_csv(full_file_path, feat_extractor=None):
     with open(full_file_path, 'r') as twitter_csv:
         # Open CSV file for reading in 'latin-1'
         reader = latin_csv_reader(twitter_csv, delimiter=',')
-        for tweet in reader:
+        for index, tweet in enumerate(reader):
+            if verbose and index % 10000 == 0:
+                logging.info("PROGRESS: at tweet #%s", index)
             # Gets tweets string from line in csv
             tweet_string = tweet[5]
             # Gets feature from Sentiment dictionary
