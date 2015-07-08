@@ -1,6 +1,6 @@
 import sys
 import getopt
-sys.path.insert(0, '../Bayes_NLTK')
+sys.path.insert(0, '../Bayes-NLTK')
 
 from import_stanford_twitter import open_stanford_twitter_csv
 
@@ -54,10 +54,10 @@ def main(argv):
     # Builds model
     model = Doc2Vec(min_count=1, window=10, size=100, sample=1e-4, negative=5, 
                     workers=7)
-    model.build_vocab(iter(all_data))
+    model.build_vocab(all_data)
 
     for epoch in range(10):
-        model.train(iter(shuffle(all_data)))
+        model.train(shuffle(all_data))
 
     if save_model:
         model.save(model_name)
