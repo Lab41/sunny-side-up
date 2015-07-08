@@ -45,30 +45,32 @@ def main(argv):
             logging.basicConfig(format=output_format, level=logging.INFO)
 
     print("Opening CSV file...")
-    all_data = open_stanford_twitter_csv(PATH)
+    all_data = open_stanford_twitter_csv(PATH, verbose=True)
 
     # Generator over all_data helps to save memory usage
-    all_data = [LabeledSentence(tweet.lower().split(), sent)
-                for tweet, sent in iter(all_data)]
+    all_data = [LabeledSentence(tweet.lower().split(), sent) for tweet, sent in iter(all_data)]
 
     # Builds model
-    model = Doc2Vec(min_count=1, window=10, size=100, sample=1e-4, negative=5, 
-                    workers=7)
-    model.build_vocab(all_data)
+    model = Doc2Vec(min_count=1, window=10, size=100, sample=1e-4, negative=5, workers=7)
+    model.build_vocab(iter(all_data))
 
     for epoch in range(10):
-        model.train(shuffle(all_data))
+        shuffle(all_data)
+        model.train(iter(all_data))
 
     if save_model:
         model.save(model_name)
 
-    return
-
 
 def usage():
-    # TODO
-    print("TODO")
-    pass
+    print('Usage: Word2Vec_Pipeline.py [-i file | -s file | -h]')
+    print('Options and arguments:')
+    print('-h\t\t: print this help message and exit (also --help)')
+    print('-i csv_file\t: specify path for StanfordTweet input CSV file')
+    print('-s model_name\t: saves the model creatred by Doc2Vec')
+    print('-v\t\t: makes the operation verbose')
+    print('')
+    print('--help\t\t: print this help message and exit (also -h)\n')
 
 
 if __name__ == "__main__":
