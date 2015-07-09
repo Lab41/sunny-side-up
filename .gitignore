@@ -3,4 +3,5 @@
 *.sublime-workspace
 *.DS_Store
 *.ipynb
-*.zip
+**/.downloads/*
+**/models/*
