@@ -1,7 +1,6 @@
 import os, io
 import csv
 import logging
-from progressbar import ProgressBar
 from urllib2 import urlopen, HTTPError, URLError
 
 
@@ -33,13 +32,15 @@ def latin_csv_reader(csv_data, dialect=csv.excel, **kwargs):
 def get_file(url):
     try:
         # Prevents redownloading
-        fname = './.downloads/' + url.split('/')[-1]
-        if fname in os.listdir('.'):
-            print("File has already been dowloaded")
-            return fname
+        fname = os.path.join(os.getcwd(), '.downloads', url.split('/')[-1])
+        if '.downloads' in os.listdir('.'):
+            if url.split('/')[-1] in os.listdir('./.downloads'):
+                print("File has already been dowloaded")
+                return fname
 
         # Create hidden folder to hold zip file
-        os.mkdir(os.path.join(os.getcwd(), '.downloads'))
+        if not os.path.exists(os.path.join(os.getcwd(), '.downloads')):
+            os.mkdir(os.path.join(os.getcwd(), '.downloads'))
 
         response = urlopen(url)
         # Get total length of content
@@ -49,11 +50,8 @@ def get_file(url):
         # Open dowload file and save locally
         with open(fname, 'wb') as f:
             print("Downloading %s..." % url.split('/')[-1]),
-            for i in range(100):
-                f.write(response.read(chunk_size))
-                if i % 10 == 0:
-                    print('-%i%' % i),
-            print("Downloaded %s successfully")
+            f.write(response.read())
+            print("Success!")
         return fname
 
     # Handle errors

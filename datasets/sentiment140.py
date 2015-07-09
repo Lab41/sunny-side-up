@@ -14,34 +14,35 @@ def load_data(file_path=None, feat_extractor=None, verbose=False):
         sentiments to a list
 
         @Arguments:
-            file_path -- personal system file path to the
+            file_path -- (optional) personal system file path to the
                 training.1600000.processed.noemoticon.csv data set (or others of
                 a similar structure)
 
                 The Stanford Sentiment140 Dataset is of the following format per row:
                     [polarity, tweet id, tweet date, query, user, tweet text]
 
-            feat_extractor -- a function that converts a tweet text string
+            feat_extractor -- (optional) a function that converts a tweet text string
                 and outputs a dictionary of features
+
+            verbose -- if True, this funciton shows logging data as it progresses
 
         @Return:
             A list of tuples of the following format:
                 (tweets/features, sentiment label)
     '''
     tweet_to_sentiment = list()
-    f = None
 
     # Open file path
     if file_path:
         twitter_csv = open(file_path, 'r')
     else:
-        fpath = get_file("http://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip")
-        f = open(fpath, 'rb')
-        zfile = zipfile.ZipFile(f)
-        twitter_csv = StringIO.StringIO(zfile.read('trainingandtestdata/training.1600000.processed.noemoticon.csv'))
+        file_path = get_file("http://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip")
+
+        with zipfile.ZipFile(file_path, 'r') as zp:
+            twitter_csv = zp.open('training.1600000.processed.noemoticon.csv')
             
     # Perform parsing of CSV file            
-    reader = latin_csv_reader(data, delimiter=',')
+    reader = latin_csv_reader(twitter_csv, delimiter=',')
     for index, tweet in enumerate(reader):
         if verbose and index % 10000 == 0:
             logging.info("PROGRESS: at tweet #%s", index)
@@ -56,5 +57,5 @@ def load_data(file_path=None, feat_extractor=None, verbose=False):
             tweet_to_sentiment.append((features, sent))
         else:
             tweet_to_sentiment.append((tweet_string, sent))
-    f.close()
+    twitter_csv.close()
     return tweet_to_sentiment
