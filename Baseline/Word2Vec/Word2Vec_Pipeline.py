@@ -1,6 +1,6 @@
 import sys
 import getopt
-sys.path.insert(0, '../Bayes-NLTK')
+sys.path.insert(0, '../../datasets')
 
 from import_stanford_twitter import open_stanford_twitter_csv
 
@@ -18,6 +18,27 @@ import numpy as np
 # from sklearn.linear_model import LogisticRegression
 from random import shuffle
 
+def train_d2v_model(data):
+    data = [LabeledSentence(tweet.lower().split(), sent) for tweet, sent in data]
+
+    # Builds model
+    print("Building model...")
+    model = Doc2Vec(min_count=1, window=10, size=100, sample=1e-4, negative=5, workers=7)
+    print("Building Vocabulary...")
+    model.build_vocab(data)
+
+    ### TODO ###
+    print("TODO: Figure out how to stop logging because it super slow")
+    logger = logging.getLogger()
+    logger.disabled = True
+
+    print("Training model...")
+    for epoch in range(10):
+        print("Epoch %s..." % epoch)
+        shuffle(data)
+        model.train(data)
+
+    return model
 
 def main(argv):
 
@@ -46,28 +67,12 @@ def main(argv):
 
     print("Opening CSV file...")
     all_data = open_stanford_twitter_csv(PATH, verbose=True)
-
-    # Generator over all_data helps to save memory usage
-    all_data = [LabeledSentence(tweet.lower().split(), sent) for tweet, sent in all_data]
-
-    # Builds model
-    print("Building model...")
-    model = Doc2Vec(min_count=1, window=10, size=100, sample=1e-4, negative=5, workers=7)
-    print("Building Vocabulary...")
-    model.build_vocab(all_data)
-
-    # Stops logging, I think that it is slowing things down alot
-    logger = logging.getLogger()
-    logger.disabled = True
-
-    print("Training model...")
-    for epoch in range(10):
-        print("Epoch %s..." % epoch)
-        shuffle(all_data)
-        model.train(all_data)
+    #all_data = 
+    model = train_d2v_model(all_data)
 
     if save_model:
         model.save(model_name)
+
 
 
 def usage():

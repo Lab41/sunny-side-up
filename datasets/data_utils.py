@@ -39,7 +39,7 @@ def get_file(url):
             return fname
 
         # Create hidden folder to hold zip file
-        os.mkdir(os.path.join(os.getcwd(), '.downloads')
+        os.mkdir(os.path.join(os.getcwd(), '.downloads'))
 
         response = urlopen(url)
         # Get total length of content
@@ -49,11 +49,12 @@ def get_file(url):
         # Open dowload file and save locally
         with open(fname, 'wb') as f:
             # Initialize the visual progress bar for the download
-            pbar = ProgressBar().start()
+            print("Downloading %s..." % url.split('/')[-1]),
             for i in range(100):
                 f.write(response.read(chunk_size))
-                pbar.update(i+1)
-            pbar.finish()
+                if i % 10 == 0:
+                    print('-%i%' % i),
+            print("Downloaded %s successfully")
         return fname
 
     # Handle errors
