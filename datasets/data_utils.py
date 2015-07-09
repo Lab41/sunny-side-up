@@ -1,4 +1,4 @@
-import os, io
+import os
 import csv
 import logging
 import random
