@@ -43,13 +43,10 @@ def get_file(url):
             os.mkdir(os.path.join(os.getcwd(), '.downloads'))
 
         response = urlopen(url)
-        # Get total length of content
-        total_size = int(response.info().getheader('Content-Length').strip())
-        chunk_size = total_size / 100
 
         # Open dowload file and save locally
         with open(fname, 'wb') as f:
-            print("Downloading %s..." % url.split('/')[-1]),
+            print("Downloading %s... " % url.split('/')[-1]),
             f.write(response.read())
             print("Success!")
         return fname

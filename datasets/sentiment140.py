@@ -1,7 +1,5 @@
-import csv
 import logging
 from data_utils import latin_csv_reader, get_file
-from io import StringIO
 import zipfile
 
 # Dictionary that defines the Sentiment features
@@ -40,8 +38,8 @@ def load_data(file_path=None, feat_extractor=None, verbose=False):
 
         with zipfile.ZipFile(file_path, 'r') as zp:
             twitter_csv = zp.open('training.1600000.processed.noemoticon.csv')
-            
-    # Perform parsing of CSV file            
+
+    # Perform parsing of CSV file
     reader = latin_csv_reader(twitter_csv, delimiter=',')
     for index, tweet in enumerate(reader):
         if verbose and index % 10000 == 0:
