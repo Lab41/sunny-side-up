@@ -48,7 +48,6 @@ def get_file(url):
 
         # Open dowload file and save locally
         with open(fname, 'wb') as f:
-            # Initialize the visual progress bar for the download
             print("Downloading %s..." % url.split('/')[-1]),
             for i in range(100):
                 f.write(response.read(chunk_size))
