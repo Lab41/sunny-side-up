@@ -29,43 +29,32 @@ def load_data(file_path=None, feat_extractor=None, verbose=False):
                 (tweets/features, sentiment label)
     '''
     tweet_to_sentiment = list()
-    if file_path:
-        with open(file_path, 'r') as twitter_csv:
-            # Open CSV file for reading in 'latin-1'
-            reader = latin_csv_reader(twitter_csv, delimiter=',')
-            for index, tweet in enumerate(reader):
-                if verbose and index % 10000 == 0:
-                    logging.info("PROGRESS: at tweet #%s", index)
+    f = None
 
-                # Gets tweets string from line in csv
-                tweet_string = tweet[5]
-                # Gets feature from Sentiment dictionary
-                sent = Sentiment[int(tweet[0])]
-                # If a feat_extractor function was provided, apply it to tweet
-                if feat_extractor:
-                    features = feat_extractor(tweet_string)
-                    tweet_to_sentiment.append((features, sent))
-                else:
-                    tweet_to_sentiment.append((tweet_string, sent))
-        return tweet_to_sentiment
+    # Open file path
+    if file_path:
+        twitter_csv = open(file_path, 'r')
     else:
         fpath = get_file("http://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip")
-        with open(fpath, 'rb') as f:
-            zfile = zipfile.ZipFile(f)
-            data = StringIO.StringIO(zfile.read('trainingandtestdata/training.1600000.processed.noemoticon.csv'))
-            reader = latin_csv_reader(data, delimiter=',')
-            for index, tweet in enumerate(reader):
-                if verbose and index % 10000 == 0:
-                    logging.info("PROGRESS: at tweet #%s", index)
+        f = open(fpath, 'rb')
+        zfile = zipfile.ZipFile(f)
+        twitter_csv = StringIO.StringIO(zfile.read('trainingandtestdata/training.1600000.processed.noemoticon.csv'))
+            
+    # Perform parsing of CSV file            
+    reader = latin_csv_reader(data, delimiter=',')
+    for index, tweet in enumerate(reader):
+        if verbose and index % 10000 == 0:
+            logging.info("PROGRESS: at tweet #%s", index)
 
-                # Gets tweets string from line in csv
-                tweet_string = tweet[5]
-                # Gets feature from Sentiment dictionary
-                sent = Sentiment[int(tweet[0])]
-                # If a feat_extractor function was provided, apply it to tweet
-                if feat_extractor:
-                    features = feat_extractor(tweet_string)
-                    tweet_to_sentiment.append((features, sent))
-                else:
-                    tweet_to_sentiment.append((tweet_string, sent))
-        return tweet_to_sentiment
+        # Gets tweets string from line in csv
+        tweet_string = tweet[5]
+        # Gets feature from Sentiment dictionary
+        sent = Sentiment[int(tweet[0])]
+        # If a feat_extractor function was provided, apply it to tweet
+        if feat_extractor:
+            features = feat_extractor(tweet_string)
+            tweet_to_sentiment.append((features, sent))
+        else:
+            tweet_to_sentiment.append((tweet_string, sent))
+    f.close()
+    return tweet_to_sentiment
