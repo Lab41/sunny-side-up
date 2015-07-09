@@ -38,26 +38,25 @@ def get_file(url):
             print("File has already been dowloaded")
             return fname
 
+        # Create hidden folder to hold zip file
+        os.mkdir(os.path.join(os.getcwd(), '.downloads')
+
         response = urlopen(url)
         # Get total length of content
         total_size = int(response.info().getheader('Content-Length').strip())
         chunk_size = total_size / 100
 
-        # Create temporary hidden folder to hold zip file
-        os.mkdir('./.downloads')
-
-        with open(fname, 'wb') as zp:
+        # Open dowload file and save locally
+        with open(fname, 'wb') as f:
             # Initialize the visual progress bar for the download
             pbar = ProgressBar().start()
             for i in range(100):
-                zp.write(response.read(chunk_size))
+                f.write(response.read(chunk_size))
                 pbar.update(i+1)
             pbar.finish()
-
         return fname
 
-
-    #handle errors
+    # Handle errors
     except HTTPError, e:
         print "HTTP Error:", e.code, url
     except URLError, e:
