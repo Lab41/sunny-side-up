@@ -3,3 +3,4 @@
 *.sublime-workspace
 *.DS_Store
 *.ipynb
+*.downloads*
