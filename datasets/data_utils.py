@@ -42,15 +42,17 @@ def get_file(url):
     '''
     try:
         # Prevents redownloading
-        fname = os.path.join(os.getcwd(), '.downloads', url.split('/')[-1])
-        if '.downloads' in os.listdir('.'):
-            if url.split('/')[-1] in os.listdir('./.downloads'):
+        file_path = os.path.dirname(os.path.abspath(__file__))
+        downloads_path = os.path.join(file_path, './.downloads')
+        fname = os.path.join(file_path, '.downloads', url.split('/')[-1])
+        if '.downloads' in os.listdir(file_path):
+            if url.split('/')[-1] in os.listdir(downloads_path):
                 logging.info("File has already been dowloaded")
                 return fname
 
         # Create hidden folder to hold zip file
-        if not os.path.exists(os.path.join(os.getcwd(), '.downloads')):
-            os.mkdir(os.path.join(os.getcwd(), '.downloads'))
+        if not os.path.exists(downloads_path):
+            os.mkdir(downloads_path)
 
         response = urlopen(url)
 

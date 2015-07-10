@@ -71,4 +71,3 @@ def to_txt(write_path, read_path=None, verbose=False):
         # For each line in CSV, write each tweet with a new line to the output
         for line in reader:
             output.write(line[5].encode('UTF-8') + '\n')
-
