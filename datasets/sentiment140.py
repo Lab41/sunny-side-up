@@ -58,3 +58,17 @@ def load_data(file_path=None, feat_extractor=None, verbose=False):
             tweet_to_sentiment.append((tweet_string, sent))
     twitter_csv.close()
     return tweet_to_sentiment
+
+
+def to_txt(write_path, read_path=None, verbose=False):
+    ''' Function that takes in a path to the StanfordTweetData CSV
+        file, opens it, and writes the tweets with new lines to an output
+        file.
+    '''
+    read_path = load_data(file_path=read_path, verbose=verbose)
+    with open(read_path, 'r') as twitter_csv, open(write_path, 'w') as output:
+        reader = latin_csv_reader(twitter_csv, delimiter=',')
+        # For each line in CSV, write each tweet with a new line to the output
+        for line in reader:
+            output.write(line[5].encode('UTF-8') + '\n')
+
