@@ -25,7 +25,10 @@ def train_d2v_model(data, epoch_num=10):
     @Arguments:
         data -- the loaded sentiment140 dataset from module
 
-        epoch_num -- sets the number of epochs to train no
+        epoch_num -- sets the number of epochs to train on
+
+    @Return:
+        A trained Doc2Vec model
     '''
     labeled_sent = list()
     pos_count = 0
@@ -42,7 +45,7 @@ def train_d2v_model(data, epoch_num=10):
 
     logging.info("Training on %d Positive and %d Negative tweets" % (pos_count, neg_count))
     logging.info("Building model...")
-    
+
     # NOTE!
     # Setting min_count > 1 can cause some tweets to "disappear" later #
     # from the Doc2Vec sentence corpus. #
@@ -78,6 +81,9 @@ def to_sklearn_format(model, test=.1):
 
     @Raises:
         ValueError -- if test is less than 0 or greater then 1
+
+    @Return:
+        4 numpy arrays consisting of the train/testing data and labels
     '''
     if test <= 0 or test >= 1:
         raise ValueError('test variable must be between 0-1')
@@ -115,7 +121,6 @@ def test_model(model):
 
     @Argument:
         model -- A trained and loaded Doc2Vec model of Sentiment140
-
     '''
     logging.info("Developing training and testing sets...")
     # Converts data to Sklearn acceptable numpy format

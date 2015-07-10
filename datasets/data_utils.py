@@ -31,6 +31,15 @@ def latin_csv_reader(csv_data, dialect=csv.excel, **kwargs):
 
 
 def get_file(url):
+    ''' Takes in a file url from the web and dowloads that file to
+    to a local directory called ./.downloads
+
+    @Arguments:
+        url -- the url of the chosen dataset
+
+    @Raises:
+        HTTPError, URLError
+    '''
     try:
         # Prevents redownloading
         fname = os.path.join(os.getcwd(), '.downloads', url.split('/')[-1])
