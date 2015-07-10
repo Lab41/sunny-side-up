@@ -94,7 +94,6 @@ def test_model(model):
                        intercept_scaling=1, penalty='l2', random_state=None,
                        tol=0.0001)
     logging.info("Accuracy: %.2f" % classifier.score(test_arr, test_labels))
-    
 
 
 def main(argv):
@@ -106,7 +105,7 @@ def main(argv):
         sys.exit(2)
 
     model_name = None
-    verb = False
+    verbose = False
     testing = False
     for opt, arg in opts:
         if opt in ("-h", "--help"):
@@ -117,7 +116,7 @@ def main(argv):
         elif opt in ("-t", "-test"):
             testing = True
         elif opt in ("-v", "--verbose"):
-            verb = True
+            verbose = True
             output_format = '%(asctime)s : %(levelname)s : %(message)s'
             logging.basicConfig(format=output_format, level=logging.INFO)
 
@@ -125,8 +124,8 @@ def main(argv):
     ## Remove ability to remove @mentions
     ## Using a better tokenizer
     logging.info("Opening CSV file...")
-    all_data = sentiment140.load_data(verbose=verb)
-    model = train_d2v_model(all_data, epoch_num=1)
+    all_data = sentiment140.load_data(verbose=verbose)
+    model = train_d2v_model(all_data, epoch_num=10)
 
     if model_name:
         model.save(model_name)
@@ -140,12 +139,12 @@ def usage():
     print('Options and arguments:')
     print('-h\t\t: print this help message and exit (also --help)')
     print('-s model_name\t: saves the model creatred by Doc2Vec (also --help)')
-    print('-v\t\t: makes the operation verbose')
+    print('-v\t\t: makes the operation verbose by showing logging (also --verbose)')
     print('')
     print('--help\t\t: print this help message and exit (also -h)\n')
     print('--save\t\t: saves the model creatred by Doc2Vec(also -s)\n')
     print('--test\t\t: runs given test_model function at end of process\n')
-
+    print('--verbose\t\t: makes the operation verbose by showing logging (also -v)')
 
 
 if __name__ == "__main__":

@@ -2,7 +2,6 @@ import os
 import csv
 import logging
 import random
-import copy
 from urllib2 import urlopen, HTTPError, URLError
 
 
@@ -37,7 +36,7 @@ def get_file(url):
         fname = os.path.join(os.getcwd(), '.downloads', url.split('/')[-1])
         if '.downloads' in os.listdir('.'):
             if url.split('/')[-1] in os.listdir('./.downloads'):
-                print("File has already been dowloaded")
+                logging.info("File has already been dowloaded")
                 return fname
 
         # Create hidden folder to hold zip file
@@ -48,9 +47,9 @@ def get_file(url):
 
         # Open dowload file and save locally
         with open(fname, 'wb') as f:
-            print("Downloading %s... " % url.split('/')[-1]),
+            logging.info("Downloading %s... " % url.split('/')[-1]),
             f.write(response.read())
-            print("Success!")
+            logging.info("Success!")
         return fname
 
     # Handle errors
