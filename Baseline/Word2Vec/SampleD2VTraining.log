@@ -1,0 +1,347 @@
+2015-07-10 17:07:57,633 : INFO : Opening CSV file...
+File has already been dowloaded
+2015-07-10 17:07:57,634 : INFO : PROGRESS: at tweet #0
+2015-07-10 17:07:57,673 : INFO : PROGRESS: at tweet #10000
+2015-07-10 17:07:57,719 : INFO : PROGRESS: at tweet #20000
+2015-07-10 17:07:57,757 : INFO : PROGRESS: at tweet #30000
+2015-07-10 17:07:57,795 : INFO : PROGRESS: at tweet #40000
+2015-07-10 17:07:57,833 : INFO : PROGRESS: at tweet #50000
+2015-07-10 17:07:57,871 : INFO : PROGRESS: at tweet #60000
+2015-07-10 17:07:57,908 : INFO : PROGRESS: at tweet #70000
+2015-07-10 17:07:57,946 : INFO : PROGRESS: at tweet #80000
+2015-07-10 17:07:57,984 : INFO : PROGRESS: at tweet #90000
+2015-07-10 17:07:58,022 : INFO : PROGRESS: at tweet #100000
+2015-07-10 17:07:58,060 : INFO : PROGRESS: at tweet #110000
+2015-07-10 17:07:58,098 : INFO : PROGRESS: at tweet #120000
+2015-07-10 17:07:58,136 : INFO : PROGRESS: at tweet #130000
+2015-07-10 17:07:58,174 : INFO : PROGRESS: at tweet #140000
+2015-07-10 17:07:58,212 : INFO : PROGRESS: at tweet #150000
+2015-07-10 17:07:58,250 : INFO : PROGRESS: at tweet #160000
+2015-07-10 17:07:58,288 : INFO : PROGRESS: at tweet #170000
+2015-07-10 17:07:58,326 : INFO : PROGRESS: at tweet #180000
+2015-07-10 17:07:58,364 : INFO : PROGRESS: at tweet #190000
+2015-07-10 17:07:58,401 : INFO : PROGRESS: at tweet #200000
+2015-07-10 17:07:58,439 : INFO : PROGRESS: at tweet #210000
+2015-07-10 17:07:58,477 : INFO : PROGRESS: at tweet #220000
+2015-07-10 17:07:58,515 : INFO : PROGRESS: at tweet #230000
+2015-07-10 17:07:58,553 : INFO : PROGRESS: at tweet #240000
+2015-07-10 17:07:58,590 : INFO : PROGRESS: at tweet #250000
+2015-07-10 17:07:58,628 : INFO : PROGRESS: at tweet #260000
+2015-07-10 17:07:58,666 : INFO : PROGRESS: at tweet #270000
+2015-07-10 17:07:58,704 : INFO : PROGRESS: at tweet #280000
+2015-07-10 17:07:58,742 : INFO : PROGRESS: at tweet #290000
+2015-07-10 17:07:58,780 : INFO : PROGRESS: at tweet #300000
+2015-07-10 17:07:58,818 : INFO : PROGRESS: at tweet #310000
+2015-07-10 17:07:58,856 : INFO : PROGRESS: at tweet #320000
+2015-07-10 17:07:58,894 : INFO : PROGRESS: at tweet #330000
+2015-07-10 17:07:58,932 : INFO : PROGRESS: at tweet #340000
+2015-07-10 17:07:58,970 : INFO : PROGRESS: at tweet #350000
+2015-07-10 17:07:59,008 : INFO : PROGRESS: at tweet #360000
+2015-07-10 17:07:59,046 : INFO : PROGRESS: at tweet #370000
+2015-07-10 17:07:59,084 : INFO : PROGRESS: at tweet #380000
+2015-07-10 17:07:59,122 : INFO : PROGRESS: at tweet #390000
+2015-07-10 17:07:59,160 : INFO : PROGRESS: at tweet #400000
+2015-07-10 17:07:59,198 : INFO : PROGRESS: at tweet #410000
+2015-07-10 17:07:59,236 : INFO : PROGRESS: at tweet #420000
+2015-07-10 17:07:59,273 : INFO : PROGRESS: at tweet #430000
+2015-07-10 17:07:59,311 : INFO : PROGRESS: at tweet #440000
+2015-07-10 17:07:59,349 : INFO : PROGRESS: at tweet #450000
+2015-07-10 17:07:59,387 : INFO : PROGRESS: at tweet #460000
+2015-07-10 17:07:59,425 : INFO : PROGRESS: at tweet #470000
+2015-07-10 17:07:59,463 : INFO : PROGRESS: at tweet #480000
+2015-07-10 17:07:59,501 : INFO : PROGRESS: at tweet #490000
+2015-07-10 17:07:59,539 : INFO : PROGRESS: at tweet #500000
+2015-07-10 17:07:59,577 : INFO : PROGRESS: at tweet #510000
+2015-07-10 17:07:59,615 : INFO : PROGRESS: at tweet #520000
+2015-07-10 17:07:59,653 : INFO : PROGRESS: at tweet #530000
+2015-07-10 17:07:59,691 : INFO : PROGRESS: at tweet #540000
+2015-07-10 17:07:59,729 : INFO : PROGRESS: at tweet #550000
+2015-07-10 17:07:59,767 : INFO : PROGRESS: at tweet #560000
+2015-07-10 17:07:59,805 : INFO : PROGRESS: at tweet #570000
+2015-07-10 17:07:59,843 : INFO : PROGRESS: at tweet #580000
+2015-07-10 17:07:59,881 : INFO : PROGRESS: at tweet #590000
+2015-07-10 17:07:59,919 : INFO : PROGRESS: at tweet #600000
+2015-07-10 17:07:59,957 : INFO : PROGRESS: at tweet #610000
+2015-07-10 17:07:59,995 : INFO : PROGRESS: at tweet #620000
+2015-07-10 17:08:00,033 : INFO : PROGRESS: at tweet #630000
+2015-07-10 17:08:00,071 : INFO : PROGRESS: at tweet #640000
+2015-07-10 17:08:00,109 : INFO : PROGRESS: at tweet #650000
+2015-07-10 17:08:00,148 : INFO : PROGRESS: at tweet #660000
+2015-07-10 17:08:00,186 : INFO : PROGRESS: at tweet #670000
+2015-07-10 17:08:00,224 : INFO : PROGRESS: at tweet #680000
+2015-07-10 17:08:00,261 : INFO : PROGRESS: at tweet #690000
+2015-07-10 17:08:00,299 : INFO : PROGRESS: at tweet #700000
+2015-07-10 17:08:00,337 : INFO : PROGRESS: at tweet #710000
+2015-07-10 17:08:00,375 : INFO : PROGRESS: at tweet #720000
+2015-07-10 17:08:00,413 : INFO : PROGRESS: at tweet #730000
+2015-07-10 17:08:00,451 : INFO : PROGRESS: at tweet #740000
+2015-07-10 17:08:00,489 : INFO : PROGRESS: at tweet #750000
+2015-07-10 17:08:00,527 : INFO : PROGRESS: at tweet #760000
+2015-07-10 17:08:00,564 : INFO : PROGRESS: at tweet #770000
+2015-07-10 17:08:00,602 : INFO : PROGRESS: at tweet #780000
+2015-07-10 17:08:00,640 : INFO : PROGRESS: at tweet #790000
+2015-07-10 17:08:00,678 : INFO : PROGRESS: at tweet #800000
+2015-07-10 17:08:00,716 : INFO : PROGRESS: at tweet #810000
+2015-07-10 17:08:00,754 : INFO : PROGRESS: at tweet #820000
+2015-07-10 17:08:00,791 : INFO : PROGRESS: at tweet #830000
+2015-07-10 17:08:00,829 : INFO : PROGRESS: at tweet #840000
+2015-07-10 17:08:00,866 : INFO : PROGRESS: at tweet #850000
+2015-07-10 17:08:00,904 : INFO : PROGRESS: at tweet #860000
+2015-07-10 17:08:00,942 : INFO : PROGRESS: at tweet #870000
+2015-07-10 17:08:00,980 : INFO : PROGRESS: at tweet #880000
+2015-07-10 17:08:01,018 : INFO : PROGRESS: at tweet #890000
+2015-07-10 17:08:01,055 : INFO : PROGRESS: at tweet #900000
+2015-07-10 17:08:01,093 : INFO : PROGRESS: at tweet #910000
+2015-07-10 17:08:01,131 : INFO : PROGRESS: at tweet #920000
+2015-07-10 17:08:01,169 : INFO : PROGRESS: at tweet #930000
+2015-07-10 17:08:01,206 : INFO : PROGRESS: at tweet #940000
+2015-07-10 17:08:01,244 : INFO : PROGRESS: at tweet #950000
+2015-07-10 17:08:01,282 : INFO : PROGRESS: at tweet #960000
+2015-07-10 17:08:01,320 : INFO : PROGRESS: at tweet #970000
+2015-07-10 17:08:01,358 : INFO : PROGRESS: at tweet #980000
+2015-07-10 17:08:01,395 : INFO : PROGRESS: at tweet #990000
+2015-07-10 17:08:01,433 : INFO : PROGRESS: at tweet #1000000
+2015-07-10 17:08:01,471 : INFO : PROGRESS: at tweet #1010000
+2015-07-10 17:08:01,509 : INFO : PROGRESS: at tweet #1020000
+2015-07-10 17:08:01,547 : INFO : PROGRESS: at tweet #1030000
+2015-07-10 17:08:01,584 : INFO : PROGRESS: at tweet #1040000
+2015-07-10 17:08:01,622 : INFO : PROGRESS: at tweet #1050000
+2015-07-10 17:08:01,660 : INFO : PROGRESS: at tweet #1060000
+2015-07-10 17:08:01,698 : INFO : PROGRESS: at tweet #1070000
+2015-07-10 17:08:01,735 : INFO : PROGRESS: at tweet #1080000
+2015-07-10 17:08:01,773 : INFO : PROGRESS: at tweet #1090000
+2015-07-10 17:08:01,811 : INFO : PROGRESS: at tweet #1100000
+2015-07-10 17:08:01,848 : INFO : PROGRESS: at tweet #1110000
+    2015-07-10 17:08:01,886 : INFO : PROGRESS: at tweet #1120000
+2015-07-10 17:08:01,923 : INFO : PROGRESS: at tweet #1130000
+2015-07-10 17:08:01,961 : INFO : PROGRESS: at tweet #1140000
+2015-07-10 17:08:01,999 : INFO : PROGRESS: at tweet #1150000
+2015-07-10 17:08:02,036 : INFO : PROGRESS: at tweet #1160000
+2015-07-10 17:08:02,074 : INFO : PROGRESS: at tweet #1170000
+2015-07-10 17:08:02,111 : INFO : PROGRESS: at tweet #1180000
+2015-07-10 17:08:02,149 : INFO : PROGRESS: at tweet #1190000
+2015-07-10 17:08:02,187 : INFO : PROGRESS: at tweet #1200000
+2015-07-10 17:08:02,224 : INFO : PROGRESS: at tweet #1210000
+2015-07-10 17:08:02,262 : INFO : PROGRESS: at tweet #1220000
+2015-07-10 17:08:02,300 : INFO : PROGRESS: at tweet #1230000
+2015-07-10 17:08:02,338 : INFO : PROGRESS: at tweet #1240000
+2015-07-10 17:08:02,375 : INFO : PROGRESS: at tweet #1250000
+2015-07-10 17:08:02,413 : INFO : PROGRESS: at tweet #1260000
+2015-07-10 17:08:02,451 : INFO : PROGRESS: at tweet #1270000
+2015-07-10 17:08:02,488 : INFO : PROGRESS: at tweet #1280000
+2015-07-10 17:08:02,526 : INFO : PROGRESS: at tweet #1290000
+2015-07-10 17:08:02,564 : INFO : PROGRESS: at tweet #1300000
+2015-07-10 17:08:02,602 : INFO : PROGRESS: at tweet #1310000
+2015-07-10 17:08:02,640 : INFO : PROGRESS: at tweet #1320000
+2015-07-10 17:08:02,678 : INFO : PROGRESS: at tweet #1330000
+2015-07-10 17:08:02,715 : INFO : PROGRESS: at tweet #1340000
+2015-07-10 17:08:02,753 : INFO : PROGRESS: at tweet #1350000
+2015-07-10 17:08:02,791 : INFO : PROGRESS: at tweet #1360000
+2015-07-10 17:08:02,829 : INFO : PROGRESS: at tweet #1370000
+2015-07-10 17:08:02,866 : INFO : PROGRESS: at tweet #1380000
+2015-07-10 17:08:02,904 : INFO : PROGRESS: at tweet #1390000
+2015-07-10 17:08:02,942 : INFO : PROGRESS: at tweet #1400000
+2015-07-10 17:08:02,980 : INFO : PROGRESS: at tweet #1410000
+2015-07-10 17:08:03,017 : INFO : PROGRESS: at tweet #1420000
+2015-07-10 17:08:03,055 : INFO : PROGRESS: at tweet #1430000
+2015-07-10 17:08:03,092 : INFO : PROGRESS: at tweet #1440000
+2015-07-10 17:08:03,130 : INFO : PROGRESS: at tweet #1450000
+2015-07-10 17:08:03,168 : INFO : PROGRESS: at tweet #1460000
+2015-07-10 17:08:03,206 : INFO : PROGRESS: at tweet #1470000
+2015-07-10 17:08:03,243 : INFO : PROGRESS: at tweet #1480000
+2015-07-10 17:08:03,281 : INFO : PROGRESS: at tweet #1490000
+2015-07-10 17:08:03,319 : INFO : PROGRESS: at tweet #1500000
+2015-07-10 17:08:03,356 : INFO : PROGRESS: at tweet #1510000
+2015-07-10 17:08:03,394 : INFO : PROGRESS: at tweet #1520000
+2015-07-10 17:08:03,432 : INFO : PROGRESS: at tweet #1530000
+2015-07-10 17:08:03,470 : INFO : PROGRESS: at tweet #1540000
+2015-07-10 17:08:03,508 : INFO : PROGRESS: at tweet #1550000
+2015-07-10 17:08:03,545 : INFO : PROGRESS: at tweet #1560000
+2015-07-10 17:08:03,583 : INFO : PROGRESS: at tweet #1570000
+2015-07-10 17:08:03,621 : INFO : PROGRESS: at tweet #1580000
+2015-07-10 17:08:03,658 : INFO : PROGRESS: at tweet #1590000
+2015-07-10 17:08:12,813 : INFO : Training on 800000 Positive and 800000 Negative tweets
+2015-07-10 17:08:12,813 : INFO : Building model...
+2015-07-10 17:08:12,813 : INFO : Building Vocabulary...
+2015-07-10 17:08:12,813 : INFO : collecting all words and their counts
+2015-07-10 17:08:12,814 : INFO : PROGRESS: at item #0, processed 0 words and 0 word types
+2015-07-10 17:08:12,872 : INFO : PROGRESS: at item #10000, processed 145751 words and 34295 word types
+2015-07-10 17:08:12,928 : INFO : PROGRESS: at item #20000, processed 289667 words and 60259 word types
+2015-07-10 17:08:12,983 : INFO : PROGRESS: at item #30000, processed 433150 words and 83761 word types
+2015-07-10 17:08:13,040 : INFO : PROGRESS: at item #40000, processed 577486 words and 106397 word types
+2015-07-10 17:08:13,097 : INFO : PROGRESS: at item #50000, processed 722387 words and 129039 word types
+2015-07-10 17:08:13,153 : INFO : PROGRESS: at item #60000, processed 867696 words and 150675 word types
+2015-07-10 17:08:13,209 : INFO : PROGRESS: at item #70000, processed 1011030 words and 171722 word types
+2015-07-10 17:08:13,269 : INFO : PROGRESS: at item #80000, processed 1155150 words and 192318 word types
+2015-07-10 17:08:13,326 : INFO : PROGRESS: at item #90000, processed 1303420 words and 212716 word types
+2015-07-10 17:08:13,383 : INFO : PROGRESS: at item #100000, processed 1449841 words and 233188 word types
+2015-07-10 17:08:13,439 : INFO : PROGRESS: at item #110000, processed 1595253 words and 253510 word types
+2015-07-10 17:08:13,496 : INFO : PROGRESS: at item #120000, processed 1739858 words and 273312 word types
+2015-07-10 17:08:13,552 : INFO : PROGRESS: at item #130000, processed 1885280 words and 292717 word types
+2015-07-10 17:08:13,610 : INFO : PROGRESS: at item #140000, processed 2032786 words and 312237 word types
+2015-07-10 17:08:13,669 : INFO : PROGRESS: at item #150000, processed 2182477 words and 332097 word types
+2015-07-10 17:08:13,736 : INFO : PROGRESS: at item #160000, processed 2329257 words and 351841 word types
+2015-07-10 17:08:13,794 : INFO : PROGRESS: at item #170000, processed 2477204 words and 371458 word types
+2015-07-10 17:08:13,850 : INFO : PROGRESS: at item #180000, processed 2623441 words and 390769 word types
+2015-07-10 17:08:13,906 : INFO : PROGRESS: at item #190000, processed 2767635 words and 409658 word types
+2015-07-10 17:08:13,963 : INFO : PROGRESS: at item #200000, processed 2915047 words and 428182 word types
+2015-07-10 17:08:14,020 : INFO : PROGRESS: at item #210000, processed 3061646 words and 446755 word types
+2015-07-10 17:08:14,076 : INFO : PROGRESS: at item #220000, processed 3206496 words and 465126 word types
+2015-07-10 17:08:14,132 : INFO : PROGRESS: at item #230000, processed 3348179 words and 483063 word types
+2015-07-10 17:08:14,189 : INFO : PROGRESS: at item #240000, processed 3495051 words and 501125 word types
+2015-07-10 17:08:14,245 : INFO : PROGRESS: at item #250000, processed 3639660 words and 518876 word types
+2015-07-10 17:08:14,301 : INFO : PROGRESS: at item #260000, processed 3784000 words and 536521 word types
+2015-07-10 17:08:14,357 : INFO : PROGRESS: at item #270000, processed 3928856 words and 554243 word types
+2015-07-10 17:08:14,414 : INFO : PROGRESS: at item #280000, processed 4075133 words and 572192 word types
+2015-07-10 17:08:14,472 : INFO : PROGRESS: at item #290000, processed 4221150 words and 589831 word types
+2015-07-10 17:08:14,529 : INFO : PROGRESS: at item #300000, processed 4367009 words and 607653 word types
+2015-07-10 17:08:14,586 : INFO : PROGRESS: at item #310000, processed 4513234 words and 625450 word types
+2015-07-10 17:08:14,644 : INFO : PROGRESS: at item #320000, processed 4659678 words and 642995 word types
+2015-07-10 17:08:14,702 : INFO : PROGRESS: at item #330000, processed 4806047 words and 660896 word types
+2015-07-10 17:08:14,760 : INFO : PROGRESS: at item #340000, processed 4952667 words and 678742 word types
+2015-07-10 17:08:14,818 : INFO : PROGRESS: at item #350000, processed 5100193 words and 696300 word types
+2015-07-10 17:08:14,896 : INFO : PROGRESS: at item #360000, processed 5246702 words and 714132 word types
+2015-07-10 17:08:14,952 : INFO : PROGRESS: at item #370000, processed 5391968 words and 731784 word types
+2015-07-10 17:08:15,008 : INFO : PROGRESS: at item #380000, processed 5535532 words and 749105 word types
+2015-07-10 17:08:15,065 : INFO : PROGRESS: at item #390000, processed 5682378 words and 766364 word types
+2015-07-10 17:08:15,122 : INFO : PROGRESS: at item #400000, processed 5827872 words and 783499 word types
+2015-07-10 17:08:15,178 : INFO : PROGRESS: at item #410000, processed 5972819 words and 800503 word types
+2015-07-10 17:08:15,234 : INFO : PROGRESS: at item #420000, processed 6116871 words and 817720 word types
+2015-07-10 17:08:15,291 : INFO : PROGRESS: at item #430000, processed 6261424 words and 834690 word types
+2015-07-10 17:08:15,347 : INFO : PROGRESS: at item #440000, processed 6405387 words and 851587 word types
+2015-07-10 17:08:15,403 : INFO : PROGRESS: at item #450000, processed 6549639 words and 868354 word types
+2015-07-10 17:08:15,459 : INFO : PROGRESS: at item #460000, processed 6692972 words and 885214 word types
+2015-07-10 17:08:15,516 : INFO : PROGRESS: at item #470000, processed 6838635 words and 902270 word types
+2015-07-10 17:08:15,572 : INFO : PROGRESS: at item #480000, processed 6983743 words and 919224 word types
+2015-07-10 17:08:15,629 : INFO : PROGRESS: at item #490000, processed 7128469 words and 936282 word types
+2015-07-10 17:08:15,685 : INFO : PROGRESS: at item #500000, processed 7272537 words and 953296 word types
+2015-07-10 17:08:15,742 : INFO : PROGRESS: at item #510000, processed 7418298 words and 970292 word types
+2015-07-10 17:08:15,799 : INFO : PROGRESS: at item #520000, processed 7565082 words and 987336 word types
+2015-07-10 17:08:15,857 : INFO : PROGRESS: at item #530000, processed 7711375 words and 1004268 word types
+2015-07-10 17:08:15,914 : INFO : PROGRESS: at item #540000, processed 7857077 words and 1021006 word types
+2015-07-10 17:08:15,972 : INFO : PROGRESS: at item #550000, processed 8003722 words and 1038112 word types
+2015-07-10 17:08:16,029 : INFO : PROGRESS: at item #560000, processed 8150160 words and 1054958 word types
+2015-07-10 17:08:16,087 : INFO : PROGRESS: at item #570000, processed 8297668 words and 1071612 word types
+2015-07-10 17:08:16,145 : INFO : PROGRESS: at item #580000, processed 8445019 words and 1088350 word types
+2015-07-10 17:08:16,203 : INFO : PROGRESS: at item #590000, processed 8592404 words and 1105121 word types
+2015-07-10 17:08:16,261 : INFO : PROGRESS: at item #600000, processed 8739993 words and 1122093 word types
+2015-07-10 17:08:16,318 : INFO : PROGRESS: at item #610000, processed 8886583 words and 1138730 word types
+2015-07-10 17:08:16,376 : INFO : PROGRESS: at item #620000, processed 9034224 words and 1155451 word types
+2015-07-10 17:08:16,434 : INFO : PROGRESS: at item #630000, processed 9180384 words and 1171945 word types
+2015-07-10 17:08:16,492 : INFO : PROGRESS: at item #640000, processed 9327189 words and 1188751 word types
+2015-07-10 17:08:16,551 : INFO : PROGRESS: at item #650000, processed 9475881 words and 1205531 word types
+2015-07-10 17:08:16,609 : INFO : PROGRESS: at item #660000, processed 9623678 words and 1222298 word types
+2015-07-10 17:08:16,667 : INFO : PROGRESS: at item #670000, processed 9771780 words and 1238926 word types
+2015-07-10 17:08:16,725 : INFO : PROGRESS: at item #680000, processed 9916452 words and 1255534 word types
+2015-07-10 17:08:16,783 : INFO : PROGRESS: at item #690000, processed 10062068 words and 1271820 word types
+2015-07-10 17:08:16,840 : INFO : PROGRESS: at item #700000, processed 10207199 words and 1287984 word types
+2015-07-10 17:08:16,897 : INFO : PROGRESS: at item #710000, processed 10351943 words and 1304068 word types
+2015-07-10 17:08:16,954 : INFO : PROGRESS: at item #720000, processed 10496985 words and 1320276 word types
+2015-07-10 17:08:17,011 : INFO : PROGRESS: at item #730000, processed 10641451 words and 1336473 word types
+2015-07-10 17:08:17,069 : INFO : PROGRESS: at item #740000, processed 10786667 words and 1352425 word types
+2015-07-10 17:08:17,127 : INFO : PROGRESS: at item #750000, processed 10932222 words and 1368625 word types
+2015-07-10 17:08:17,184 : INFO : PROGRESS: at item #760000, processed 11078370 words and 1384944 word types
+2015-07-10 17:08:17,283 : INFO : PROGRESS: at item #770000, processed 11224418 words and 1401295 word types
+2015-07-10 17:08:17,340 : INFO : PROGRESS: at item #780000, processed 11371036 words and 1417860 word types
+2015-07-10 17:08:17,398 : INFO : PROGRESS: at item #790000, processed 11518950 words and 1434222 word types
+2015-07-10 17:08:17,454 : INFO : PROGRESS: at item #800000, processed 11665587 words and 1450510 word types
+2015-07-10 17:08:17,512 : INFO : PROGRESS: at item #810000, processed 11806118 words and 1468815 word types
+2015-07-10 17:08:17,569 : INFO : PROGRESS: at item #820000, processed 11942618 words and 1486799 word types
+2015-07-10 17:08:17,625 : INFO : PROGRESS: at item #830000, processed 12078783 words and 1504499 word types
+2015-07-10 17:08:17,681 : INFO : PROGRESS: at item #840000, processed 12215423 words and 1522068 word types
+2015-07-10 17:08:18,984 : INFO : PROGRESS: at item #850000, processed 12355192 words and 1539910 word types
+2015-07-10 17:08:19,042 : INFO : PROGRESS: at item #860000, processed 12496044 words and 1557984 word types
+2015-07-10 17:08:19,100 : INFO : PROGRESS: at item #870000, processed 12635341 words and 1575713 word types
+2015-07-10 17:08:19,157 : INFO : PROGRESS: at item #880000, processed 12773537 words and 1593227 word types
+2015-07-10 17:08:19,214 : INFO : PROGRESS: at item #890000, processed 12911175 words and 1610430 word types
+2015-07-10 17:08:19,271 : INFO : PROGRESS: at item #900000, processed 13049540 words and 1627893 word types
+2015-07-10 17:08:19,328 : INFO : PROGRESS: at item #910000, processed 13187711 words and 1645202 word types
+2015-07-10 17:08:19,384 : INFO : PROGRESS: at item #920000, processed 13324064 words and 1662122 word types
+2015-07-10 17:08:19,440 : INFO : PROGRESS: at item #930000, processed 13460490 words and 1678882 word types
+2015-07-10 17:08:19,498 : INFO : PROGRESS: at item #940000, processed 13599996 words and 1696567 word types
+2015-07-10 17:08:19,555 : INFO : PROGRESS: at item #950000, processed 13737711 words and 1714079 word types
+2015-07-10 17:08:19,613 : INFO : PROGRESS: at item #960000, processed 13876849 words and 1731350 word types
+2015-07-10 17:08:19,669 : INFO : PROGRESS: at item #970000, processed 14012398 words and 1748259 word types
+2015-07-10 17:08:19,727 : INFO : PROGRESS: at item #980000, processed 14151114 words and 1765532 word types
+2015-07-10 17:08:19,785 : INFO : PROGRESS: at item #990000, processed 14291285 words and 1783047 word types
+2015-07-10 17:08:19,844 : INFO : PROGRESS: at item #1000000, processed 14433074 words and 1800518 word types
+2015-07-10 17:08:19,902 : INFO : PROGRESS: at item #1010000, processed 14572003 words and 1817986 word types
+2015-07-10 17:08:19,959 : INFO : PROGRESS: at item #1020000, processed 14709107 words and 1835292 word types
+2015-07-10 17:08:20,017 : INFO : PROGRESS: at item #1030000, processed 14847476 words and 1852750 word types
+2015-07-10 17:08:20,075 : INFO : PROGRESS: at item #1040000, processed 14985580 words and 1870215 word types
+2015-07-10 17:08:20,133 : INFO : PROGRESS: at item #1050000, processed 15123477 words and 1887488 word types
+2015-07-10 17:08:20,191 : INFO : PROGRESS: at item #1060000, processed 15261324 words and 1905019 word types
+2015-07-10 17:08:20,248 : INFO : PROGRESS: at item #1070000, processed 15397846 words and 1921954 word types
+2015-07-10 17:08:20,305 : INFO : PROGRESS: at item #1080000, processed 15532852 words and 1938995 word types
+2015-07-10 17:08:20,363 : INFO : PROGRESS: at item #1090000, processed 15669453 words and 1955860 word types
+2015-07-10 17:08:20,420 : INFO : PROGRESS: at item #1100000, processed 15807932 words and 1972468 word types
+2015-07-10 17:08:20,477 : INFO : PROGRESS: at item #1110000, processed 15945532 words and 1989137 word types
+2015-07-10 17:08:20,534 : INFO : PROGRESS: at item #1120000, processed 16079998 words and 2005579 word types
+2015-07-10 17:08:20,590 : INFO : PROGRESS: at item #1130000, processed 16214866 words and 2021899 word types
+2015-07-10 17:08:20,647 : INFO : PROGRESS: at item #1140000, processed 16351655 words and 2038263 word types
+2015-07-10 17:08:20,703 : INFO : PROGRESS: at item #1150000, processed 16486718 words and 2054672 word types
+2015-07-10 17:08:20,761 : INFO : PROGRESS: at item #1160000, processed 16625763 words and 2071272 word types
+2015-07-10 17:08:20,819 : INFO : PROGRESS: at item #1170000, processed 16764076 words and 2087661 word types
+2015-07-10 17:08:20,876 : INFO : PROGRESS: at item #1180000, processed 16900970 words and 2104060 word types
+2015-07-10 17:08:20,933 : INFO : PROGRESS: at item #1190000, processed 17037953 words and 2120204 word types
+2015-07-10 17:08:20,990 : INFO : PROGRESS: at item #1200000, processed 17174620 words and 2136360 word types
+2015-07-10 17:08:21,047 : INFO : PROGRESS: at item #1210000, processed 17309857 words and 2152639 word types
+2015-07-10 17:08:21,105 : INFO : PROGRESS: at item #1220000, processed 17448666 words and 2169511 word types
+2015-07-10 17:08:21,164 : INFO : PROGRESS: at item #1230000, processed 17588932 words and 2186301 word types
+2015-07-10 17:08:21,223 : INFO : PROGRESS: at item #1240000, processed 17728917 words and 2203230 word types
+2015-07-10 17:08:21,281 : INFO : PROGRESS: at item #1250000, processed 17867556 words and 2219843 word types
+2015-07-10 17:08:21,339 : INFO : PROGRESS: at item #1260000, processed 18004549 words and 2236422 word types
+2015-07-10 17:08:21,397 : INFO : PROGRESS: at item #1270000, processed 18142923 words and 2253090 word types
+2015-07-10 17:08:21,455 : INFO : PROGRESS: at item #1280000, processed 18280760 words and 2269783 word types
+2015-07-10 17:08:21,514 : INFO : PROGRESS: at item #1290000, processed 18418477 words and 2286526 word types
+2015-07-10 17:08:21,573 : INFO : PROGRESS: at item #1300000, processed 18558693 words and 2303317 word types
+2015-07-10 17:08:21,631 : INFO : PROGRESS: at item #1310000, processed 18696800 words and 2320051 word types
+2015-07-10 17:08:21,690 : INFO : PROGRESS: at item #1320000, processed 18835726 words and 2336958 word types
+2015-07-10 17:08:21,749 : INFO : PROGRESS: at item #1330000, processed 18974310 words and 2353655 word types
+2015-07-10 17:08:21,807 : INFO : PROGRESS: at item #1340000, processed 19112977 words and 2370511 word types
+2015-07-10 17:08:21,866 : INFO : PROGRESS: at item #1350000, processed 19251919 words and 2387555 word types
+2015-07-10 17:08:21,924 : INFO : PROGRESS: at item #1360000, processed 19388415 words and 2404388 word types
+2015-07-10 17:08:21,982 : INFO : PROGRESS: at item #1370000, processed 19524305 words and 2420753 word types
+2015-07-10 17:08:22,039 : INFO : PROGRESS: at item #1380000, processed 19661365 words and 2436898 word types
+2015-07-10 17:08:22,098 : INFO : PROGRESS: at item #1390000, processed 19800312 words and 2453279 word types
+2015-07-10 17:08:22,156 : INFO : PROGRESS: at item #1400000, processed 19937371 words and 2469694 word types
+2015-07-10 17:08:22,213 : INFO : PROGRESS: at item #1410000, processed 20073262 words and 2485758 word types
+2015-07-10 17:08:22,271 : INFO : PROGRESS: at item #1420000, processed 20210708 words and 2501792 word types
+2015-07-10 17:08:22,328 : INFO : PROGRESS: at item #1430000, processed 20344755 words and 2517811 word types
+2015-07-10 17:08:22,385 : INFO : PROGRESS: at item #1440000, processed 20479725 words and 2533785 word types
+2015-07-10 17:08:22,443 : INFO : PROGRESS: at item #1450000, processed 20618235 words and 2550072 word types
+2015-07-10 17:08:22,501 : INFO : PROGRESS: at item #1460000, processed 20756160 words and 2566248 word types
+2015-07-10 17:08:22,559 : INFO : PROGRESS: at item #1470000, processed 20892591 words and 2582307 word types
+2015-07-10 17:08:22,617 : INFO : PROGRESS: at item #1480000, processed 21030926 words and 2598193 word types
+2015-07-10 17:08:22,674 : INFO : PROGRESS: at item #1490000, processed 21165925 words and 2614053 word types
+2015-07-10 17:08:22,731 : INFO : PROGRESS: at item #1500000, processed 21301975 words and 2629963 word types
+2015-07-10 17:08:22,789 : INFO : PROGRESS: at item #1510000, processed 21437740 words and 2646128 word types
+2015-07-10 17:08:22,848 : INFO : PROGRESS: at item #1520000, processed 21576119 words and 2662703 word types
+2015-07-10 17:08:22,906 : INFO : PROGRESS: at item #1530000, processed 21713751 words and 2679009 word types
+2015-07-10 17:08:22,965 : INFO : PROGRESS: at item #1540000, processed 21851912 words and 2695555 word types
+2015-07-10 17:08:23,023 : INFO : PROGRESS: at item #1550000, processed 21991048 words and 2711788 word types
+2015-07-10 17:08:23,081 : INFO : PROGRESS: at item #1560000, processed 22129750 words and 2728133 word types
+2015-07-10 17:08:23,139 : INFO : PROGRESS: at item #1570000, processed 22267007 words and 2744446 word types
+2015-07-10 17:08:23,198 : INFO : PROGRESS: at item #1580000, processed 22404748 words and 2760764 word types
+2015-07-10 17:08:23,257 : INFO : PROGRESS: at item #1590000, processed 22543331 words and 2777115 word types
+2015-07-10 17:08:23,316 : INFO : collected 2793584 word types from a corpus of 22681841 words and 1600000 items
+2015-07-10 17:08:24,855 : INFO : total 2793584 word types after removing those with count<1
+2015-07-10 17:08:24,855 : INFO : constructing a huffman tree from 2793584 words
+2015-07-10 17:09:34,966 : INFO : built huffman tree with maximum node depth 25
+2015-07-10 17:09:36,111 : INFO : constructing a table with noise distribution from 2793584 words
+2015-07-10 17:09:55,568 : INFO : frequent-word downsampling, threshold 0.0001; progress tallies will be approximate
+2015-07-10 17:10:01,634 : INFO : resetting layer weights
+2015-07-10 17:10:22,592 : INFO : Training model...
+2015-07-10 17:10:22,592 : INFO : Epoch 0...
+2015-07-10 17:13:01,547 : INFO : Epoch 1...
+2015-07-10 17:15:40,450 : INFO : Epoch 2...
+2015-07-10 17:18:15,420 : INFO : Epoch 3...
+2015-07-10 17:20:52,042 : INFO : Epoch 4...
+2015-07-10 17:23:29,508 : INFO : Epoch 5...
+2015-07-10 17:26:05,257 : INFO : Epoch 6...
+2015-07-10 17:28:41,292 : INFO : Epoch 7...
+2015-07-10 17:31:17,677 : INFO : Epoch 8...
+2015-07-10 17:33:54,104 : INFO : Epoch 9...
+2015-07-10 17:36:27,581 : INFO : Developing training and testing sets...
+2015-07-10 17:36:27,949 : INFO : Building logisitic regression classifier...
+2015-07-10 17:36:29,400 : INFO : Accuracy: 0.70
