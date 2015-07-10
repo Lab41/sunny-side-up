@@ -34,6 +34,7 @@ def load_data(file_path=None, feat_extractor=None, verbose=False):
     if file_path:
         twitter_csv = open(file_path, 'r')
     else:
+        # Dowloads and saves locally the zip file from internet
         file_path = get_file("http://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip")
 
         with zipfile.ZipFile(file_path, 'r') as zp:

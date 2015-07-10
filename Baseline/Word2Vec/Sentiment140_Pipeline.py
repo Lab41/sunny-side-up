@@ -43,10 +43,9 @@ def train_d2v_model(data, epoch_num=10):
 
     # Sets logging level to show only if its at least WARNING
     # This prevents model.train from overloading the log
-    logging.getLogger().setLevel(logging.WARNING)
+    #logging.getLogger().setLevel(logging.WARNING)
 
     logging.info("Training model...")
-    ## TODO variable for the number of epochs ##
     for epoch in range(epoch_num):
         logging.info("Epoch %s..." % epoch)
         model.train(np.random.permutation(labeled_sent))
@@ -103,7 +102,7 @@ def main(argv):
         sys.exit(2)
 
     model_name = None
-    verbose = False
+    verb = False
     testing = False
     for opt, arg in opts:
         if opt in ("-h", "--help"):
@@ -114,7 +113,7 @@ def main(argv):
         elif opt in ("-t", "-test"):
             testing = True
         elif opt == ("-v", "--verbose"):
-            verbose = True
+            verb = True
             output_format = '%(asctime)s : %(levelname)s : %(message)s'
             logging.basicConfig(format=output_format, level=logging.INFO)
 
@@ -122,7 +121,7 @@ def main(argv):
     ## Remove ability to remove @mentions
     ## Using a better tokenizer
     logging.info("Opening CSV file...")
-    all_data = sentiment140.load_data(verbose=verbose)
+    all_data = sentiment140.load_data(verbose=verb)
     model = train_d2v_model(all_data, epoch_num=1)
 
     if model_name:
