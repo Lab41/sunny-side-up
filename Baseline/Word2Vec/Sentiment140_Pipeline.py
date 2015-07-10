@@ -1,21 +1,18 @@
-import sys
+import os, sys
 import getopt
-sys.path.insert(0, '../../datasets')
+file_path = os.path.dirname(os.path.abspath(__file__))
+ssu_path = file_path.rsplit('/Baseline')[0]
 
-import sentiment140
-from data_utils import split_data
+sys.path.insert(0, ssu_path)
+
+from datasets import sentiment140
 
 # Word2Vec/Doc2Vec packages
-from gensim import utils
 from gensim.models.doc2vec import LabeledSentence
 from gensim.models import Doc2Vec
 
 import logging
-
-# Numpy
 import numpy as np
-
-# Sci Kit Learn Classifier
 from sklearn.linear_model import LogisticRegression
 
 
@@ -116,7 +113,7 @@ def to_sklearn_format(model, test=.1):
 
 
 def test_model(model):
-    ''' Uses a loaded Doc2Vec model and a LogisticRegression 
+    ''' Uses a loaded Doc2Vec model and a LogisticRegression
     from the scikitlearn package to build a sentiment classifier
 
     @Argument:
@@ -145,8 +142,8 @@ def main(argv):
         sys.exit(2)
 
     model_name = None
-    verbose = False
     testing = False
+    verbose = False
     for opt, arg in opts:
         if opt in ("-h", "--help"):
             usage()
@@ -162,8 +159,8 @@ def main(argv):
 
     # Prevents user from running script without saving
     # or testing the model
-    if not (model_name and testing):
-        logging.CRITICAL("Sentiment140_Pipeline script is neither saving or testing the model built")
+    if not (model_name or testing):
+        logging.critical("Sentiment140_Pipeline script is neither saving or testing the model built")
         sys.exit()
 
     # TODO
