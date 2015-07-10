@@ -127,6 +127,9 @@ def main(argv):
     all_data = sentiment140.load_data(verbose=verbose)
     model = train_d2v_model(all_data, epoch_num=10)
 
+    # Saves a ton of memory
+    model.init_sims(replace=True)
+
     if model_name:
         model.save(model_name)
 
