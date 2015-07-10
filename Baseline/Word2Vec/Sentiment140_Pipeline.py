@@ -35,7 +35,8 @@ def train_d2v_model(data, epoch_num=10):
 
     logging.info("Training on %d Positive and %d Negative tweets" % (pos_count, neg_count))
     logging.info("Building model...")
-    model = Doc2Vec(min_count=3, window=10, size=100, sample=1e-4, negative=5, workers=1)
+    model = Doc2Vec(min_count=3, window=10, size=100, sample=1e-4, negative=5,
+                    workers=1)
 
     logging.info("Building Vocabulary...")
     model.build_vocab(labeled_sent)
@@ -53,16 +54,8 @@ def train_d2v_model(data, epoch_num=10):
     return model
 
 
-def to_sklearn_format(data):
-    pass
-
-
-def test_model(model_path):
-    logging.info("Loading model...")
-    model = Doc2Vec.load(model_path)
-
-    logging.info("Developing training and testing sets...")
-    # Converts data to Sklearn acceptable numpy format
+def to_sklearn_format(model):
+    # This function is specific to the Sentiment140 Dataset
     train_arrays = np.zeros((72000 * 2, 100))
     train_labels = np.zeros(72000 * 2)
     test_arrays = np.zeros((8000 * 2, 100))
@@ -82,39 +75,46 @@ def test_model(model_path):
         test_labels[i] = 1
         test_labels[8000 + i] = 0
 
+    return train_arrays, train_labels, test_arrays, test_labels
+
+
+def test_model(model):
+    logging.info("Developing training and testing sets...")
+    # Converts data to Sklearn acceptable numpy format
+    train_arr, train_labels, test_arr, test_labels = to_sklearn_format(model)
+
     logging.info("Building logisitic regression classifier...")
     classifier = LogisticRegression()
-    classifier.fit(train_arrays, train_labels)
+    classifier.fit(train_arr, train_labels)
 
     LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,
-          intercept_scaling=1, penalty='l2', random_state=None, tol=0.0001)
+                       intercept_scaling=1, penalty='l2', random_state=None,
+                       tol=0.0001)
     logging.info("Accuracy: "),
-    classifier.score(test_arrays, test_labels)
+    classifier.score(test_arr, test_labels)
 
 
 def main(argv):
-
-    PATH = './StanfordTweetData/training.1600000.processed.noemoticon.csv'
-
     try:
-        opts, args = getopt.getopt(argv, "hi:s:v", ["help"])
+        long_flags = ["help", "save", "test", "verbose"]
+        opts, args = getopt.getopt(argv, "hi:s:tv", long_flags)
     except:
         usage()
         sys.exit(2)
 
-    save_model = False
     model_name = None
     verbose = False
+    testing = False
     for opt, arg in opts:
         if opt in ("-h", "--help"):
             usage()
             sys.exit()
-        elif opt == "-i":
-            PATH = arg
-        elif opt == "-s":
-            save_model = True
+        elif opt in ("-s", "--save"):
             model_name = arg
-        elif opt == "-v":
+        elif opt in ("-t", "-test"):
+            testing = True
+        elif opt == ("-v", "--verbose"):
+            verbose = True
             output_format = '%(asctime)s : %(levelname)s : %(message)s'
             logging.basicConfig(format=output_format, level=logging.INFO)
 
@@ -123,25 +123,26 @@ def main(argv):
     ## Using a better tokenizer
     logging.info("Opening CSV file...")
     all_data = sentiment140.load_data(verbose=verbose)
-    train_set, dev_set, test_set = split_data(all_data, train=.9, dev=0, test=.1, shuffle=True)
-    model = train_d2v_model(all_data, epoch_num=8)
+    model = train_d2v_model(all_data, epoch_num=1)
 
-    if save_model:
+    if model_name:
         model.save(model_name)
 
-
-
+    if testing:
+        test_model(model)
 
 
 def usage():
     print('Usage: Word2Vec_Pipeline.py [-i file | -s file | -h]')
     print('Options and arguments:')
     print('-h\t\t: print this help message and exit (also --help)')
-    print('-i csv_file\t: specify local path for StanfordTweet input CSV file')
-    print('-s model_name\t: saves the model creatred by Doc2Vec')
+    print('-s model_name\t: saves the model creatred by Doc2Vec (also --help)')
     print('-v\t\t: makes the operation verbose')
     print('')
     print('--help\t\t: print this help message and exit (also -h)\n')
+    print('--save\t\t: saves the model creatred by Doc2Vec(also -s)\n')
+    print('--test\t\t: runs given test_model function at end of process\n')
+
 
 
 if __name__ == "__main__":
