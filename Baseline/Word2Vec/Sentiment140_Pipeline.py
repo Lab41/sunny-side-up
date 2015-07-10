@@ -35,20 +35,24 @@ def train_d2v_model(data, epoch_num=10):
 
     logging.info("Training on %d Positive and %d Negative tweets" % (pos_count, neg_count))
     logging.info("Building model...")
-    model = Doc2Vec(min_count=3, window=10, size=100, sample=1e-4, negative=5,
+    ## NOTE! ##
+    # Setting min_count > 1 can cause some tweets to "disappear" later #
+    # from the Doc2Vec sentence corpus. #
+    # ex: you could imagine a tweet containing only words whose count was low #
+    model = Doc2Vec(min_count=1, window=10, size=100, sample=1e-4, negative=5,
                     workers=1)
 
     logging.info("Building Vocabulary...")
     model.build_vocab(labeled_sent)
 
-    # Sets logging level to show only if its at least WARNING
-    # This prevents model.train from overloading the log
-    #logging.getLogger().setLevel(logging.WARNING)
-
     logging.info("Training model...")
     for epoch in range(epoch_num):
         logging.info("Epoch %s..." % epoch)
+        # Temporarily sets logging level to show only if its at least WARNING
+        # This prevents model.train from overloading the log
+        logging.getLogger().setLevel(logging.WARN)
         model.train(np.random.permutation(labeled_sent))
+        logging.getLogger().setLevel(logging.INFO)
 
     return model
 
@@ -59,14 +63,14 @@ def to_sklearn_format(model):
     train_labels = np.zeros(72000 * 2)
     test_arrays = np.zeros((8000 * 2, 100))
     test_labels = np.zeros(8000 * 2)
-    for i in range(72000 * 2):
+    for i in range(72000):
         prefix_train_pos = 'pos_' + str(i)
         prefix_train_neg = 'neg_' + str(i)
         train_arrays[i] = model[prefix_train_pos]
         train_arrays[72000 + i] = model[prefix_train_neg]
         train_labels[i] = 1
         train_labels[72000 + i] = 0
-    for i in range(8000 * 2):
+    for i in range(8000):
         prefix_test_pos = 'pos_' + str(i)
         prefix_test_neg = 'neg_' + str(i)
         test_arrays[i] = model[prefix_test_pos]
@@ -89,8 +93,8 @@ def test_model(model):
     LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,
                        intercept_scaling=1, penalty='l2', random_state=None,
                        tol=0.0001)
-    logging.info("Accuracy: "),
-    classifier.score(test_arr, test_labels)
+    logging.info("Accuracy: %.2f" % classifier.score(test_arr, test_labels))
+    
 
 
 def main(argv):
@@ -112,7 +116,7 @@ def main(argv):
             model_name = arg
         elif opt in ("-t", "-test"):
             testing = True
-        elif opt == ("-v", "--verbose"):
+        elif opt in ("-v", "--verbose"):
             verb = True
             output_format = '%(asctime)s : %(levelname)s : %(message)s'
             logging.basicConfig(format=output_format, level=logging.INFO)
