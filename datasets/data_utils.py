@@ -116,7 +116,7 @@ def split_data(data, train=.7, dev=.2, test=.1, shuffle=False):
     return train_set, dev_set, test_set
 
 
-def tokenize(text):
+def preprocess_tweet(text):
     '''Script for preprocessing tweets by Romain Paulus
     with small modifications by Jeffrey Pennington
     with translation to Python by Motoki Wu
