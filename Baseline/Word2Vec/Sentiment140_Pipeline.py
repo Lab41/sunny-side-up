@@ -6,6 +6,7 @@ ssu_path = file_path.rsplit('/Baseline')[0]
 sys.path.insert(0, ssu_path)
 
 from datasets import sentiment140
+from datasets import data_utils
 
 # Word2Vec/Doc2Vec packages
 from gensim.models.doc2vec import LabeledSentence
@@ -33,10 +34,10 @@ def train_d2v_model(data, epoch_num=10):
     ls = None
     for i, (sentence, label) in enumerate(data):
         if label == 'pos':
-            ls = LabeledSentence(sentence.lower().split(), [label + '_%d' % pos_count])
+            ls = LabeledSentence(data_utils.preprocess_tweet(sentence).split(), [label + '_%d' % pos_count])
             pos_count += 1
         else:
-            ls = LabeledSentence(sentence.lower().split(), [label + '_%d' % neg_count])
+            ls = LabeledSentence(data_utils.preprocess_tweet(sentence).split(), [label + '_%d' % neg_count])
             neg_count += 1
         labeled_sent.append(ls)
 

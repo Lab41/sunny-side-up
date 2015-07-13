@@ -166,7 +166,7 @@ def preprocess_tweet(text):
     text = re_sub(r"[-+]?[.\d]*[\d]+[:,.\d]*", "<number>")
     text = re_sub(r"#\S+", hashtag)
     text = re_sub(r"([!?.]){2,}", r"\1 <repeat>")
-    text = re_sub(r"\b(\S*?)(.)\2{2,}\b", r"\1\2 <elong>")
+    #text = re_sub(r"\b(\S*?)(.)\2{2,}\b", r"\1\2 <elong>")
 
     ## -- I don't understand why the Ruby script adds <allcaps> to everything so I limited the selection.
     # text = re_sub(r"([^a-z0-9()<>'`\-]){2,}", allcaps)
