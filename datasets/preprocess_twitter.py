@@ -1,7 +1,7 @@
 import re
 
 
-def tokenize(text):
+def preprocess_tweet(text):
     '''Script for preprocessing tweets by Romain Paulus
     with small modifications by Jeffrey Pennington
     with translation to Python by Motoki Wu
