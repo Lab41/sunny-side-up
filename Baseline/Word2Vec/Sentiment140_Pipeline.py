@@ -87,7 +87,7 @@ def to_sklearn_format(model, test=.1):
         raise ValueError('test variable must be between 0-1')
 
     test_size = int(80000 * test)
-    train_size = test_size - test_size
+    train_size = 80000 - test_size
 
     train_arrays = np.zeros((train_size * 2, 100))
     train_labels = np.zeros(train_size * 2)
