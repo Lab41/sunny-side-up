@@ -15,6 +15,7 @@ from gensim.models import Doc2Vec
 import logging
 import numpy as np
 from sklearn.linear_model import LogisticRegression
+from sklearn import metrics
 
 
 def train_d2v_model(data, epoch_num=10):
@@ -125,13 +126,14 @@ def test_model(model):
     train_arr, train_labels, test_arr, test_labels = to_sklearn_format(model, test=.1)
 
     logging.info("Building logisitic regression classifier...")
-    classifier = LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True, intercept_scaling=1, penalty='l2', random_state=None, tol=0.0001)
+    classifier = LogisticRegression(C=1.0, class_weight=None, dual=False,
+                                    fit_intercept=True, intercept_scaling=1,
+                                    penalty='l2', random_state=None, tol=0.0001)
     classifier.fit(train_arr, train_labels)
 
-    #LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,
-                       # intercept_scaling=1, penalty='l2', random_state=None,
-                       # tol=0.0001)
-    logging.info("Accuracy: %.4f" % classifier.score(test_arr, test_labels))
+    print("Accuracy: %.4f" % classifier.score(test_arr, test_labels))
+    print(metrics.classification_report(test_arr, test_labels, target_names=['neg', 'pos']))
+    print(metrics.confusion_matrix(test_arr, test_labels))
 
 
 def main(argv):
@@ -164,12 +166,9 @@ def main(argv):
         logging.critical("Sentiment140_Pipeline script is neither saving or testing the model built")
         sys.exit()
 
-    # TODO
-    # Remove ability to remove @mentions
-    # Using a better tokenizer
     logging.info("Opening CSV file...")
     all_data = sentiment140.load_data(verbose=verbose)
-    model = train_d2v_model(all_data, epoch_num=1)
+    model = train_d2v_model(all_data, epoch_num=10)
 
     # Saves memory
     model.init_sims(replace=True)
