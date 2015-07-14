@@ -49,7 +49,7 @@ def train_d2v_model(data, epoch_num=10):
     # from the Doc2Vec sentence corpus. #
     # ex: you could imagine a tweet containing only words whose count was low #
     model = Doc2Vec(min_count=1, window=10, size=100, sample=1e-4, negative=5,
-                    workers=1)
+                    workers=7)
 
     logging.info("Building Vocabulary...")
     model.build_vocab(labeled_sent)
@@ -86,7 +86,7 @@ def to_sklearn_format(model, test=.1):
     if test <= 0 or test >= 1:
         raise ValueError('test variable must be between 0-1')
 
-    test_size = 80000 * test
+    test_size = int(80000 * test)
     train_size = test_size - test_size
 
     train_arrays = np.zeros((train_size * 2, 100))
@@ -125,12 +125,12 @@ def test_model(model):
     train_arr, train_labels, test_arr, test_labels = to_sklearn_format(model, test=.1)
 
     logging.info("Building logisitic regression classifier...")
-    classifier = LogisticRegression()
+    classifier = LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True, intercept_scaling=1, penalty='l2', random_state=None, tol=0.0001)
     classifier.fit(train_arr, train_labels)
 
-    LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,
-                       intercept_scaling=1, penalty='l2', random_state=None,
-                       tol=0.0001)
+    #LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,
+                       # intercept_scaling=1, penalty='l2', random_state=None,
+                       # tol=0.0001)
     logging.info("Accuracy: %.4f" % classifier.score(test_arr, test_labels))
 
 
@@ -169,7 +169,7 @@ def main(argv):
     # Using a better tokenizer
     logging.info("Opening CSV file...")
     all_data = sentiment140.load_data(verbose=verbose)
-    model = train_d2v_model(all_data, epoch_num=10)
+    model = train_d2v_model(all_data, epoch_num=1)
 
     # Saves memory
     model.init_sims(replace=True)
