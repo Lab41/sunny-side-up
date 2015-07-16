@@ -1,5 +1,7 @@
 import os, sys
 import getopt
+
+# Adds ability to import form datasets
 file_path = os.path.dirname(os.path.abspath(__file__))
 ssu_path = file_path.rsplit('/Baseline')[0]
 
@@ -14,7 +16,7 @@ from gensim.models import Doc2Vec
 
 import logging
 import numpy as np
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, RandomForestClassifier
 from sklearn import metrics
 
 
@@ -30,11 +32,16 @@ def train_d2v_model(data, epoch_num=10):
         A trained Doc2Vec model
     '''
     labeled_sent = list()
-    pos_count = 0
-    neg_count = 0
+    pos_count = neg_count = 0
     ls = None
-    for i, (sentence, label) in enumerate(data):
+
+    ''' Sets the label for each individual sentence in the Doc2Vec model.
+    These become "special words" that allow the vector for a sentence to
+    be accessed from the model. Each label must be unique '''
+    for (sentence, label) in data:
         if label == 'pos':
+            ''' Doc2Vec model takes in only this LabeledSentence data structure
+            ex: LabeledSentence(['list', 'of', 'tokenized', 'words'], ['pos_0'])'''
             ls = LabeledSentence(preprocess_tweet(sentence).split(), [label + '_%d' % pos_count])
             pos_count += 1
         else:
@@ -45,10 +52,9 @@ def train_d2v_model(data, epoch_num=10):
     logging.info("Training on %d Positive and %d Negative tweets" % (pos_count, neg_count))
     logging.info("Building model...")
 
-    # NOTE!
-    # Setting min_count > 1 can cause some tweets to "disappear" later #
-    # from the Doc2Vec sentence corpus. #
-    # ex: you could imagine a tweet containing only words whose count was low #
+    '''Setting min_count > 1 can cause some tweets to "disappear" later
+    from the Doc2Vec sentence corpus.
+    ex: you could imagine a tweet containing only words whose count was low'''
     model = Doc2Vec(min_count=1, window=10, size=100, sample=1e-4, negative=5,
                     workers=7)
 
@@ -56,11 +62,13 @@ def train_d2v_model(data, epoch_num=10):
     model.build_vocab(labeled_sent)
 
     logging.info("Training model...")
-    for epoch in range(epoch_num):
+    for epoch in xrange(epoch_num):
         logging.info("Epoch %s..." % epoch)
         # Temporarily sets logging level to show only if its at least WARNING
         # This prevents model.train from overloading the log
         logging.getLogger().setLevel(logging.WARN)
+        # Numpy random permutation method shuffles data in place 
+        # Shuffling improves the accuracy of the model
         model.train(np.random.permutation(labeled_sent))
         logging.getLogger().setLevel(logging.INFO)
 
@@ -90,19 +98,22 @@ def to_sklearn_format(model, test=.1):
     test_size = int(80000 * test)
     train_size = 80000 - test_size
 
+    # Initializes numpy data matrices and label vectors
     train_arrays = np.zeros((train_size * 2, 100))
     train_labels = np.zeros(train_size * 2)
     test_arrays = np.zeros((test_size * 2, 100))
     test_labels = np.zeros(test_size * 2)
-    for i in range(train_size):
+    for i in xrange(train_size):
         prefix_train_pos = 'pos_' + str(i)
         prefix_train_neg = 'neg_' + str(i)
+        ## This relies on previous function ##
+        ## Labeling is in blah  blah
         train_arrays[i] = model[prefix_train_pos]
         train_arrays[train_size + i] = model[prefix_train_neg]
         # Positive = 1, Negative = 0
         train_labels[i] = 1
         train_labels[train_size + i] = 0
-    for i in range(test_size):
+    for i in xrange(test_size):
         prefix_test_pos = 'pos_' + str(i)
         prefix_test_neg = 'neg_' + str(i)
         test_arrays[i] = model[prefix_test_pos]
@@ -126,9 +137,10 @@ def test_model(model):
     train_arr, train_labels, test_arr, test_labels = to_sklearn_format(model, test=.1)
 
     logging.info("Building logisitic regression classifier...")
-    classifier = LogisticRegression(C=1.0, class_weight=None, dual=False,
-                                    fit_intercept=True, intercept_scaling=1,
-                                    penalty='l2', random_state=None, tol=0.0001)
+    #classifier = LogisticRegression(C=1.0, class_weight=None, dual=False,
+    #                                fit_intercept=True, intercept_scaling=1,
+    #                                penalty='l2', random_state=None, tol=0.0001)
+    classifier = RandomForestClassifier(n_estimators = 100)
     classifier.fit(train_arr, train_labels)
 
     print("Accuracy: %.4f" % classifier.score(test_arr, test_labels))
@@ -152,6 +164,7 @@ def main(argv):
             usage()
             sys.exit()
         elif opt in ("-s", "--save"):
+            print('Saving model to %s' % arg)
             model_name = arg
         elif opt in ("-t", "--test"):
             testing = True
