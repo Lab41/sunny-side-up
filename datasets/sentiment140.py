@@ -1,6 +1,6 @@
 import logging
 from data_utils import latin_csv_reader, get_file
-import zipfile
+from zipfile import ZipFile
 
 # Dictionary that defines the Sentiment features
 Sentiment = {0: 'neg', 2: 'neutral', 4: 'pos'}
@@ -32,19 +32,23 @@ def load_data(file_path=None, feat_extractor=None, verbose=False):
 
     # Open file path
     if file_path:
-        twitter_csv = open(file_path, 'r')
+        try:
+            twitter_csv = open(file_path, 'r')
+        except IOError, e:
+            print "IO Error:", e.code, file_path
     else:
         # Dowloads and saves locally the zip file from internet
         file_path = get_file("http://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip")
 
-        with zipfile.ZipFile(file_path, 'r') as zp:
+        with ZipFile(file_path, 'r') as zp:
             twitter_csv = zp.open('training.1600000.processed.noemoticon.csv')
 
     # Perform parsing of CSV file
     reader = latin_csv_reader(twitter_csv, delimiter=',')
-    for index, tweet in enumerate(reader):
-        if verbose and index % 10000 == 0:
-            logging.info("PROGRESS: at tweet #%s", index)
+    for i, tweet in enumerate(reader):
+        # Prints progress every 10000 words read
+        if verbose and i % 10000 == 0:
+            logging.info("PROGRESS: at tweet #%s", i)
 
         # Gets tweets string from line in csv
         tweet_string = tweet[5]

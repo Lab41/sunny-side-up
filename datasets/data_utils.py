@@ -1,6 +1,4 @@
-import os
-import re
-import csv
+import os, re, csv
 import logging
 import random
 from urllib2 import urlopen, HTTPError, URLError

@@ -13,14 +13,18 @@ def load_data(file_path=None, verbose=False):
                 SNAP Stanford data set (or others of a similar structure)
 
         @Return:
-            A generator over a dictionaries of each Amazon Reveiws]
+            A generator over a dictionaries of each Amazon Reveiws
     '''
     # Open file path
     if not file_path:
         file_path = get_file("https://snap.stanford.edu/data/amazon/all.txt.gz")
 
     # Parse Amazon Reviews GZip file -- taken from Stanford SNAP page
-    f = gzip.open(file_path, 'r')
+    try:
+        f = gzip.open(file_path, 'r')
+    except IOError, e:
+        print "IO Error", e.code, file_path
+
     entry = dict()
     for l in f:
         l = l.strip()
