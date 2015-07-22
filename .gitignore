@@ -2,3 +2,6 @@
 *.sublime-project
 *.sublime-workspace
 *.DS_Store
+*.ipynb
+**/.downloads/*
+**/models/*
