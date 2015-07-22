@@ -17,10 +17,6 @@ def load_data(file_path=None):
         @Return:
             A list of strings representing analogies
     '''
-    # TODO #
-    # Add logging for a verbosity flag...although the file is small #
-    # so I am not sure that it is even worth it #
-
     word_analogies = list()
 
     # Open file path
@@ -28,9 +24,12 @@ def load_data(file_path=None):
         file_path = get_file("https://word2vec.googlecode.com/svn/trunk/questions-words.txt")
 
     # Questions word file
-    qw = open(file_path, 'r')
+    try:
+        qw = open(file_path, 'r')
+    except IOError, e:
+        print "IO Error" + e.code + file_path
 
-    ### Removes categories!!! ### 
+    # Removes categories!!!
     word_analogies = [l for l in qw.read().splitlines() if l[0] != ':']
     qw.close()
     return word_analogies

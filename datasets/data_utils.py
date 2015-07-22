@@ -1,5 +1,4 @@
-import os
-import csv
+import os, re, csv
 import logging
 import random
 from urllib2 import urlopen, HTTPError, URLError
@@ -113,3 +112,62 @@ def split_data(data, train=.7, dev=.2, test=.1, shuffle=False):
     test_set = data[train_size + dev_size + 1:data_size]
 
     return train_set, dev_set, test_set
+
+
+def preprocess_tweet(text):
+    '''Script for preprocessing tweets by Romain Paulus
+    with small modifications by Jeffrey Pennington
+    with translation to Python by Motoki Wu
+
+    Translation of Ruby script to create features for GloVe vectors for Twitter data.
+    By Motoki Wu
+    http://nlp.stanford.edu/projects/glove/preprocess-twitter.rb
+
+    @Arguments:
+        "Some random text with #hashtags, @mentions and http://t.co/kdjfkdjf (links). :)"
+
+    @Return:
+        Processed tweet with certain features replaced
+
+    '''
+    FLAGS = re.MULTILINE | re.DOTALL
+
+    # Different regex parts for smiley faces
+    eyes = ur"[8:=;]"
+    nose = ur"['`\-]?"
+
+    # function so code less repetitive
+    def re_sub(pattern, repl):
+        return re.sub(pattern, repl, text, flags=FLAGS)
+
+    def hashtag(text):
+        text = text.group()
+        hashtag_body = text[1:]
+        if hashtag_body.isupper():
+            result = u"<hashtag> {} <allcaps>".format(hashtag_body)
+        else:
+            result = u" ".join([u"<hashtag>"] + re.split(ur"(?=[A-Z])", hashtag_body, flags=FLAGS))
+        return result
+
+    def allcaps(text):
+        text = text.group()
+        return text.lower() + u" <allcaps>"
+
+    text = re_sub(ur"https?:\/\/\S+\b|www\.(\w+\.)+\S*", u"<url>")
+    text = re_sub(ur"/", " / ")
+    text = re_sub(ur"@\w+", u"<user>")
+    text = re_sub(ur"{}{}[)dD]+|[)dD]+{}{}".format(eyes, nose, nose, eyes), u"<smile>")
+    text = re_sub(ur"{}{}p+".format(eyes, nose), u"<lolface>")
+    text = re_sub(ur"{}{}\(+|\)+{}{}".format(eyes, nose, nose, eyes), u"<sadface>")
+    text = re_sub(ur"{}{}[\/|l*]".format(eyes, nose), u"<neutralface>")
+    text = re_sub(ur"<3", "<heart>")
+    text = re_sub(ur"[-+]?[.\d]*[\d]+[:,.\d]*", u"<number>")
+    text = re_sub(ur"#\S+", hashtag)
+    text = re_sub(ur"([!?.]){2,}", ur"\1 <repeat>")
+    #text = re_sub(r"\b(\S*?)(.)\2{2,}\b", r"\1\2 <elong>")
+
+    ## -- I don't understand why the Ruby script adds <allcaps> to everything so I limited the selection.
+    # text = re_sub(r"([^a-z0-9()<>'`\-]){2,}", allcaps)
+    text = re_sub(ur"([A-Z]){2,}", allcaps)
+
+    return text.lower()
