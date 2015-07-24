@@ -17,6 +17,7 @@ from gensim.models import Doc2Vec
 import logging
 import numpy as np
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn import metrics
 
 
@@ -125,7 +126,7 @@ def to_sklearn_format(model, test=.1):
     return train_arrays, train_labels, test_arrays, test_labels
 
 
-def test_model(model):
+def test_model(model, classifier=None):
     ''' Uses a loaded Doc2Vec model and a LogisticRegression
     from the scikitlearn package to build a sentiment classifier
 
@@ -137,14 +138,17 @@ def test_model(model):
     train_arr, train_labels, test_arr, test_labels = to_sklearn_format(model, test=.1)
 
     logging.info("Building logisitic regression classifier...")
-    classifier = LogisticRegression(C=1.0, class_weight=None, dual=False,
-                                    fit_intercept=True, intercept_scaling=1,
-                                    penalty='l2', random_state=None, tol=0.0001)
+
+    if not classifier:
+        classifier = LogisticRegression(C=1.0, class_weight=None, dual=False,
+                                        fit_intercept=True, intercept_scaling=1,
+                                        penalty='l2', random_state=None,
+                                        tol=0.0001)
     classifier.fit(train_arr, train_labels)
 
     print("Accuracy: %.4f" % classifier.score(test_arr, test_labels))
-    print(metrics.classification_report(test_arr, test_labels, target_names=['neg', 'pos']))
-    print(metrics.confusion_matrix(test_arr, test_labels))
+    #print(metrics.classification_report(test_arr, test_labels, target_names=['neg', 'pos']))
+    #print(metrics.confusion_matrix(test_arr, test_labels))
 
 
 def main(argv):

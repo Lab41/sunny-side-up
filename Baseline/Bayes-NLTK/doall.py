@@ -43,8 +43,8 @@ def main(argv):
             ''' This section allows you to use scikit-learn packages for
             text classification.
 
-            "NLTK’s SklearnClassifier makes the process much easier,
-            since you don’t have to convert feature dictionaries to
+            NLTKs SklearnClassifier makes the process much easier,
+            since you dont have to convert feature dictionaries to
             numpy arrays yourself, or keep track of all known features.
             The Scikits classifiers also tend to be more memory efficient
             than the standard NLTK classifiers, due to their use of sparse
