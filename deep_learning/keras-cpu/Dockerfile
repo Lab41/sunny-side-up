@@ -13,6 +13,8 @@ RUN pip install numpy
 RUN pip install scipy
 RUN pip install cython
 RUN pip install h5py
+RUN pip install pyyaml
+RUN pip install six==1.9.0
 
 # install keras
 RUN cd /tmp && \
