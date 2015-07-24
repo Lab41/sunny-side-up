@@ -23,7 +23,7 @@ def latin_csv_reader(csv_data, dialect=csv.excel, **kwargs):
             CSV file
     '''
 
-    # Opens CSV reader
+    # Opens CSV csv_reader
     csv_reader = csv.reader(csv_data, dialect=dialect, **kwargs)
     # Converts row to latin-1 encoding and yields this line on next() calls
     for row in csv_reader:
