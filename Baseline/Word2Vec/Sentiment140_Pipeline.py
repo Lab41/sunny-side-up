@@ -16,7 +16,7 @@ from gensim.models import Doc2Vec
 
 import logging
 import numpy as np
-from sklearn.linear_model import LogisticRegression, 
+from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import metrics
 
