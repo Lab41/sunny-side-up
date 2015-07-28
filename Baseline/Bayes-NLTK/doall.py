@@ -77,8 +77,7 @@ def main(argv):
     train_set, dev_set, test_set = split_tweets(all_data, train=.9,
                                                 dev=0, test=.1, shuffle=True)
     print("Data split into sets")
-
-    classifier.train(train_set)
+    classifier = classifier.train(train_set)
     print("Classifier trained")
 
     print("Evaluating accuracy and other features\n")
