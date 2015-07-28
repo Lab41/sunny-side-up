@@ -108,7 +108,7 @@ def to_sklearn_format(model, test=.1):
         prefix_train_pos = 'pos_' + str(i)
         prefix_train_neg = 'neg_' + str(i)
         ## This relies on previous function ##
-        ## Labeling is in blah  blah
+        ## Labeling is in train_d2v_model
         train_arrays[i] = model[prefix_train_pos]
         train_arrays[train_size + i] = model[prefix_train_neg]
         # Positive = 1, Negative = 0

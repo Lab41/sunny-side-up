@@ -1,24 +1,32 @@
-import sys
+import os, sys
 import getopt
+import logging
 from nltk import NaiveBayesClassifier
 from nltk.classify.scikitlearn import SklearnClassifier
 from sklearn.naive_bayes import BernoulliNB, MultinomialNB, GaussianNB
 from sklearn.pipeline import Pipeline
-from import_stanford_twitter import open_stanford_twitter_csv
-from feature_evaluator import evaluate_features
+
+# Adds ability to import form datasets
+file_path = os.path.dirname(os.path.abspath(__file__))
+ssu_path = file_path.rsplit('/Baseline')[0]
+
+sys.path.insert(0, ssu_path)
+
+from datasets import sentiment140
+from datasets.data_utils import split_data
+from feature_evaluator import test_model
 from feature_extractors import word_feats
-from ingest_twitter import split_tweets
 
 
 def main(argv):
-    # Initial local path for Stanford Twitter Data
-    PATH = './StanfordTweetData/training.1600000.processed.noemoticon.csv'
-    FEAT_PATH = './twitter_features.txt'
+    # Initial local path for Stanford Twitter Data Features is None
+    FEAT_PATH = None
+    verbose = False
 
     # Parse command line arguments
     try:
         long_flags = ["help", "bernoulli", "multinomial", "gaussian"]
-        opts, args = getopt.getopt(argv, "hi:f:", long_flags)
+        opts, args = getopt.getopt(argv, "hf:v", long_flags)
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -29,16 +37,12 @@ def main(argv):
         if opt in ('-h', '--help'):
             usage()
             sys.exit()
-        elif opt == '-i':
-            # Updates PATH to Stanford Tweet CSV data set
-            if arg:
-                PATH = arg
-            else:
-                print('Argument expected for the -i option\n')
-                usage()
-                sys.exit(2)
         elif opt == '-f':
             FEAT_PATH = arg
+        elif opt == '-v':
+            verbose = True
+            output_format = '%(asctime)s : %(levelname)s : %(message)s'
+            logging.basicConfig(format=output_format, level=logging.INFO)
         elif opt in ("bernoulli", "multinomial", "gaussian"):
             ''' This section allows you to use scikit-learn packages for
             text classification.
@@ -62,33 +66,33 @@ def main(argv):
             classifier = SklearnClassifier(pipeline)
 
     # Perform tweet parsing and learning
-    print("Opening CSV file...")
-    print("Extracting Features...")
+    logging.info("Opening CSV file...")
+    logging.info("Extracting Features...")
 
     all_data = list()
     # Checks if all_data has already been set
-    if any([opt == '-f' for opt, arg in opts]):
+    if FEAT_PATH is not None:
         tweet_feats = open(FEAT_PATH, 'r')
         all_data = [eval(line) for line in tweet_feats]
     else:
-        all_data = open_stanford_twitter_csv(PATH, feat_extractor=word_feats)
+        all_data = sentiment140.load_data(feat_extractor=word_feats,
+                                          verbose=verbose)
 
-    print("CSV file opened and features extracted")
-    train_set, dev_set, test_set = split_tweets(all_data, train=.9,
-                                                dev=0, test=.1, shuffle=True)
-    print("Data split into sets")
+    logging.info("CSV file opened and features extracted")
+    train_set, dev_set, test_set = split_data(all_data, train=.9,
+                                              dev=0, test=.1, shuffle=True)
+    logging.info("Data split into sets")
     classifier = classifier.train(train_set)
-    print("Classifier trained")
+    logging.info("Classifier trained")
 
-    print("Evaluating accuracy and other features\n")
-    evaluate_features(classifier, test_set)
+    logging.info("Evaluating accuracy and other features\n")
+    test_model(classifier, test_set)
 
 
 def usage():
     print('Usage: doall.py [-i file | -h]')
     print('Options and arguments:')
     print('-h\t\t: print this help message and exit (also --help)')
-    print('-i csv_file\t: specify path for StanfordTweet input CSV file')
     print('-f txt_file\t: specify path for txt file containing tweet features')
     print('')
     print('--bernoulli\t: specifies the use a Bernoulli Naive Bayes classifier')
