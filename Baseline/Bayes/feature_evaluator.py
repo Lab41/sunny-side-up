@@ -1,9 +1,10 @@
 import collections
 import nltk
+import logging
 from import_stanford_twitter import Sentiment
 
 
-def evaluate_features(trained_classifier, test_data):
+def test_model(trained_classifier, test_data):
     ''' Takes in an previously trained_classifier and test_data
         with which to determine the classifiers accuracy.
 
@@ -26,7 +27,7 @@ def evaluate_features(trained_classifier, test_data):
     pos = Sentiment[4]
     neg = Sentiment[0]
 
-    print("Classifying test data...")
+    logging.info("Classifying test data...")
     for i, (features, label) in enumerate(test_data):
         referenceSets[label].add(i)
         predicted = trained_classifier.classify(features)
