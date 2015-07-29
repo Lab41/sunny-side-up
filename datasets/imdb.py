@@ -1,3 +1,4 @@
+import os
 import tarfile
 import random
 from data_utils import get_file
@@ -20,25 +21,38 @@ def load_data(file_path=None):
         @Return:
             A generator over a tuples of Movie reviews and their sentiment
     '''
-    tar = None
-
     # Open file path
     if not file_path:
+        print "Downloading IMDB dataset"
         file_path = get_file("http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz")
 
-    tar = tarfile.open(file_path, mode="r:gz")
+    # If file has not been extracted, then extract it 
+    # to the downloads folder. This will save a lot of time
+    if not os.path.isdir('./.downloads/aclImdb'):
+        print("Extracting IMDB dataset")
+        tar = tarfile.open(file_path, mode="r:gz")
+        tar.extractall(path="./.downloads")
+        tar.close()
+
     # Specifies positive and negative files
-    pos = [(m, Sentiment[4]) for m in tar.getmembers() if r'pos/' in m.name]
-    neg = [(m, Sentiment[0]) for m in tar.getmembers() if r'neg/' in m.name]
+    pos_train = os.listdir('./.downloads/aclImdb/train/pos')
+    pos_train = [(os.path.join('./.downloads/aclImdb/train/pos', file_name), 'pos') for file_name in pos_train]
+    pos_test = os.listdir('./.downloads/aclImdb/test/pos')
+    pos_test = [(os.path.join('./.downloads/aclImdb/test/pos', file_name), 'pos') for file_name in pos_test]
+
+    neg_train = os.listdir('./.downloads/aclImdb/train/neg')
+    neg_train = [(os.path.join('./.downloads/aclImdb/train/neg', file_name), 'neg') for file_name in neg_train]
+    neg_test = os.listdir('./.downloads/aclImdb/test/neg')
+    neg_test = [(os.path.join('./.downloads/aclImdb/test/neg', file_name), 'neg') for file_name in neg_test]
+
+    all_data = pos_train + pos_test + neg_train + neg_test
 
     # Combines data and shuffles it.
-    all_data = pos + neg
     random.shuffle(all_data)
 
-    for (member, sentiment) in all_data:
+    for (file_path, sentiment) in all_data:
         # Open the movie review
-        f = tar.extractfile(member)
+        f = open(file_path, 'r')
         yield (f.read(), sentiment)
         # Closes f on the following next() call by user
         f.close()
-    tar.close()
