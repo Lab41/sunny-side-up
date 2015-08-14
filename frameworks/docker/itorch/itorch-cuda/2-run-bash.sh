@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # image name
-__image=lab41/itorch
+__image=lab41/itorch-cuda
 __volume_host=/opt
 __volume_cntr=/data
 

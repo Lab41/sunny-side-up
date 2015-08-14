@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # image name
-__image=lab41/itorch
+__image=lab41/itorch-cpu
 __ip_host=49888
 __ip_cntr=8888
 
