@@ -12,7 +12,7 @@ RUN apt-get install --assume-yes  python-dev \
 RUN pip install numpy \
                 scipy \
                 cython \
-                h5py
+                h5py \
                 pyyaml \
                 six==1.9.0
 
