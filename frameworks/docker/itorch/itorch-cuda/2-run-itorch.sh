@@ -2,7 +2,7 @@
 
 # image name
 __ip=<IP-OF-MACHINE>
-__image=lab41/itorch
+__image=lab41/itorch-cuda
 __port_host=80
 __port_cntr=8888
 __volume_host=/opt/sunny-side-up
