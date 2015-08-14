@@ -2,7 +2,7 @@
 
 # image name
 __image=lab41/keras-cpu
-__volume_host=$(pwd)
+__volume_host=/home/kylef/dev/keras
 __volume_cntr=/data
 
 # run image

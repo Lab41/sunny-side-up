@@ -9,10 +9,10 @@ RUN apt-get install --assume-yes  python-dev \
                                   libhdf5-dev
 
 # install python modules
-RUN pip install numpy
-RUN pip install scipy
-RUN pip install cython
-RUN pip install h5py
+RUN pip install numpy \
+                scipy \
+                cython \
+                h5py
 
 
 # install cuDNN
@@ -29,11 +29,19 @@ RUN cd /tmp && \
     python setup.py install && \
     rm -rf /tmp/keras
 
+
 # Adding ipython
-RUN pip install ipython pyzmq jinja2 tornado jsonschema
+RUN pip install ipython \
+                pyzmq \
+                jinja2 \
+                tornado \
+                jsonschema
+
 
 # setup data volume
 VOLUME ["/data"]
+WORKDIR /data
+
 
 # default to shell
 CMD ["/bin/bash"]
