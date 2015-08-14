@@ -2,6 +2,6 @@
 *.sublime-project
 *.sublime-workspace
 *.DS_Store
-*.ipynb
+*-checkpoint.ipynb
 **/.downloads/*
 **/models/*
