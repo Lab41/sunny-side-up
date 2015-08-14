@@ -1,3 +1,4 @@
+*.log
 *.pyc
 *.sublime-project
 *.sublime-workspace
@@ -5,3 +6,6 @@
 *-checkpoint.ipynb
 **/.downloads/*
 **/models/*
+**/outputs/psd/*
+**/tutorials/*.ascii
+**/cudnn*.tgz
