@@ -12,14 +12,24 @@ RUN apt-get install --assume-yes  python-dev \
 RUN pip install numpy \
                 scipy \
                 cython \
-                h5py
+                h5py \
+                pyyaml \
+                six==1.9.0
 
 
-# install cuDNN
-ADD config/cudnn-6.5-linux-x64-v2.tgz /tmp
-RUN cd /tmp/cudnn-6.5-linux-x64-v2 && \
-    cp cudnn.h /usr/local/cuda/include && \
-    cp libcudnn* /usr/local/cuda/lib
+# install CUDA
+RUN cd /tmp && \
+    wget http://developer.download.nvidia.com/compute/cuda/7_0/Prod/local_installers/cuda_7.0.28_linux.run && \
+    chmod +x cuda_*_linux.run && \
+    ./cuda_*_linux.run -extract=`pwd` && \
+    ./NVIDIA-Linux-x86_64-*.run -s --no-kernel-module && \
+    ./cuda-linux64-rel-*.run -noprompt && \
+    rm -rf *
+
+
+# Add to path
+ENV PATH=/usr/local/cuda/bin:$PATH \
+    LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
 
 # install keras
