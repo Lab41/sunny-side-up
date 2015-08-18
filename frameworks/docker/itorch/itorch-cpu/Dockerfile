@@ -2,11 +2,8 @@
 FROM kaixhin/torch
 MAINTAINER Kyle F <kylef@lab41.org>
 
-# reset working directory
-#WORKDIR $HOME
-ENV DEBIAN_FRONTEND noninteractive
-
 # update
+ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update
 
 # install utilities
@@ -89,4 +86,6 @@ RUN bash -l -c "git clone https://github.com/torch/nngraph.git && \
 EXPOSE 8888
 VOLUME ["/data"]
 WORKDIR /data
+
+# default iTorch notebook server
 CMD ["itorch","notebook","--ip='*'"]
