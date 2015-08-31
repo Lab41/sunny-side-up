@@ -17,6 +17,7 @@ RUN cd /root/caffe && \
   sed 's!# $(ANACONDA_HOME)! $(ANACONDA_HOME)!' | \
   sed 's!# PYTHON_INCLUDE := $(ANACONDA_HOME)!PYTHON_INCLUDE := $(ANACONDA_HOME)!' | \
   sed 's!# USE_CUDNN := 1!USE_CUDNN := 1!' >  /root/caffe/Makefile.config && \
+  make clean && \
   make -j"$(nproc)" all && \
   make pycaffe
 
