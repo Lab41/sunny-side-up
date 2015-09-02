@@ -47,6 +47,8 @@ RUN pip install ipython \
                 tornado \
                 jsonschema
 
+# Add Passage
+RUN pip install passage
 
 # setup data volume
 VOLUME ["/data"]
