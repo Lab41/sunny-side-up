@@ -1,0 +1,12 @@
+# keras jypyter builds on base keras image
+FROM lab41/keras-cuda
+MAINTAINER Kyle F <kylef@lab41.org>
+
+
+# Add jupyter
+RUN pip install jupyter
+
+
+# default to jupyter notebook
+ADD config/notebook.sh /notebook.sh
+CMD ["/notebook.sh"]

@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# image name
+# build base
 __image=lab41/keras-cuda
-
-# build image
 docker build -t $__image .
+
+__image=lab41/keras-cuda-jupyter
+docker build -f Dockerfile_jupyter -t $__image .
+
