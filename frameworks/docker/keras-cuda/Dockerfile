@@ -50,8 +50,6 @@ RUN pip install ipython \
 # Add Passage
 RUN pip install passage
 
-# Add jupyter
-RUN pip install jupyter
 
 # setup data volume
 VOLUME ["/data"]
@@ -59,5 +57,4 @@ WORKDIR /data
 
 
 # default to shell
-ADD config/notebook.sh /notebook.sh
-CMD ["/notebook.sh"]
+CMD ["/bin/bash"]
