@@ -67,7 +67,6 @@ def get_file(url):
         print "HTTP Error:", e.code, url
     except URLError, e:
         print "URL Error:", e.reason, url
-        print "URL Error:", e.reason, url
 
 
 def split_data(data, train=.7, dev=.2, test=.1, shuffle=False):
