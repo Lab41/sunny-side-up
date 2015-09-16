@@ -9,9 +9,16 @@ import csv
 import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
+
+import numpy as np
+import pandas as pd
 
 from data_utils import get_file
+
+
+vocabulary=ur"""abcdefghijklmnopqrstuvwxyz0123456789-,;.!?:'"/\|_@#$%^&*~`+-=<>()[]{}""" + "\n"
+
 
 def unicode_csv_reader(unicode_csv_data, dialect=csv.excel, **kwargs):
     # csv.py doesn't do Unicode; encode temporarily as UTF-8:
@@ -35,10 +42,23 @@ def utf_8_encoder(unicode_csv_data):
 
 class BadRecordException(Exception):
     pass
+class TextTooShortException(Exception):
+    pass
 
-def load_data(file_path=None, verbose=False, which_set='train', train_pct=1.0, rng_seed=None):
+def enforce_length(txt, min_length=None, max_length=None):
+    if min_length is not None:
+        if len(txt) < min_length:
+            raise TextTooShortException()
+    if max_length is not None:
+        if len(txt) > max_length:
+            # truncate txt (from end)
+            return txt[0:max_length]
+    return txt
+
+def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, rng_seed=None, min_length=None, max_length=None):
     """
-    Load data from Open Weiboscope corpus of Sina Weibo posts.
+    Load data from Open Weiboscope corpus of Sina Weibo posts. Options are available for encoding
+    of returned text data. 
 
     @Arguments:
         file_path -- path to downloaded, unzipped Open Weiboscope
@@ -47,13 +67,20 @@ def load_data(file_path=None, verbose=False, which_set='train', train_pct=1.0, r
         which_set -- whether to iterate over train or testing set. You should
             also set train_pct and rng_seed to non-default values if you specify this
             (string)
-        train_pct -- what percent of dataset should go to training (rest for test; float)
+        form -- return results in hanzi, pinyin romanization, or one-hot encodings of romanization?
+            can take values of 'hanzi', 'pinyin', or 'onehot' (string)
+        train_pct -- what percent of dataset should go to training (remainder goes to test)?  (float)
         rng_seed -- value for seeding random number generator
+        min_length -- enforce a minimum length, in characters, for the 
+            dataset? Counted in hanzi for form='hanzi' and in roman characters 
+            for form='pinyin'. Texts that are too short will be excluded. (int)
+        max_length -- enforce a maximum length, in characters, for the dataset?
+            Counted in hanzi or roman characters as approriate (see above).
+            Texts that are too long will be truncated at the end. (int)
 
     @Return:
-        a generator over a tuples of review text (unicode) and whether or not 
-        the tweet was deleted (bool) and the romanized text of the tweet, if jieba
-        and pypinyin are installed
+        a generator over a tuples of review text (unicode or numpy array) and whether or not 
+        the tweet was deleted (bool)
 
     """
 
@@ -87,29 +114,45 @@ def load_data(file_path=None, verbose=False, which_set='train', train_pct=1.0, r
                 try:
                     records_split = line
                     if len(records_split) != 11:
-                        yield (records_split, BadRecordException("Comma split error on mid={} in"
+                        raise  BadRecordException("Comma split error on mid={} in"
                                          "file {} (len of record: {})".format(
                                             records_split[0], 
                                             os.path.basename(table_path),
-                                            len(records_split))))
+                                            len(records_split)))
             
                     # text on field 6, deleted on field 9. screen out retweets (field 1) 
                     if records_split[1] == '':
-                        try:
-                            yield (records_split[6], records_split[9] != '', romanize_tweet(records_split[6])) 
-                        except:
-                            yield (records_split[6], records_split[9] != '') 
-                except IndexError:
-                    # error handling: could yield exceptions into result, or not
-                    #yield (records_split, BadRecordException("Possible unicode error/fields in record"))
-                    continue
+                        if form=='hanzi':
+                            record_txt, sentiment = enforce_length(records_split[6], min_length, max_length), records_split[9] != '' 
+                            yield record_txt, sentiment
+                        elif form=='pinyin':
+                            record_txt, sentiment = enforce_length(romanize_tweet(records_split[6]), min_length, max_length), records_split[9] != '' 
+                            yield record_txt, sentiment
+                        elif form=='onehot':
+                            record_txt, sentiment = enforce_length(romanize_tweet(records_split[6]), min_length, max_length), records_split[9] != '' 
+                            yield text_to_one_hot(record_txt, vocabulary), sentiment
 
-                except UnicodeEncodeError as e:
-                    #yield (records_split, e)
+                except TextTooShortException:
+                    continue
+                except BadRecordException:
+                    continue
+                except IndexError:
+                    continue
+                except UnicodeEncodeError:
                     continue
 
                 except GeneratorExit:
                     return
+
+def text_to_one_hot(txt, vocabulary=vocabulary):
+    # setup the vocabulary for one-hot encoding
+    vocab_chars = set(list(vocabulary))
+
+    # create the output list
+    chars = list(txt)
+    categorical_chars = pd.Categorical(chars, categories=vocab_chars)
+    vectorized_chars = np.array(pd.get_dummies(categorical_chars))
+    return vectorized_chars
 
 def romanize_tweet(txt):
     import jieba
