@@ -121,10 +121,7 @@ RUN cd /opt/neon && \
     sed -i "s/^DEV = .*/DEV = $NEON_CONFIG_DEV/g" setup.cfg && \
     make sysinstall
 
-# install nervanagpu and make some updates
-#RUN cd /opt && git clone https://github.com/NervanaSystems/nervanagpu.git 
-#RUN cd /opt/nervanagpu && \
-#    pip install .
+# make some updates
 RUN pip install -U six
 
 # default to shell in neon dir
