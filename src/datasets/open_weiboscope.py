@@ -141,6 +141,9 @@ def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, r
                                 romanize_tweet(records_split[6]), min_length, 
                                 max_length, pad_out), records_split[9] != '' 
                             yield text_to_one_hot(record_txt, vocabulary), sentiment
+                        else:
+                            raise Exception("Unknown form '{}' (should be 'hanzi', "
+                                            "'pinyin', or 'onehot')".format(form))
 
                 except TextTooShortException:
                     continue
