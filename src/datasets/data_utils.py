@@ -29,20 +29,19 @@ def latin_csv_reader(csv_data, dialect=csv.excel, **kwargs):
         yield [unicode(cell, 'latin-1') for cell in row]
 
 
-def get_file(url, file_path=os.path.dirname(os.path.abspath(__file__))):
+def get_file(url):
     ''' Takes in a file url from the web and dowloads that file to
-    to a local directory called {file_path}/.downloads
+    to a local directory called ./.downloads
 
     @Arguments:
         url -- the url of the chosen dataset
-        file_path -- the directory in which the hidden downloads folder 
-            is created. (defaults to pwd)
 
     @Raises:
         HTTPError, URLError
     '''
     try:
         # Prevents redownloading
+        file_path = os.path.dirname(os.path.abspath(__file__))
         downloads_path = os.path.join(file_path, './.downloads')
         fname = os.path.join(file_path, '.downloads', url.split('/')[-1])
         if '.downloads' in os.listdir(file_path):
@@ -67,6 +66,7 @@ def get_file(url, file_path=os.path.dirname(os.path.abspath(__file__))):
     except HTTPError, e:
         print "HTTP Error:", e.code, url
     except URLError, e:
+        print "URL Error:", e.reason, url
         print "URL Error:", e.reason, url
 
 
