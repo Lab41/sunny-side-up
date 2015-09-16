@@ -108,7 +108,6 @@ RUN cd /opt/imgworker && \
     pip install .
 
 # download/configure/install neon
-ENV neonupdated $(date "+%F")
 RUN cd /opt/ && git clone https://github.com/NervanaSystems/neon.git
 ENV NEON_CONFIG_CPU 1
 ENV NEON_CONFIG_GPU 1
@@ -120,12 +119,6 @@ RUN cd /opt/neon && \
     sed -i "s/^DIST = .*/DIST = $NEON_CONFIG_MPI/g" setup.cfg && \
     sed -i "s/^DEV = .*/DEV = $NEON_CONFIG_DEV/g" setup.cfg && \
     make install
-
-# install nervanagpu and make some updates
-RUN cd /opt && git clone https://github.com/NervanaSystems/nervanagpu.git 
-RUN cd /opt/nervanagpu && \
-    pip install .
-RUN pip install -U six
 
 # default to shell in neon dir
 WORKDIR /opt/neon
