@@ -65,7 +65,7 @@ def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, r
     @Arguments:
         file_path -- path to downloaded, unzipped Open Weiboscope
             data. If this path does not exist or is not given, load_data
-            will raise an exception (string)
+            will create the path and download the data (string)
         which_set -- whether to iterate over train or testing set. You should
             also set train_pct and rng_seed to non-default values if you specify this
             (string)
