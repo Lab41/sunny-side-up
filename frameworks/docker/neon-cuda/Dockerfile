@@ -53,7 +53,6 @@ RUN apt-get update && \
                         python-numpy \
                         python-pip \
                         python-scipy \
-                        python-virtualenv \
                         socat \
                         software-properties-common \
                         sudo \
@@ -83,10 +82,8 @@ RUN mkdir /ipython && \
 
 # install/configure CUDA
 RUN cd  /tmp && \
-#    wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1404/x86_64/cuda-repo-ubuntu1404_7.0-28_amd64.deb && \
-#    dpkg -i cuda-repo-ubuntu1404_7.0-28_amd64.deb && \
-    wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1404/x86_64/cuda-repo-ubuntu1404_7.5-18_amd64.deb && \
-    dpkg -i cuda-repo-ubuntu1404_7.5-18_amd64.deb && \
+    wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1404/x86_64/cuda-repo-ubuntu1404_7.0-28_amd64.deb && \
+    dpkg -i cuda-repo-ubuntu1404_7.0-28_amd64.deb && \
     apt-get update && \
     apt-get install --assume-yes cuda
 ENV PATH /usr/local/cuda/bin:$PATH
@@ -111,7 +108,7 @@ RUN cd /opt/imgworker && \
     pip install .
 
 # download/configure/install neon
-ENV neonupdated $(date "+%Y-%m")
+ENV neonupdated $(date "+%F")
 RUN cd /opt/ && git clone https://github.com/NervanaSystems/neon.git
 ENV NEON_CONFIG_CPU 1
 ENV NEON_CONFIG_GPU 1
@@ -122,15 +119,12 @@ RUN cd /opt/neon && \
     sed -i "s/^GPU = .*/GPU = $NEON_CONFIG_GPU/g" setup.cfg && \
     sed -i "s/^DIST = .*/DIST = $NEON_CONFIG_MPI/g" setup.cfg && \
     sed -i "s/^DEV = .*/DEV = $NEON_CONFIG_DEV/g" setup.cfg && \
-    make
-
-# activate virtualenv in home dir
-RUN echo ". /opt/neon/.venv/bin/activate" > "~/.bashrc"
+    make install
 
 # install nervanagpu and make some updates
-#RUN cd /opt && git clone https://github.com/NervanaSystems/nervanagpu.git 
-#RUN cd /opt/nervanagpu && \
-#    pip install .
+RUN cd /opt && git clone https://github.com/NervanaSystems/nervanagpu.git 
+RUN cd /opt/nervanagpu && \
+    pip install .
 RUN pip install -U six
 
 # default to shell in neon dir
