@@ -45,7 +45,7 @@ class BadRecordException(Exception):
 class TextTooShortException(Exception):
     pass
 
-def enforce_length(txt, min_length=None, max_length=None):
+def enforce_length(txt, min_length=None, max_length=None, pad_out=False):
     if min_length is not None:
         if len(txt) < min_length:
             raise TextTooShortException()
@@ -53,9 +53,11 @@ def enforce_length(txt, min_length=None, max_length=None):
         if len(txt) > max_length:
             # truncate txt (from end)
             return txt[0:max_length]
+    if pad_out is True:
+        txt = txt +  ' ' * (max_length - len(txt))
     return txt
 
-def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, rng_seed=None, min_length=None, max_length=None):
+def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, rng_seed=None, min_length=None, max_length=None, pad_out=False):
     """
     Load data from Open Weiboscope corpus of Sina Weibo posts. Options are available for encoding
     of returned text data. 
@@ -77,6 +79,8 @@ def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, r
         max_length -- enforce a maximum length, in characters, for the dataset?
             Counted in hanzi or roman characters as approriate (see above).
             Texts that are too long will be truncated at the end. (int)
+        pad_out -- for texts shorter than max_length, should they be padded out
+            at the end with spaces?
 
     @Return:
         a generator over a tuples of review text (unicode or numpy array) and whether or not 
@@ -123,13 +127,19 @@ def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, r
                     # text on field 6, deleted on field 9. screen out retweets (field 1) 
                     if records_split[1] == '':
                         if form=='hanzi':
-                            record_txt, sentiment = enforce_length(records_split[6], min_length, max_length), records_split[9] != '' 
+                            record_txt, sentiment = enforce_length(
+                                records_split[6], min_length, max_length, 
+                                pad_out), records_split[9] != '' 
                             yield record_txt, sentiment
                         elif form=='pinyin':
-                            record_txt, sentiment = enforce_length(romanize_tweet(records_split[6]), min_length, max_length), records_split[9] != '' 
+                            record_txt, sentiment = enforce_length(
+                                romanize_tweet(records_split[6]), min_length, 
+                                max_length, pad_out), records_split[9] != '' 
                             yield record_txt, sentiment
                         elif form=='onehot':
-                            record_txt, sentiment = enforce_length(romanize_tweet(records_split[6]), min_length, max_length), records_split[9] != '' 
+                            record_txt, sentiment = enforce_length(
+                                romanize_tweet(records_split[6]), min_length, 
+                                max_length, pad_out), records_split[9] != '' 
                             yield text_to_one_hot(record_txt, vocabulary), sentiment
 
                 except TextTooShortException:
