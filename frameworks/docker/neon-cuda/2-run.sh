@@ -4,6 +4,6 @@ __image=lab41/neon-cuda
 
 docker run  -it \
             --privileged \
-            --volume $(pwd)/data:/root/data \
+            --volume $(pwd):/root/data \
             $__image \
               bash
