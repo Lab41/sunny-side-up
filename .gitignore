@@ -9,3 +9,5 @@
 **/outputs/psd/*
 **/tutorials/*.ascii
 **/cudnn*.tgz
+**/id_rsa
+**/github/token
