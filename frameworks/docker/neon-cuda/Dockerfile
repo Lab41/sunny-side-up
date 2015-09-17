@@ -108,6 +108,7 @@ RUN cd /opt/imgworker && \
     pip install .
 
 # download/configure/install neon
+RUN pip install virtualenv
 RUN cd /opt/ && git clone https://github.com/NervanaSystems/neon.git
 ENV NEON_CONFIG_CPU 1
 ENV NEON_CONFIG_GPU 1
@@ -118,7 +119,10 @@ RUN cd /opt/neon && \
     sed -i "s/^GPU = .*/GPU = $NEON_CONFIG_GPU/g" setup.cfg && \
     sed -i "s/^DIST = .*/DIST = $NEON_CONFIG_MPI/g" setup.cfg && \
     sed -i "s/^DEV = .*/DEV = $NEON_CONFIG_DEV/g" setup.cfg && \
-    make install
+    make sysinstall
+
+# make some updates
+RUN pip install -U six
 
 # default to shell in neon dir
 WORKDIR /opt/neon
