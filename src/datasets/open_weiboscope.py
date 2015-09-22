@@ -174,15 +174,47 @@ def text_to_one_hot(txt, vocabulary=vocabulary):
     return vectorized_chars
 
 def romanize_tweet(txt):
+    """
+    Returns a representation of txt with any Chinese characters
+    replaced with a pinyin romanization in alphabetic characters
+    and numbers.
+    
+    Requires jieba and pypinyin packages.
+    
+    Args:
+        txt -- unicode
+        
+    Returns:
+        unicode object like txt, which replaces any Chinese characters with
+            alphanumeric romanization
+    """
     import jieba
     import pypinyin as pyp
 
     def segment_hanzi(txt):
+        """
+        Tokenizes Chinese text
+        
+        Args:
+            txt -- Chinese text with Chinese characters in it (unicode)
+            
+        Returns:
+            list of unicode, in which each element is a token of txt
+        """
         tokens = jieba.tokenize(txt)
         tokens_hanzi = [tkn[0] for tkn in tokens]
         return tokens_hanzi
 
     def hanzi_to_pinyin(txt):
+        """
+        Returns a version of txt with Chinese characters replaced with alphanumeric
+        pinyin romanization
+        
+        Args:
+            txt -- Chinese text with Chinese characters in it (unicode)
+        Returns:
+            unicode with romanized version of txt
+        """
         pinyin = pyp.lazy_pinyin(txt, style=pyp.TONE2)
         return u''.join(pinyin)
 
