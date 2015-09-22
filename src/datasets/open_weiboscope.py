@@ -117,29 +117,35 @@ def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, r
             for line in unicode_csv_reader(f):
                 try:
                     records_split = line
+                    post_id = records_split[0]
+                    
                     if len(records_split) != 11:
                         raise  BadRecordException("Comma split error on mid={} in"
                                          "file {} (len of record: {})".format(
-                                            records_split[0], 
+                                            post_id, 
                                             os.path.basename(table_path),
                                             len(records_split)))
             
-                    # text on field 6, deleted on field 9. screen out retweets (field 1) 
-                    if records_split[1] == '':
+                    # different fields of post record 
+                    post_text = records_split[6]
+                    post_retweeted = records_split[1] != ''
+                    post_deleted = records_split[9] != ''
+                   
+                    if not post_retweeted:
                         if form=='hanzi':
                             record_txt, sentiment = enforce_length(
-                                records_split[6], min_length, max_length, 
-                                pad_out), records_split[9] != '' 
+                                post_text, min_length, max_length, 
+                                pad_out), post_deleted
                             yield record_txt, sentiment
                         elif form=='pinyin':
                             record_txt, sentiment = enforce_length(
-                                romanize_tweet(records_split[6]), min_length, 
-                                max_length, pad_out), records_split[9] != '' 
+                                romanize_tweet(post_text), min_length, 
+                                max_length, pad_out), post_deleted
                             yield record_txt, sentiment
                         elif form=='onehot':
                             record_txt, sentiment = enforce_length(
-                                romanize_tweet(records_split[6]), min_length, 
-                                max_length, pad_out), records_split[9] != '' 
+                                romanize_tweet(post_text), min_length, 
+                                max_length, pad_out), post_deleted 
                             yield text_to_one_hot(record_txt, vocabulary), sentiment
                         else:
                             raise Exception("Unknown form '{}' (should be 'hanzi', "
