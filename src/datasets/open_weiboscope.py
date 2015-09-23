@@ -152,12 +152,16 @@ def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, r
                                             "'pinyin', or 'onehot')".format(form))
 
                 except TextTooShortException:
+                    logger.info("Record {} thrown out (too short)".format(post_id))
                     continue
-                except BadRecordException:
+                except BadRecordException as e:
+                    logger.info(e)
                     continue
-                except IndexError:
+                except IndexError as e:
+                    logger.info(e)
                     continue
-                except UnicodeEncodeError:
+                except UnicodeEncodeError as e:
+                    logger.info(e)
                     continue
 
                 except GeneratorExit:
