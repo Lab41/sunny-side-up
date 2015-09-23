@@ -181,7 +181,7 @@ def romanize_tweet(txt):
     """
     Returns a representation of txt with any Chinese characters
     replaced with a pinyin romanization in alphabetic characters
-    and numbers.
+    and numbers. Tokens delimited by spaces.
     
     Requires jieba and pypinyin packages.
     
@@ -189,8 +189,9 @@ def romanize_tweet(txt):
         txt -- unicode
         
     Returns:
-        unicode object like txt, which replaces any Chinese characters with
-            alphanumeric romanization
+        unicode object like txt, which separates tokens (words) with spaces and 
+        replaces any Chinese characters with
+        alphanumeric romanization
     """
     import jieba
     import pypinyin as pyp
