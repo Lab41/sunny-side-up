@@ -117,41 +117,51 @@ def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, r
             for line in unicode_csv_reader(f):
                 try:
                     records_split = line
+                    post_id = records_split[0]
+                    
                     if len(records_split) != 11:
                         raise  BadRecordException("Comma split error on mid={} in"
                                          "file {} (len of record: {})".format(
-                                            records_split[0], 
+                                            post_id, 
                                             os.path.basename(table_path),
                                             len(records_split)))
             
-                    # text on field 6, deleted on field 9. screen out retweets (field 1) 
-                    if records_split[1] == '':
+                    # different fields of post record 
+                    post_text = records_split[6]
+                    post_retweeted = records_split[1] != ''
+                    post_deleted = records_split[9] != ''
+                   
+                    if not post_retweeted:
                         if form=='hanzi':
                             record_txt, sentiment = enforce_length(
-                                records_split[6], min_length, max_length, 
-                                pad_out), records_split[9] != '' 
+                                post_text, min_length, max_length, 
+                                pad_out), post_deleted
                             yield record_txt, sentiment
                         elif form=='pinyin':
                             record_txt, sentiment = enforce_length(
-                                romanize_tweet(records_split[6]), min_length, 
-                                max_length, pad_out), records_split[9] != '' 
+                                romanize_tweet(post_text), min_length, 
+                                max_length, pad_out), post_deleted
                             yield record_txt, sentiment
                         elif form=='onehot':
                             record_txt, sentiment = enforce_length(
-                                romanize_tweet(records_split[6]), min_length, 
-                                max_length, pad_out), records_split[9] != '' 
+                                romanize_tweet(post_text), min_length, 
+                                max_length, pad_out), post_deleted 
                             yield text_to_one_hot(record_txt, vocabulary), sentiment
                         else:
                             raise Exception("Unknown form '{}' (should be 'hanzi', "
                                             "'pinyin', or 'onehot')".format(form))
 
                 except TextTooShortException:
+                    logger.info("Record {} thrown out (too short)".format(post_id))
                     continue
-                except BadRecordException:
+                except BadRecordException as e:
+                    logger.info(e)
                     continue
-                except IndexError:
+                except IndexError as e:
+                    logger.info(e)
                     continue
-                except UnicodeEncodeError:
+                except UnicodeEncodeError as e:
+                    logger.info(e)
                     continue
 
                 except GeneratorExit:
@@ -168,15 +178,48 @@ def text_to_one_hot(txt, vocabulary=vocabulary):
     return vectorized_chars
 
 def romanize_tweet(txt):
+    """
+    Returns a representation of txt with any Chinese characters
+    replaced with a pinyin romanization in alphabetic characters
+    and numbers. Tokens delimited by spaces.
+    
+    Requires jieba and pypinyin packages.
+    
+    Args:
+        txt -- unicode
+        
+    Returns:
+        unicode object like txt, which separates tokens (words) with spaces and 
+        replaces any Chinese characters with
+        alphanumeric romanization
+    """
     import jieba
     import pypinyin as pyp
 
     def segment_hanzi(txt):
+        """
+        Tokenizes Chinese text
+        
+        Args:
+            txt -- Chinese text with Chinese characters in it (unicode)
+            
+        Returns:
+            list of unicode, in which each element is a token of txt
+        """
         tokens = jieba.tokenize(txt)
         tokens_hanzi = [tkn[0] for tkn in tokens]
         return tokens_hanzi
 
     def hanzi_to_pinyin(txt):
+        """
+        Returns a version of txt with Chinese characters replaced with alphanumeric
+        pinyin romanization
+        
+        Args:
+            txt -- Chinese text with Chinese characters in it (unicode)
+        Returns:
+            unicode with romanized version of txt
+        """
         pinyin = pyp.lazy_pinyin(txt, style=pyp.TONE2)
         return u''.join(pinyin)
 
