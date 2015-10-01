@@ -5,6 +5,7 @@ import csv
 import tarfile
 from os.path import join,exists
 import re
+from heapq import heappush, heappushpop
 import random
 
 # Adds ability to import loader, preprocess
@@ -12,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import preprocess
 
-cacheDir = "/data/data/.cache"
+cacheDir = "/Users/zachw/sunny-side-up/src/.cache"
 
 # Filled in at run-time
 sizes = {}
@@ -58,7 +59,7 @@ def read_sentiment140(sentiment140Path = "/data/sentiment140/sentiment140.csv"):
             with open(sentiment140Path) as sentiPath:
                 reader = csv.reader(sentiPath)
                 for line in reader:
-                    cacheFile.write( json.dumps([preprocess_tweet(line[5].decode("utf-8")), 1 if line[0] == '4' else -1]) )
+                    cacheFile.write( json.dumps([preprocess.tweet(line[5].decode("utf-8")), 1 if line[0] == '4' else -1]) )
                     cacheFile.write("\n")
                     
     return cacheMaker(senti140Cache)
@@ -93,6 +94,8 @@ def read_imdb(imdbPath = "/data/aclImdb/aclImdb_v1.tar"):
             print("Please provide the local path to the imdb reviews dataset: ")
             imdbPath = sys.stdin.readline().strip()
 
+        heapq.heappushpop(heap, item)
+            
         with tarfile.open(imdbPath) as tarf:
             ensureCache()
             with open(imdbCache,"w") as cacheFile:
@@ -115,7 +118,7 @@ def limiter(baseGen, limit):
     assert(limit > 0)
     while limit > 0:
         limit -= 1
-        yield( next(gen) )
+        yield( next(baseGen) )
             
 def sampler(baseGen, sampleRate):
     for item in baseGen:
@@ -135,7 +138,7 @@ def read(dataset, dataPath=None, limit=None, sampleRate=None):
         print("No dataset, %s, your options are: imdb, amazon or sentiment140" % dataset)
         exit()
     
-    if sample:
+    if sampleRate:
         gen = sampler(gen, sampleRate)
     
     if limit:

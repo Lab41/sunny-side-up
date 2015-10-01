@@ -1,6 +1,6 @@
 import os, sys
 import argparse
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 
 # Word2Vec/Doc2Vec packages
@@ -159,6 +159,7 @@ def test_model(full_dataset, args):
         model -- A trained and loaded Doc2Vec model of Sentiment140
         full_dataset -- All documents
     '''
+    dist = Counter()
     f1Scores = defaultdict(list)
     accuracyScores = defaultdict(list)
     i=0
@@ -172,6 +173,8 @@ def test_model(full_dataset, args):
         else:
             (training_data, training_labels), (testing_data, testing_labels) = train_d2v_model(training, testing, args)
         
+        dist.update(testing_labels)
+        
         for (clsName, clsModel) in getClassifiers(args):
             logging.info("Building %s classifier..." % clsName)
             clsModel.fit(training_data, training_labels)
@@ -179,6 +182,9 @@ def test_model(full_dataset, args):
             
             f1Scores[ clsName ].append( metrics.f1_score(testing_labels, clsPreds) ) 
             accuracyScores[ clsName ].append( metrics.accuracy_score(testing_labels, clsPreds) ) 
+    
+    totalObs = float(sum(dist.values()))
+    logging.info("Distribution: %s" % " | ".join([ "%s = %0.2f%%" % (k, 100*dist[k]/totalObs) for k in dist]))
     
     for clsName in accuracyScores:
         clsF1 = f1Scores[ clsName ]
@@ -212,6 +218,10 @@ def main():
     
     parser.add_argument("--lsi", action="store_true", help="Use Latent Semantic Indexing.")
     
+    parser.add_argument("--dataLength", default=None, type=int, help="Use to limit the number of examples used")
+    parser.add_argument("--dataSample", default=None, type=float, help="Use to sample examples from data")
+    
+    
     parser.add_argument("--nTrees", default=15, type=int, help="Number of trees for Random Forests.")
     parser.add_argument("--rfFeatures", default="sqrt", choices=["sqrt","log2","auto","all"],
                         help="Number of features for Random Forests.")
@@ -220,7 +230,11 @@ def main():
     
     logging.basicConfig(format='%(asctime)-15s: %(message)s', level=logging.INFO)
 
-    all_data = list( datasets.read( args.dataset, args.datapath ) )
+    all_data = list( loader.read( args.dataset,
+                                 dataPath   = args.datapath,
+                                 limit      = args.dataLength,
+                                 sampleRate = args.dataSample ) )
+    
     random.shuffle(all_data)
     test_model( all_data, args )
             

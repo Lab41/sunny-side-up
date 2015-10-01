@@ -1,9 +1,8 @@
 import re
+from urlparse import urlparse
 import nltk
 from nltk.util import ngrams
 from nltk.corpus import stopwords as stopCorpus
-
-re_url = re.compile(ur"https?:\/\/\S+\b|www\.(\w+\.)+\S*", re.MULTILINE | re.DOTALL)
 
 """
     Preprocessing methods. Best used with the paradigm:
@@ -13,5 +12,12 @@ re_url = re.compile(ur"https?:\/\/\S+\b|www\.(\w+\.)+\S*", re.MULTILINE | re.DOT
 """
 
 def tweet(text):
-    return re_url.sub(text, u"<url>")
+    toks = text.split()
+    for i in xrange(len(toks)):
+        try:
+            if urlparse(toks[i]).netloc:
+                toks[i] = u"<url>"
+        except ValueError:
+            pass
+    return " ".join(toks)
 
