@@ -5,7 +5,6 @@ import csv
 import tarfile
 from os.path import join,exists
 import re
-from heapq import heappush, heappushpop
 import random
 
 # Adds ability to import loader, preprocess
@@ -93,8 +92,6 @@ def read_imdb(imdbPath = "/data/aclImdb/aclImdb_v1.tar"):
         if not imdbPath or not exists(imdbPath):
             print("Please provide the local path to the imdb reviews dataset: ")
             imdbPath = sys.stdin.readline().strip()
-
-        heapq.heappushpop(heap, item)
             
         with tarfile.open(imdbPath) as tarf:
             ensureCache()
