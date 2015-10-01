@@ -106,7 +106,7 @@ def read_imdb(imdbPath = "/data/aclImdb/aclImdb_v1.tar"):
                             cacheFile.write( json.dumps([review, pNum]) )
                             cacheFile.write("\n")
                             
-                        except IndexError, KeyError:
+                        except:
                             print("Ignoring error on %s" % name)
     
     return cacheMaker(imdbCache)
