@@ -8,11 +8,12 @@ import re
 import random
 
 # Adds ability to import loader, preprocess
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+currentPath = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, currentPath)
 
 import preprocess
 
-cacheDir = "/Users/zachw/Downloads/.cache"
+cacheDir = "%s/.cached_data" % currentPath
 
 # Filled in at run-time
 sizes = {}
