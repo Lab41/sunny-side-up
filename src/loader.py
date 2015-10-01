@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import preprocess
 
-cacheDir = "/Users/zachw/sunny-side-up/src/.cache"
+cacheDir = "/data/data/.cache"
 
 # Filled in at run-time
 sizes = {}
