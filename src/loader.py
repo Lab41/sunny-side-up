@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import preprocess
 
-cacheDir = "/data/data/.cache"
+cacheDir = "/Users/zachw/Downloads/.cache"
 
 # Filled in at run-time
 sizes = {}
@@ -102,11 +102,11 @@ def read_imdb(imdbPath = "/data/aclImdb/aclImdb_v1.tar"):
                             
                             pol = name.split("/")[2]
                             pNum = polNum[pol]
-                            review = tarf.getfile().read().strip()
+                            review = tarf.extractfile(name).read().strip()
                             cacheFile.write( json.dumps([review, pNum]) )
                             cacheFile.write("\n")
                             
-                        except:
+                        except Exception as e:
                             print("Ignoring error on %s" % name)
     
     return cacheMaker(imdbCache)
