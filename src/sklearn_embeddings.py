@@ -208,10 +208,13 @@ def test_model(full_dataset, args):
         i += 1
         logging.info("Working on fold %s" % i)
         
-        if args.lsi:
-            (training_data, training_labels), (testing_data, testing_labels) = train_lsi_model(training, testing, args)
-        else:
+        if args.embeddings == "glove":
+            (training_data, training_labels), (testing_data, testing_labels) = build_glove_embeddings(training, testing, args)
+        elif args.embeddings == "doc2vec":
             (training_data, training_labels), (testing_data, testing_labels) = build_doc2vec_embeddings(training, testing, args)
+        else:
+            print("No suitable embedding function found for %s" % args.embeddings)blue
+            exit()
         
         dist.update(testing_labels)
         
