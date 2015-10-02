@@ -4,7 +4,10 @@
 *.sublime-workspace
 *.DS_Store
 *-checkpoint.ipynb
+*.model
+*.obj
 .cache/
+build/
 **/.downloads/*
 **/models/*
 **/outputs/psd/*
