@@ -220,7 +220,7 @@ def test_model(full_dataset, args):
             clsModel.fit(training_data, training_labels)
             clsPreds = clsModel.predict(testing_data)
             
-            f1Scores[ clsName ].append( metrics.f1_score(testing_labels, clsPreds) ) 
+            f1Scores[ clsName ].append( metrics.f1_score(testing_labels, clsPreds, average = "weighted" if len(dist) > 2 else None) ) 
             accuracyScores[ clsName ].append( metrics.accuracy_score(testing_labels, clsPreds) ) 
     
     totalObs = float(sum(dist.values()))
@@ -236,7 +236,7 @@ def test_model(full_dataset, args):
         
 def main():
     
-    parser = argparse.ArgumentParser(description='Run Doc2Vec then push those vectors into Scikit-Learn')
+    parser = argparse.ArgumentParser(description='Run Doc2Vec/GloVe then push those vectors into Scikit-Learn')
     
     parser.add_argument('-e', '--epochs', type=int, default=10, help='Number of epochs for training')
     parser.add_argument('-v', '--verbose', action="store_true", help="Show verbose output")
