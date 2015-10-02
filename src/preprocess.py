@@ -21,3 +21,5 @@ def tweet(text):
             pass
     return " ".join(toks)
 
+def tokenize(text, label=None):
+    return text.split()

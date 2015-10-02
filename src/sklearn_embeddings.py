@@ -21,12 +21,13 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn import metrics
 import math
-from itertools import izip
+from itertools import izip, imap
 
 # Adds ability to import loader, preprocess
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import loader, preprocess
+from glove import Glove, Corpus
 
 englishStops = set( stopCorpus.words("english") )
 
@@ -46,10 +47,49 @@ def getFolds(allData, k=5):
         
     yield allData[: -perFoldLen], allData[-perFoldLen:]
         
-def train_lsi_model(training,testing,args):
+def build_lsi_embeddings(training,testing,args):
     raise NotImplementedError("Coming soon...")
         
-def train_d2v_model(training, testing, args):
+def build_glove_embeddings(training, testing, args):
+    
+    ''' Trains the model on the sentiment140 dataset
+
+    @Arguments:
+        data:  the loaded sentiment140 dataset from module
+        num_epochs: the number of epochs to train on
+        num_threads: the number of threads to use
+        num_components: the number of components the glove model should use
+        learning_rate: the model's learning rate
+        window_size: the size of the window to use when looking for word co-occurence
+        verbose: boolean for whether or not extensive output should be printed to screen
+
+    @Return:
+        A trained glove model
+    '''
+        
+    # initialize model
+    glove = Glove(no_components = args.vecsize, learning_rate = args.learningRate)
+    
+    # read in the data to train on
+    corpus_model = Corpus()
+    corpus_model.fit( imap(preprocess.tokenize, training), window = args.window)
+        
+    # fit the model using the given parameters
+    glove.fit(corpus_model.matrix, epochs = args.epochs, no_threads = args.parallelism, verbose = args.verbose)
+              
+    # add a dictionary just to make it easier for similarity queries
+    glove.add_dictionary(corpus_model.dictionary)
+    
+    transformer = lambda words: model.transform_paragraph(words, use_pca = use_pca)
+
+    fromTraining = to_sklearn_format(transformer, training, args.vecsize)
+    fromTesting = to_sklearn_format(transformer, testing, args.vecsize)
+    
+    return fromTraining, fromTesting
+
+    return glove
+        
+def build_doc2vec_embeddings(training, testing, args):
     ''' Trains the Doc2Vec on the sentiment140 dataset
 
     @Arguments:
@@ -80,7 +120,7 @@ def train_d2v_model(training, testing, args):
     from the Doc2Vec sentence corpus.
     ex: you could imagine a tweet containing only words whose count was low'''
     model = Doc2Vec(min_count=args.dvMinCount,
-                    window=args.dvWindow,
+                    window=args.window,
                     size=args.vecsize,
                     sample=args.dvSample,
                     negative=args.dvNegative,
@@ -171,7 +211,7 @@ def test_model(full_dataset, args):
         if args.lsi:
             (training_data, training_labels), (testing_data, testing_labels) = train_lsi_model(training, testing, args)
         else:
-            (training_data, training_labels), (testing_data, testing_labels) = train_d2v_model(training, testing, args)
+            (training_data, training_labels), (testing_data, testing_labels) = build_doc2vec_embeddings(training, testing, args)
         
         dist.update(testing_labels)
         
@@ -213,7 +253,7 @@ def main():
     parser.add_argument("--dvSample", default=0.0001, type=float, help="Doc2Vec sampling.")
     parser.add_argument("--dvNegative", default=5, help="Doc2Vec negative.")
     parser.add_argument("--dvMinCount", default=1, help="Doc2Vec min_count.")
-    parser.add_argument("--dvWindow", default=1, help="Doc2Vec window.")
+    parser.add_argument("--window", default=1, help="Doc2Vec window.")
     parser.add_argument("--dvWorkers", default=1, help="Doc2Vec workers.")
     
     parser.add_argument("--lsi", action="store_true", help="Use Latent Semantic Indexing.")
@@ -225,6 +265,16 @@ def main():
     parser.add_argument("--nTrees", default=15, type=int, help="Number of trees for Random Forests.")
     parser.add_argument("--rfFeatures", default="sqrt", choices=["sqrt","log2","auto","all"],
                         help="Number of features for Random Forests.")
+    
+    parser.add_argument("--learningRate", default=0.05, type=float,help="GloVe learning rate.")
+    parser.add_argument("--verbose", action="store_true", help="Turn on verbose output.")
+    
+    parser.add_argument("--pca", action="store_true", help="Use pca with GloVe vectors")
+    parser.add_argument('--parallelism', '-p', action='store',
+                        default=4,
+                        help=('Number of parallel threads to use'))
+
+    parser.add_argument("--embeddings", choices=["glove","doc2vec"], default="doc2vec", help="Methods to generate vectors from text")
     
     args = parser.parse_args()
     

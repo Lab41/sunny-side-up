@@ -1,0 +1,14 @@
+*.pyc
+*.*~
+*.so
+*.c
+*.cpp
+dist/*
+*.egg*
+*.model
+*.corpus
+build/*
+*.txt
+Makefile~
+*.npy
+*.bz2
