@@ -213,7 +213,7 @@ def test_model(full_dataset, args):
         elif args.embeddings == "doc2vec":
             (training_data, training_labels), (testing_data, testing_labels) = build_doc2vec_embeddings(training, testing, args)
         else:
-            print("No suitable embedding function found for %s" % args.embeddings)blue
+            print("No suitable embedding function found for %s" % args.embeddings)
             exit()
         
         dist.update(testing_labels)
