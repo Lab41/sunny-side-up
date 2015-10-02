@@ -80,7 +80,7 @@ def build_glove_embeddings(training, testing, args):
     # add a dictionary just to make it easier for similarity queries
     glove.add_dictionary(corpus_model.dictionary)
     
-    transformer = lambda words: glove.transform_paragraph(words, use_pca = use_pca)
+    transformer = lambda words: glove.transform_paragraph(words, use_pca = args.pca)
 
     fromTraining = to_sklearn_format(transformer, training, args.vecsize)
     fromTesting = to_sklearn_format(transformer, testing, args.vecsize)
