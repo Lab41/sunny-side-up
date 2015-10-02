@@ -77,8 +77,9 @@ def build_glove_embeddings(training, testing, args):
     corpus_model.fit( imap(preprocess.tokenize, txtSource), window = args.window)
         
     # fit the model using the given parameters
+    logging.info("Training GloVe")
     glove.fit(corpus_model.matrix, epochs = args.epochs, no_threads = args.parallelism, verbose = args.verbose)
-              
+    
     # add a dictionary just to make it easier for similarity queries
     glove.add_dictionary(corpus_model.dictionary)
     
