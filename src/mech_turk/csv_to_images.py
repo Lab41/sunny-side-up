@@ -4,7 +4,7 @@ import csv, codecs, base64, HTMLParser
 from subprocess import call
 
 
-def text_to_png(dir_input, dir_output, tempfile = '/tmp/tweet.txt', debug=False):
+def text_to_png(dir_input, dir_output, tempfile = '/tmp/tweet.txt', debug=False, limit=None):
     '''
 
       create png images from each text file in directory
@@ -19,11 +19,18 @@ def text_to_png(dir_input, dir_output, tempfile = '/tmp/tweet.txt', debug=False)
         # unescape html characters
         html_parser = HTMLParser.HTMLParser()
 
+        # iterate and count number of results
+        counter = 0
+
         # process all files in directory
         for root, dirs, files in os.walk(dir_input):
 
             # process everything at once
             dirs.extend(files)
+
+            # optional limit
+            if (limit is None):
+              limit = len(dirs) + 1
 
             # iterate files
             for pathname in dirs:
@@ -47,13 +54,20 @@ def text_to_png(dir_input, dir_output, tempfile = '/tmp/tweet.txt', debug=False)
                 # render the text as an image
                 call(['pango-view',tempfile,'--no-display','--font','Scheherazade 24','-o',file_out])
 
+                # track number processed (for building rows)
+                counter += 1
+
+                # optional upper limit
+                if (counter >= limit):
+                  break
+
 
     # catch-all for exceptions
     except Exception as e:
         print(e)
 
 
-def png_to_csv(dir_input, filename='output.csv', csv_output_head = ['batch_id', 'tweet1', 'tweet2', 'tweet3', 'tweet4', 'tweet5'], debug=False):
+def png_to_csv(dir_input, filename='output.csv', csv_output_head = ['batch_id', 'tweet1', 'tweet2', 'tweet3', 'tweet4', 'tweet5'], debug=False, limit=None):
     '''
 
       base64-encode all png files in directory and save to single csv file
@@ -68,7 +82,7 @@ def png_to_csv(dir_input, filename='output.csv', csv_output_head = ['batch_id', 
     row = []
     images_per_row = len(csv_output_head)
 
-    # iterate and count number of
+    # iterate and count number of results
     counter = 0
 
     # process all files
@@ -76,6 +90,10 @@ def png_to_csv(dir_input, filename='output.csv', csv_output_head = ['batch_id', 
 
         # process everything at once
         dirs.extend(files)
+
+        # optional limit
+        if (limit is None):
+          limit = len(dirs) + 1
 
         # iterate files
         for pathname in dirs:
@@ -102,6 +120,10 @@ def png_to_csv(dir_input, filename='output.csv', csv_output_head = ['batch_id', 
             # track number processed (for building rows)
             counter += 1
 
+            # optional upper limit
+            if (counter >= limit):
+              break
+
 
     # add the last row
     if (len(row) > 0):
@@ -109,7 +131,8 @@ def png_to_csv(dir_input, filename='output.csv', csv_output_head = ['batch_id', 
 
 
     # write CSV
-    with open(os.path.join(dir_input, filename), "wb") as fh:
+    filename_full = "{}_{}".format(os.path.basename(dir_input), filename)
+    with open(os.path.join(dir_input, filename_full), "wb") as fh:
         writer = csv.writer(fh)
 
         # write header
@@ -134,6 +157,11 @@ if __name__ == "__main__":
     dir_input = sys.argv[1]
     dir_output = sys.argv[2]
 
+    # optional limit
+    limit = None
+    if (len(sys.argv) > 3 and sys.argv[3] != None):
+      limit = int(sys.argv[3])
+
     # ensure input directory exists
     if not os.path.exists(dir_input):
         raise Exception("Bad directory: {}".format(dir_input))
@@ -143,7 +171,7 @@ if __name__ == "__main__":
         os.makedirs(dir_output)
 
     # create images for each tweet
-    #text_to_png(dir_input, dir_output)
+    text_to_png(dir_input, dir_output, limit=limit)
 
     # store images into CSV for mechanical turk
-    png_to_csv(dir_output)
+    png_to_csv(dir_output, limit=limit)
