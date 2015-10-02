@@ -267,7 +267,6 @@ def main():
                         help="Number of features for Random Forests.")
     
     parser.add_argument("--learningRate", default=0.05, type=float,help="GloVe learning rate.")
-    parser.add_argument("--verbose", action="store_true", help="Turn on verbose output.")
     
     parser.add_argument("--pca", action="store_true", help="Use pca with GloVe vectors")
     parser.add_argument('--parallelism', '-p', action='store',
