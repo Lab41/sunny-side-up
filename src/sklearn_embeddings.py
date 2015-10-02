@@ -21,7 +21,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn import metrics
 import math
-from itertools import izip, imap
+from itertools import izip, imap, chain
 
 # Adds ability to import loader, preprocess
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
