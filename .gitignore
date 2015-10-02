@@ -11,3 +11,5 @@
 **/cudnn*.tgz
 **/id_rsa
 **/github/token
+**/data/input/*
+**/data/output/*
