@@ -25,5 +25,9 @@ RUN apt-get update && \
     apt-get install --assume-yes libpango1.0-dev
 
 
+# start in the /data directory
+WORKDIR /data
+
+
 # default to shell
 CMD ["/bin/bash"]
