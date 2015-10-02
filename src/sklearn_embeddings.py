@@ -72,7 +72,7 @@ def build_glove_embeddings(training, testing, args):
     
     # read in the data to train on
     corpus_model = Corpus()
-    corpus_model.fit( imap(preprocess.tokenize, training), window = args.window)
+    corpus_model.fit( imap(preprocess.tokenize, imap(lambda (txt,lbl): txt, training)), window = args.window)
         
     # fit the model using the given parameters
     glove.fit(corpus_model.matrix, epochs = args.epochs, no_threads = args.parallelism, verbose = args.verbose)
