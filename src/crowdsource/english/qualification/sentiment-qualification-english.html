@@ -1,0 +1,342 @@
+<!-- Bootstrap v3.0.3 -->
+<link href="https://s3.amazonaws.com/mturk-public/bs30/css/bootstrap.min.css" rel="stylesheet" />
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+
+<style type="text/css">
+
+.explanation {
+	color: grey;
+	font-style: italic;
+}
+
+h1 {
+	font-size: 24px;	
+}
+
+h2 {
+	font-size: 20px;
+}
+
+h3 {
+	font-size: 18px;
+	margin-left: 25px;
+}
+
+.form-control {
+	font-size: small;
+}
+
+.likertRadio {
+    display:inline-block;
+    text-align:center;
+}
+.likertRadio label {
+    display:block;
+	margin: 0em 0em 2em 2em;
+}
+
+.likertPrompt {
+	color: #428bca;
+	display: block;
+	margin-bottom: .3em;
+	font-style:italic;
+}
+
+.likertTable {
+	border: 0px solid black;
+	margin-bottom:20px;
+}
+
+.likertTable td {
+	width: 8em;
+}
+
+.likertTable tr td {
+	border: 1px solid black;
+	text-align: center
+}
+
+/* override float and margin-right properties so buttons align right */
+.radio input[type="radio"],
+.radio-inline input[type="radio"],
+.checkbox input[type="checkbox"],
+.checkbox-inline input[type="checkbox"] {
+  float: right;
+  margin-right: -20px;
+}
+
+/* override padding-right so buttons don't overlap text */
+.radio,
+.checkbox {
+  padding-right: 20px;
+}
+
+table, th, td {
+	border-collapse: collapse;
+	/*border: 1px solid black;*/
+}
+
+td {
+	text-align:center;
+	padding: 5px;
+}
+
+th {
+	font-size: medium;
+	padding: 5px;
+	text-align:center;
+}
+
+tr {
+	border: 1px solid grey;
+}
+
+td.tweet {
+	text-align: center;
+}
+
+</style>
+<section class="container" id="Survey" style="margin-bottom:15px; padding: 10px 10px; font-family: Verdana, Geneva, sans-serif; color:#333333; font-size:0.9em;">
+<div class="row col-xs-12 col-md-12"><!-- Instructions -->
+<div class="panel panel-primary">
+<div class="panel-heading"><strong>Instructions</strong></div>
+
+<div class="panel-body">
+Click on the headers to expand or collapse each section.
+<h2>Overall Instructions</h2>
+
+<p>Thank you for your interest in participating. We are investigating what constitutes generally positive or generally negative feelings (sentiment) within text and how to distinguish it from more objective or neutral types of written content. Whether it’s strongly or weakly positive or strongly or weakly negative doesn’t matter; we only want you to capture the overall sentiment/feeling of the text. </p>
+
+<p>For this study, we are presenting individual tweets from Twitter for you to assess. They are out of context. You will be asked to categorize them in one of the below categories, which encompass all magnitudes/intensities of the described feeling or emotion. So, a tweet about adoring someone – an intense emotion - would fall under Positive Sentiment just like a tweet about describing someone as nice.</p>
+
+<p>Also, be generous or inclusive in how you categorize a tweet: If a tweet says &ldquo;I feel sick&rdquo; and you’re unsure whether this refers to a physical or emotional state, assume emotional and categorize accordingly.</p>
+
+<p><b>MOST IMPORTANT:</b> Judge the tweets for how the <b>TWEETER</b> is trying to communicate emotion, not how <b>YOU</b> feel about the particular topic.</p>
+
+<p>To aid you in correctly categorizing tweets, the example tweets under each category are preceded by an underlined word or description indicating why it fits that category.</p>
+
+<h1>OVERALL SENTIMENT: the Twitter user’s overall mood, attitude, or tone</h1>
+<p>You will categorize each tweet into one of the following five categories:</p>
+
+<h2>(1) Objective Or Neutral Sentiment</h2>
+<p>This refers to <i>solely objective</i> text such as facts or strictly news/headlines/quotes/titles (of essays, blog posts, etc.) as indicated, for example, by “pipes” (i.e., | ) which often precede news headlines or quotes from news, a news organization’s name, quotation marks, an author’s name following a quote or a phrase without quotations marks (e.g., The early bird gets the worm -- John Smith). Neutral text also applies here, such as impersonal or unbiased questions (not reflecting any genuine interest – see Positive Sentiment) or commentary reflecting lack of concern/apathy/indifference. </p>
+
+<p><i>Please note that if a headline or any content detailed above includes additional commentary from the tweeter that involves any feelings or emotions, the tweet belongs in another category.</i></p>
+
+<p>This “Objective or Neutral” category also refers to tweets about other people’s feelings (not about the tweeter’s feelings), unless the tweeter clearly expresses how he/she feels about the other people’s emotions or emotional state, which would therefore fall under another category. Therefore, “Safa looked angry” would fall under this category, but “Safa looked angry!!!” or “I’m upset that Safa looked angry” or “Safa looks angry &#9785;” involves some feelings and would not fall under objective or neutral because the tweeter is inserting his/her emotions into the tweet about Safa.</p>
+
+<p>Tweets that use emotional content (word choice implies feeling or emotions or elongation of words such as using extra vowels, e.g., “noooooooo”) certain punctuation (e.g., ! or ??? or ?!), emoticons (use of punctuation to make faces with expressions), or emoji (images used to express emotions) to relate, represent, or refer to any feelings of the tweeter would NOT be considered Objective or Neutral.</p>
+
+<h3>Examples of objective or neutral tweets</h3>
+<ul>
+<li><b>Quote:</b><i> Syrian boy to Hungarian police: &ldquo;Please help the Syrians.. just stop the war, and we don't want to go to Europe&rdquo;</i></li>
+<li><b>News:</b><i> Scott Brown rejected for another state's Senate seat</i></li>
+<li>Iranian woman in the era before the Islamic revolution, 1960 (describing a picture)</i></li>
+<li><b>Quote:</b><i> Cruz: &ldquo;The government arrested a Christian woman for living according to her faith. This is wrong. This is not America.&rdquo;</i></li>
+<li><b>Not about the tweeter:</b><i> Children's author Michael Rosen writes heartbreaking poem highlighting human cost of fleeing a war</i></li>
+<li><b>Fact (or presented as such):</b><i> Thing I learned today: Two-thirds of refugees from Balkan war went home when peace came to their countries.</i></li>
+<li><b>Quote:</b><i> IMF chief: &ldquo;Women’s empowerment is not just a fundamentally moral cause, it is also an absolute economic no-brainer&rdquo;</i></li>
+<li><b>Impersonal question:</b><i> How did pink become a girly color?</i></li>
+<li><b>Fact:</b><i> 8 September 1966 - &ldquo;The Man Trap,&rdquo; the very first Star Trek episode ever aired.</i></li>
+</ul>
+
+<h2>(2) Positive Sentiment</h2>
+<p>Tweets that are <i>solely positive</i>, which includes expressions of joy, enthusiasm (anticipation, positive surprise), friendly humor (good-natured teasing, playfulness, wit, silliness), genuine interest (open-ended questions, clarification/elaboration seeking), affection or concern (caring, compliments, flirting), gratitude, understanding/acceptance/compassion (including confirming or agreeing with how someone feels or thinks; self-acceptance; apologies), upbeat/affirming/constructive self-assurance (including tweets perceived as proud, strong, confident, bold, daring, fearless). These tweets may or may not have clear indications of these feelings based on grammar, emoticons, emoji, or punctuation.</p>
+
+<h3>Examples of positive tweets</h3>
+<ul>
+<li><b>Humor:</b><i> I don't know what kind of luck that is [that] every taxi vehicle['s] driver is heart-broken and listening to Mustafa Kamel &#9786;&#9786;</i></li>
+<li><b>Enthusiasm:</b><i> #GIRLBOSS Sophia Amoruso is married! Check out her amazing wedding here</i></li>
+<li><b>Affection or concern:</b><i> Oh Allah, You are the most Just. Bring justice to those afflicted recently with violence, war and oppression.</i></li>
+<li><b>Gratitude:</b><i> AI feel so blessed thank you liam for this gift -B</i></li>
+<li><b>Affirming/Constructive:</b><i> The dignity of work was poured into the souls of our elders, who then instilled our values in us. Remember your Ancestors today.</i></li>
+<li><b>Caring:</b><i> I have no hate in my heart for anyone.</i></li>
+<li><b>Humor:</b><i> Watch professional OPERA singer, Christina Elizabeth, sing on HELIUM!!!</i></li>
+<li><b>Compliment:</b><i> If you are drawn to an enlightened teacher, it is because there is already enough presence in you to recognize presence in another.</i></li>
+</ul>
+
+<h2>(3) Negative Sentiment</h2>
+<p>Tweets that are <i>solely negative</i>, which includes expressions of fear, nervousness, worry,  negative surprise (shock), irritability, stress, frustration, anger, hostility, disgust (including repulsiveness over moral objections), threats (banning certain behaviors, ultimatums),  ridicule (in contrast to friendly humor in Positive Sentiment), contempt (sarcasm, mockery, insults), criticism (blaming, character attacks, list of complaints, betrayal), defensiveness (yes-but statements, excuses), whining (e.g., wwwwhhhyyyyy??), guilt (including tweets that convey anger at one’s self), and sadness (including tweets that convey loneliness, hopelessness, or resignation). These tweets may or may not have clear indications of these feelings based on grammar, emoticons, emoji, or punctuation</p>
+
+<h3>Examples of negative tweets</h3>
+<ul>
+<li><b>Sad and hostile:</b><i> I'm sick to see brave young syrian killed by Assad psychopaths mercenaries. So sad. #Syria #PT</i></li>
+<li><b>Negative surprise/sadness:</b><i> We should protest against violation of privacy! Poor Jennifer..!! :(</i></li>
+<li><b>Frustration:</b><i> I wanna like jump off a cliff into water & scream bc I feel like there's no other way to rid of my bottled up emotions</i></li>
+<li><b>Criticism:</b><i> Where’s the call for Pres. Obama to resign for ignoring & defying immigration law, welfare reform law & Obamacare?</i></li>
+<li><b>Threat (ban certain behaviors):</b><i> I am a firm believer in IF you are convicted for a crime...any crime, you lose your rights to Welfare benefits. Period.</i></li>
+<li><b>Anger:</b><i> Ignorant boys be like &ldquo;oh so y'all want equality? That means we can abuse y'all without a problem&rdquo;... WHY DO YOU WANT TO ABUSE US</i></li>
+</ul>
+
+<h2>(4) Mixed Sentiment</h2>
+<p>These tweets have a combination of positive and negative feelings.</p>
+<h3>Examples of mixed tweets</h3>
+<ul>
+<li><i>In 2013 the summary is: Morsi's gone :) The army did it :( </i></li>
+<li><i>republicans win the Senate :( And no, Americans don't love to vote. Many don't! lol</i></li>
+<li><i>How's you?? I'm sorry I couldn't make the world congress :( but hope to be able to make the next one!!</i></li>
+<li><i>scary!! :( politicians are trying to do that in America now, too. Good always wins in the end, though, right? :)</i></li>
+<li><i>Ted Cruz is extremely smart and understands this perfectly. Which is why his statement was so reprehensible.</i></li>
+</ul>
+
+<h2>(5) Unclear Sentiment</h2>
+<p>There appears to be sentiment in the tweet, but there is no indication of which of the above categories is applicable without further context. Use the Unclear Sentiment category as a last resort.</p>
+<h3>Examples of unclear tweets</h3>
+<ul>
+<li><i>Our elections are like our football games. Go, NC, State. :) / :( / :’( / what’s happening? Nobody knows.</i></li>
+<li><i>TN people blaming congress for all things happen in TN? LOL : (</i></li>
+<li><i>why don't you kill me there and leave my dead body at the old senate hall?&quot; I HAVE SUCH WEIRD FRIENDS :( :))</i></li>
+<li><i>:( You have betrayed the revolution. This is a sad day for democracy. :P No worries - coming to the big one in London?</i></li>
+</ul>
+
+</div>
+</div>
+<!-- End Instructions --><!-- Survey Body -->
+
+<section>
+<fieldset>
+<table>
+	<tr>
+        <th>Tweet</th>
+        <th width="25%">Overall Sentiment</th>
+    </tr>
+    <tr>
+
+        <td class="tweet">Notice the beheadings dropped way off? Could it be that MY plan that I passed to Obama about killing ISIL leaders worked : ) </td>
+        <td><select class="form-control" name="sentiment1">
+        		<option selected="selected" value="select one">- select one -</option>
+                <option value="neutralSentiment">Objective or neutral sentiment</option>
+                <option value="positiveSentiment">Positive sentiment</option>
+                <option value="negativeSentiment">Negative sentiment</option>
+                <option value="mixedSentiment">Mixed sentiment</option>
+                <option value="unclearSentiment">Unclear sentiment</option>
+            </select>
+         </td>   
+	</tr>
+    <tr>
+        <td class="tweet">Dying with dignity is a human right. Prolonging human suffering is cruel and shameful</td>
+        <td><select class="form-control" name="sentiment2">
+        		<option selected="selected" value="select one">- select one -</option>
+                <option value="neutralSentiment">Objective or neutral sentiment</option>
+                <option value="positiveSentiment">Positive sentiment</option>
+                <option value="negativeSentiment">Negative sentiment</option>
+                <option value="mixedSentiment">Mixed sentiment</option>
+                <option value="unclearSentiment">Unclear sentiment</option>
+            </select>
+         </td>
+	</tr>
+    <tr>
+        <td class="tweet">Angry French farmers hold tractor protest in Paris </td>
+        <td><select class="form-control" name="sentiment3">
+        		<option selected="selected" value="select one">- select one -</option>
+                <option value="neutralSentiment">Objective or neutral sentiment</option>
+                <option value="positiveSentiment">Positive sentiment</option>
+                <option value="negativeSentiment">Negative sentiment</option>
+                <option value="mixedSentiment">Mixed sentiment</option>
+                <option value="unclearSentiment">Unclear sentiment</option>
+            </select>
+         </td>
+	</tr>
+    <tr>
+        <td class="tweet">once the government re-opens, we outta hereee. lol</td>
+        <td><select class="form-control" name="sentiment4">
+        		<option selected="selected" value="select one">- select one -</option>
+                <option value="neutralSentiment">Objective or neutral sentiment</option>
+                <option value="positiveSentiment">Positive sentiment</option>
+                <option value="negativeSentiment">Negative sentiment</option>
+                <option value="mixedSentiment">Mixed sentiment</option>
+                <option value="unclearSentiment">Unclear sentiment</option>
+            </select>
+         </td>
+	</tr>
+    <tr>
+        <td class="tweet">war so Ugly pray for all children around the world I hope live in peace #AylanKurdi</td>
+        <td><select class="form-control" name="sentiment5">
+        		<option selected="selected" value="select one">- select one -</option>
+                <option value="neutralSentiment">Objective or neutral sentiment</option>
+                <option value="positiveSentiment">Positive sentiment</option>
+                <option value="negativeSentiment">Negative sentiment</option>
+                <option value="mixedSentiment">Mixed sentiment</option>
+                <option value="unclearSentiment">Unclear sentiment</option>
+            </select>
+         </td>
+	</tr>
+    <tr>
+        <td class="tweet">If we ever go to war and you become my prisoner of war, you will certainly beg for a shower.</td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">- select one -</option>
+                <option value="neutralSentiment">Objective or neutral sentiment</option>
+                <option value="positiveSentiment">Positive sentiment</option>
+                <option value="negativeSentiment">Negative sentiment</option>
+                <option value="mixedSentiment">Mixed sentiment</option>
+                <option value="unclearSentiment">Unclear sentiment</option>
+            </select>
+         </td>
+	</tr>
+    <tr>
+        <td class="tweet">Our votes stolen. Now elex too. You shake hands with coup prez Waheed #Maldives ? Feeling sad </td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">- select one -</option>
+                <option value="neutralSentiment">Objective or neutral sentiment</option>
+                <option value="positiveSentiment">Positive sentiment</option>
+                <option value="negativeSentiment">Negative sentiment</option>
+                <option value="mixedSentiment">Mixed sentiment</option>
+                <option value="unclearSentiment">Unclear sentiment</option>
+            </select>
+         </td>
+	</tr>
+    <tr>
+        <td class="tweet">Why has America, so gung-ho about individual rights, been slow to extend them to gay people?</td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">- select one -</option>
+                <option value="neutralSentiment">Objective or neutral sentiment</option>
+                <option value="positiveSentiment">Positive sentiment</option>
+                <option value="negativeSentiment">Negative sentiment</option>
+                <option value="mixedSentiment">Mixed sentiment</option>
+                <option value="unclearSentiment">Unclear sentiment</option>
+            </select>
+         </td>
+	</tr>
+    <tr>
+        <td class="tweet">Without effort we make no progress, but without rest and reflection our lives can fall out of balance. </td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">- select one -</option>
+                <option value="neutralSentiment">Objective or neutral sentiment</option>
+                <option value="positiveSentiment">Positive sentiment</option>
+                <option value="negativeSentiment">Negative sentiment</option>
+                <option value="mixedSentiment">Mixed sentiment</option>
+                <option value="unclearSentiment">Unclear sentiment</option>
+            </select>
+         </td>
+	</tr>
+    <tr>
+        <td class="tweet">Nearly 20 organizations demand Twitter restore tool that captures politicians' deleted tweets </td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">- select one -</option>
+                <option value="neutralSentiment">Objective or neutral sentiment</option>
+                <option value="positiveSentiment">Positive sentiment</option>
+                <option value="negativeSentiment">Negative sentiment</option>
+                <option value="mixedSentiment">Mixed sentiment</option>
+                <option value="unclearSentiment">Unclear sentiment</option>
+            </select>
+         </td>
+	</tr>
+</table>    
+	
+</fieldset>
+
+</section>
+
+<!-- End Survey Body --><!-- close container -->
+<style type="text/css">fieldset {
+    padding: 10px;
+    background:#fbfbfb;
+    border-radius:5px;
+    margin-bottom:5px;
+}
+</style>
+</div>
+</section>

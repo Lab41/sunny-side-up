@@ -1,0 +1,318 @@
+<!-- Bootstrap v3.0.3 -->
+<!-- Latest compiled and minified CSS -->
+
+
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script type="text/javascript">
+//this code assumes jQuery is implemented, though it would not be difficult to do this with straight javascript. .ready() assures the code runs after the submit button is added
+$(document).ready(function () {
+   var studyName="amtsentiment";//replace this value with a unique, acceptable cookie name... no spaces and stick with alphanumerics and underscores
+   $("#submitButton").click(function(){
+	  var exdate=new Date();
+	  exdate.setDate(exdate.getDate() + 365);
+      document.cookie=studyName+"=1; expires="+exdate.toUTCString()+"; domain=mturkcontent.com; path=/";//When the user clicks the Submit button, it creates a cookie that you can read later as having already completed this survey
+   });
+   var i,x,y,ARRcookies=document.cookie.split(";");//variables necessary to read the cookies. Last variables separates all available cookie names into an array we will loop through to find our cookie
+   for (i=0;i<ARRcookies.length;i++){
+      x=ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));//x=cookie name
+      y=ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);//y=cookie value
+      x=x.replace(/^\s+|\s+$/g,"");//Remove white space
+      if (x==studyName && y==1){
+		 //If your cookie exists AND the value is 1, they have taken your survey before.
+		 //Here you would put code that somehow prevents them from doing anything for your HIT, like not loading content etc.
+		 //However, for our purposes here, I just put a simple alert in. Change this to whatever code works for you.
+         document.getElementById("overallInstructions").className = "collapse collapse";
+         document.getElementById("InstructionsSection1").className = "collapse collapse";
+         document.getElementById("InstructionsSection2").className = "collapse collapse";
+         document.getElementById("InstructionsSection3").className = "collapse collapse";
+         document.getElementById("InstructionsSection4").className = "collapse collapse";
+         document.getElementById("InstructionsSection5").className = "collapse collapse";
+      }
+   }
+});
+</script>
+</head>
+
+<style type="text/css">
+
+.accordion-toggle:after {
+    /* symbol for "opening" panels */
+    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+    content: "\e252";    /* adjust as needed, taken from bootstrap.css */
+    float: right;        /* adjust as needed */
+    color: grey;         /* adjust as needed */
+}
+.accordion-toggle.collapsed:after {
+    /* symbol for "collapsed" panels */
+    content: "\e251";    /* adjust as needed, taken from bootstrap.css */
+}
+
+.explanation {
+	color: grey;
+	font-style: italic;
+}
+
+h1 {
+	font-size: 24px;	
+}
+
+h2 {
+	font-size: 20px;
+}
+
+h3 {
+	font-size: 18px;
+	margin-left: 25px;
+}
+
+h4 a {
+	font-size: 20px;
+}
+
+.form-control {
+	font-size: small;
+}
+
+.likertRadio {
+    display:inline-block;
+    text-align:center;
+}
+.likertRadio label {
+    display:block;
+	margin: 0em 0em 2em 2em;
+}
+
+.likertPrompt {
+	color: #428bca;
+	display: block;
+	margin-bottom: .3em;
+	font-style:italic;
+}
+
+.likertTable {
+	border: 0px solid black;
+	margin-bottom:20px;
+}
+
+.likertTable td {
+	width: 8em;
+}
+
+.likertTable tr td {
+	border: 1px solid black;
+	text-align: center
+}
+
+.panel-heading {
+	font-size: 200%;
+}
+
+/* override float and margin-right properties so buttons align right */
+.radio input[type="radio"],
+.radio-inline input[type="radio"],
+.checkbox input[type="checkbox"],
+.checkbox-inline input[type="checkbox"] {
+  float: right;
+  margin-right: -20px;
+}
+
+/* override padding-right so buttons don't overlap text */
+.radio,
+.checkbox {
+  padding-right: 20px;
+}
+
+table, th, td {
+	border-collapse: collapse;
+	/*border: 1px solid black;*/
+}
+
+td {
+	font-size: 150%;
+	text-align:center;
+	padding: 5px;
+}
+
+td select option {
+	font-size: 200%;
+}
+
+th {
+	font-size: 200%;
+	padding: 5px;
+	text-align:center;
+}
+
+tr {
+	border: 1px solid grey;
+}
+
+td.tweet {
+	text-align: center;
+}
+
+</style>
+
+<section class="container" id="Survey" style="margin-bottom:15px; padding: 10px 10px; font-family: Verdana, Geneva, sans-serif; color:#333333; font-size:0.9em;">
+<div class="row col-xs-12 col-md-12"><!-- Instructions -->
+<div class="panel panel-primary">
+<div class="panel-heading"><strong>تعليمات</strong></div>
+
+<div class="panel-body" dir="rtl" lang="ar">
+      
+<!-- Overall instructions --> 
+      <h4 class="panel-title">
+        <a class="accordion-toggle" data-toggle="collapse" href="#overallInstructions">
+        Overall Instructions
+        </a>
+      </h4>
+<div id="overallInstructions" class= "collapse in">
+<img src="InstructionsOverall.png" style="max-width:120%;"/>
+
+<!--<p>You will categorize each Tweet into one of the following five categories:</p>-->
+</div>
+<br />
+<!-- Objective or Neutral Sentiment -->
+      <h4 class="panel-title">
+        <a  class="accordion-toggle" data-toggle="collapse" href="#objectiveSentiment">
+        <img src="InstructionsHeading1.png" />
+        </a>
+      </h4>
+<div id="objectiveSentiment" class= "collapse in">
+<!-- <h2>(1) 	احساس عام موضوعي او محايد </h2> -->
+<img src="InstructionsSection1.png" />
+</div>
+
+<!-- Positive tweets -->
+      <h4 class="panel-title">
+        <a  class="accordion-toggle" data-toggle="collapse" href="#positiveSentiment">
+        <img src="InstructionsHeading2.png" />
+        </a>
+      </h4>
+<div id="positiveSentiment" class= "collapse in">
+<!-- <h2>(2) 	احساس عام إيجابي </h2> -->
+<img src="InstructionsSection2.png" />
+</div>
+
+
+<!-- Negative Tweets -->
+      <h4 class="panel-title">
+        <a  class="accordion-toggle" data-toggle="collapse" href="#negativeSentiment">
+        <img src="InstructionsHeading3.png" />
+        </a>
+      </h4>
+<div id="negativeSentiment" class= "collapse in">
+<img src="InstructionsSection3.png" />
+</div>
+
+<!-- Mixed Sentiment -->
+      <h4 class="panel-title">
+        <a  class="accordion-toggle" data-toggle="collapse" href="#mixedSentiment">
+		<img src="InstructionsHeading4.png" />
+        </a>
+      </h4>
+<div id="mixedSentiment" class= "collapse in">
+<img src="InstructionsSection4.png" />
+</div>
+
+<!-- Unclear sentiment -->
+      <h4 class="panel-title">
+        <a  class="accordion-toggle" data-toggle="collapse" href="#unclearSentiment">
+        <img src="InstructionsHeading5.png" />
+        </a>
+      </h4>
+<div id="unclearSentiment" class= "collapse in">
+<img src="InstructionsSection5.png" />
+</div>
+</div>
+<!-- End Instructions --><!-- Survey Body -->
+
+<section dir="rtl" lang="ar">
+<fieldset>
+<table>
+	<tr>
+        <th><img src="Tweet.png"></th>
+        <th width="25%"><img src="OverallSentiment.png"></th>
+    </tr>
+    <tr>
+
+        <td class="tweet">اذا كنا نقاتل بعض في حرب وانت تقع اسيري فستطلب مني ان اسمح لك باخذ دش في الحمام</td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>   
+	</tr>
+    <tr>
+        <td class="tweet">ممكن تجيب لي القطة من الثلاجة؟.</td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>
+	</tr>
+    <tr>
+        <td class="tweet">الموت بكرامة هو حق من حقوق الانسان. اطالة معاناة الانسان امر قاسي ومخزي.  </td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>
+	</tr>
+    <tr>
+        <td class="tweet">انا ليس لدي اي شك بانه اذا حُكم عليك بسبب اي جريمة،  فانت بالتالي ستفقد حق </td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>
+	</tr>
+    <tr>
+        <td class="tweet">بدون الجهد لانستطيع تحقيق التقدم ولكن بدون الراحة والتفكير ستكون حياتنا غير متوازنة. </td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>
+	</tr>
+</table>    
+	
+</fieldset>
+
+</section>
+
+<!-- End Survey Body --><!-- close container -->
+<style type="text/css">fieldset {
+    padding: 10px;
+    background:#fbfbfb;
+    border-radius:5px;
+    margin-bottom:5px;
+}
+</style>
+</div>
+</section>
