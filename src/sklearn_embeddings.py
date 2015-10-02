@@ -70,9 +70,11 @@ def build_glove_embeddings(training, testing, args):
     # initialize model
     glove = Glove(no_components = args.vecsize, learning_rate = args.learningRate)
     
+    txtSource = chain( imap(lambda (txt,lbl): txt, training), imap(lambda (txt,lbl): txt, testing))
+    
     # read in the data to train on
     corpus_model = Corpus()
-    corpus_model.fit( imap(preprocess.tokenize, imap(lambda (txt,lbl): txt, training)), window = args.window)
+    corpus_model.fit( imap(preprocess.tokenize, txtSource), window = args.window)
         
     # fit the model using the given parameters
     glove.fit(corpus_model.matrix, epochs = args.epochs, no_threads = args.parallelism, verbose = args.verbose)
@@ -80,7 +82,7 @@ def build_glove_embeddings(training, testing, args):
     # add a dictionary just to make it easier for similarity queries
     glove.add_dictionary(corpus_model.dictionary)
     
-    transformer = lambda words: glove.transform_paragraph(words, use_pca = args.pca, ignore_missing=True)
+    transformer = lambda words: glove.transform_paragraph(words, use_pca = args.pca)
 
     fromTraining = to_sklearn_format(transformer, training, args.vecsize)
     fromTesting = to_sklearn_format(transformer, testing, args.vecsize)
