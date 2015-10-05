@@ -25,6 +25,10 @@ RUN apt-get update && \
     apt-get install --assume-yes libpango1.0-dev
 
 
+# install image processing tools
+RUN pip install pillow
+
+
 # start in the /data directory
 WORKDIR /data
 

@@ -2,6 +2,32 @@
 import sys, os
 import csv, codecs, base64, HTMLParser
 from subprocess import call
+from PIL import Image
+
+
+def image_trim_and_save(path, padding=5):
+		'''
+
+			trim whitespace around image and re-save
+
+		'''
+
+		# open image and get outermost dimensions
+		image = Image.open(path)
+		bbox = image.getbbox()
+
+		# update box to add padding
+		x,y,w,h = bbox
+		x -= padding
+		y -= padding
+		w += padding
+		h += padding
+		bbox = (x,y,w,h)
+
+		# crop and save image
+		if bbox:
+				image = image.crop(bbox)
+				image.save(path)
 
 
 def text_to_png(dir_input, dir_output, tempfile = '/tmp/tweet.txt', debug=False, limit=None):
@@ -52,7 +78,10 @@ def text_to_png(dir_input, dir_output, tempfile = '/tmp/tweet.txt', debug=False,
                         outfile.write(data)
 
                 # render the text as an image
-                call(['pango-view',tempfile,'--no-display','--font','Scheherazade 24','-o',file_out])
+                call(['pango-view',tempfile,'--no-display','--font','Scheherazade 30','--background','transparent','-o',file_out])
+
+                # create a trimmed version
+                image_trim_and_save(file_out)
 
                 # track number processed (for building rows)
                 counter += 1
@@ -132,7 +161,7 @@ def png_to_csv(dir_input, filename='output.csv', csv_output_head = ['batch_id', 
 
     # write CSV
     filename_full = "{}_{}".format(os.path.basename(dir_input), filename)
-    with open(os.path.join(dir_input, filename_full), "wb") as fh:
+    with open(os.path.join(dir_input, filename_full), "w+") as fh:
         writer = csv.writer(fh)
 
         # write header
