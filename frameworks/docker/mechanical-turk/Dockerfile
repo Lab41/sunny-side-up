@@ -11,22 +11,14 @@ RUN wget http://packages.sil.org/sil.gpg -O /tmp/sil.gpg && \
     apt-get update
 
 
-# add scheherazade font
+# add font and text->png utility
 RUN apt-get install --assume-yes  ttf-sil-scheherazade \
-                                  fonts-sil-scheherazade
+                                  fonts-sil-scheherazade \
+                                  libpango1.0-dev
 
 
-# install python modules
-RUN pip install boto
-
-
-# install pango text->png
-RUN apt-get update && \
-    apt-get install --assume-yes libpango1.0-dev
-
-
-# install image processing tools
-RUN pip install pillow
+# python modules: mechanical turk; image processing
+RUN pip install boto pillow
 
 
 # start in the /data directory
