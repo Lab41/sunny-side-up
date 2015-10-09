@@ -1,4 +1,4 @@
-<AnswerKey xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurk/2014-08-15/AWSMechanicalTurkRequester.xsd">
+<AnswerKey xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2005-10-01/AnswerKey.xsd">
 
   <Question>
     <QuestionIdentifier>tweet1</QuestionIdentifier>
