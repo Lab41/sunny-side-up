@@ -21,6 +21,17 @@ RUN apt-get install --assume-yes  ttf-sil-scheherazade \
 RUN pip install boto pillow
 
 
+# add MTurk command line tools
+RUN cd / && \
+    wget https://mturk.s3.amazonaws.com/CLTSource/aws-mturk-clt.tar.gz && \
+    tar zxvf aws-mturk-clt.tar.gz && \
+    rm aws-mturk-clt.tar.gz
+
+
+# set java
+ENV JAVA_HOME /opt/jdk/jdk1.7.0_67
+
+
 # start in the /data directory
 WORKDIR /data
 
