@@ -12,7 +12,7 @@ class TextTooShortException(DataException):
 
 def normalize(txt, vocab=None, replace_char=' ',
                 min_length=100, max_length=1014, pad_out=True, 
-                to_lower=False):
+                to_lower=False, reverse = True):
     ''' Takes a single string object and truncates it to max_length,
     raises an exception if its length does not exceed min_length, and
     performs case normalization if to_lower is True. Optionally
@@ -54,10 +54,13 @@ def normalize(txt, vocab=None, replace_char=' ',
     txt = txt[0:max_length]
     # pad out if needed
     if pad_out==True:
-        txt = txt + replace_char * (max_length - len(txt))
+        txt = replace_char * (max_length - len(txt)) + txt
     # change case
     if to_lower==True:
         txt = txt.lower()
+    #
+    if reverse == True:
+        txt = txt[::-1]
     return txt
 
 zhang_lecun_vocab=list("abcdefghijklmnopqrstuvwxyz0123456789,;.!?:'\"/|_@#$%^&*~`+-=<>()[]{}")
