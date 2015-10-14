@@ -32,9 +32,9 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=data_utils.normalize,
             docs_np = np.array(docs)
             if flatten==True:
                 # transform to form (batch_size, w*h); flattening doc
-                docs_np = docs_np.reshape(docs_np.shape[0],-1)
+                docs_np = docs_np.reshape(batch_size,-1)
             # labels come out in a separate (batch_size, 1) np array
-            labels_np = np.array(labels).reshape(1, -1)
+            labels_np = np.array(labels).reshape(batch_size, -1)
             docs = []
             labels = []
 
