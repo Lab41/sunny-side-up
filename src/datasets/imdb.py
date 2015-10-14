@@ -7,8 +7,7 @@ from data_utils import get_file
 # Dictionary that defines the Sentiment features
 Sentiment = {0: 'neg', 2: 'neutral', 4: 'pos'}
 
-
-def load_data(file_path=None):
+def load_data(file_path=None, dest_path="./.downloads"):
     ''' Function that takes in a path to the IMDB movie review dataset
         word analogy file, opens it, removes topic tags and returns a list
         of the analogies
@@ -28,10 +27,10 @@ def load_data(file_path=None):
 
     # If file has not been extracted, then extract it 
     # to the downloads folder. This will save a lot of time
-    if not os.path.isdir('./.downloads/aclImdb'):
+    if not os.path.isdir(os.path.join(dest_path, 'aclImdb')):
         print("Extracting IMDB dataset")
         tar = tarfile.open(file_path, mode="r:gz")
-        tar.extractall(path="./.downloads")
+        tar.extractall(path=dest_path)
         tar.close()
 
     # Specifies positive and negative files
