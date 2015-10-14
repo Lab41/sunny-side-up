@@ -106,6 +106,8 @@ def get_file(url, dest_path):
 
     @Arguments:
         url -- the url of the chosen dataset
+        file_path -- the directory in which the hidden downloads folder 
+            is created. (defaults to pwd)
 
         dest_path -- the destination path
 
