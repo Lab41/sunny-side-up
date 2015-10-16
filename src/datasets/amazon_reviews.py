@@ -2,6 +2,7 @@ import os
 import gzip
 import json
 import logging
+import h5py
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -51,8 +52,18 @@ def load_data(file_path='/data/amazon/reviews_Home_and_Kitchen.json.gz',
         for l in f:
             try:
                 review_text, sentiment = process_amazon_json(l)
-                yield review_text, sentiment
+                yield review_text.decode("latin1"), sentiment
             except BoringException as e:
                 logger.info(e)
                 continue
 
+
+                
+
+        
+
+            
+            
+    
+                              
+    
