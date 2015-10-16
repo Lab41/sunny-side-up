@@ -12,7 +12,7 @@ class TextTooShortException(DataException):
 
 def normalize(txt, vocab=None, replace_char=' ',
                 min_length=100, max_length=1014, pad_out=True, 
-                to_lower=False, reverse = True):
+                to_lower=False, reverse = True, encoding="latin1"):
     ''' Takes a single string object and truncates it to max_length,
     raises an exception if its length does not exceed min_length, and
     performs case normalization if to_lower is True. Optionally
@@ -37,12 +37,14 @@ def normalize(txt, vocab=None, replace_char=' ',
     
         to_lower -- if True, all characters in txt wil be
             coerced to lower case
+            
+        encoding -- if not None, encode txt using this encoding
 
     @Returns:
         Normalized version of txt
 
-    @Raises
-        TextTooShortException
+    @Raises:
+        DataException, TextTooShortException
     '''
     # replace chars
     if vocab is not None:
@@ -52,15 +54,18 @@ def normalize(txt, vocab=None, replace_char=' ',
         raise TextTooShortException("Too short: {}".format(len(txt)))
     # truncate if too long
     txt = txt[0:max_length]
-    # pad out if needed
-    if pad_out==True:
-        txt = replace_char * (max_length - len(txt)) + txt
     # change case
     if to_lower==True:
         txt = txt.lower()
-    #
+    # Reverse order
     if reverse == True:
         txt = txt[::-1]
+    # pad out if needed
+    if pad_out==True:
+        txt = replace_char * (max_length - len(txt)) + txt        
+    # re-encode text
+    if encoding is not None:
+        txt = txt.encode(encoding)
     return txt
 
 zhang_lecun_vocab=list("abcdefghijklmnopqrstuvwxyz0123456789,;.!?:'\"/|_@#$%^&*~`+-=<>()[]{}")
