@@ -108,7 +108,7 @@ def latin_csv_reader(csv_data, dialect=csv.excel, **kwargs):
         yield [unicode(cell, 'latin-1') for cell in row]
 
 
-def get_file(url, dest_path):
+def get_file(url, dest_path="./downloads"):
     ''' Takes in a file url from the web and dowloads that file to
     to a directory given in dest_path
 
