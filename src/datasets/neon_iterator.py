@@ -20,7 +20,7 @@ training neon models.
 """
 import numpy as np
 #import h5py
-import simplejson as json
+#import simplejson as json
 import gzip
 
 import logging
@@ -40,7 +40,7 @@ from data_utils import from_one_hot
 # path_to_amazon = '/mnt/data/AmazonReviews/reviews_Health_and_Personal_Care.json.gz'
 # total_records =  2982356
 
-class AmazonDataIterator(NervanaObject):
+class DiskDataIterator(NervanaObject):
 
     def __init__(self, batch_gen_fun, ndata, batch_size, doclength=1014, nvocab=69, nlabels=2):
         """
@@ -148,7 +148,7 @@ def main():
 
     NervanaObject.be = ng
     ng.bsz = 128
-    train_set = AmazonDataIterator(lambda: batcher(load_data('/root/data/amazon/test_amazon.json.gz')), 3000, 128, nvocab=67)
+    train_set = DiskDataIterator(lambda: batcher(load_data('/root/data/amazon/test_amazon.json.gz')), 3000, 128, nvocab=67)
     # random examples from each
     for bidx, (X_batch, y_batch) in enumerate(train_set):
         print "Batch {}:".format(bidx)
