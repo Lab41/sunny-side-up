@@ -4,7 +4,7 @@ import os
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.DEBUG)
 
 import numpy as np
 import h5py
@@ -56,6 +56,9 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=data_utils.normalize,
     docs = []
     labels = []
 
+    logger.debug(data_loader)
+    logger.debug(dir(data_loader))
+
     for doc_text, label in data_loader:
         try:
             doc_text = normalizer_fun(doc_text)
@@ -99,13 +102,10 @@ def pick_splits(splits):
         bin_num += 1
     
 class H5Iterator:
-"""
-Small utility class for iterating over an HDF5 file.
-Yields tuples of (data, label) from datasets in the
-file with the names given in data_name and labels_name.
-
-"""
-    
+    """Small utility class for iterating over an HDF5 file.
+    Yields tuples of (data, label) from datasets in the
+    file with the names given in data_name and labels_name.
+    """    
     # TODO: implement resetting
     def __init__(self, h5_path, data_name, labels_name):
         self.h5file = h5py.File(h5_path, "r")
@@ -114,17 +114,22 @@ file with the names given in data_name and labels_name.
         
     def __del__(self):
         self.h5file.close()
-        
+    
+    def __iter__(self):
+        return self
+
     def next(self):
         return (self.data.next(), self.labels.next())
         
             
 def split_data(batch_iterator,
-               splits = [0.2],
+               splits = [0.8],
+               rng_seed=888,
                in_memory=False,
+               iterate=True,
                h5_path='/data/amazon/data.hd5',
                overwrite_previous=False):
-    ''' Splits data into slices and returns a tuple of
+    ''' Splits data into slices and returns a list of
         iterators over each slice. Slice size is configurable.
         Probabilistic, so may not produce exactly the expected bin sizes, 
         especially for small data.
@@ -133,38 +138,48 @@ def split_data(batch_iterator,
             batch_iterator --
                 generator of tuples (data, label) where each of data, label
                 is a numpy array with the first dimension representing batch size.
+                This can be none if in_memory is False, h5_path is valid, and
+                overwrite_previous=False (uses existing data, does not re-shuffle 
+                or rearrange).
             splits --
                 list of floats indicating how to split the data. The data will
                 be split into len(splits) + 1 slices, with the final slice 
                 having 1-sum(splits) of the data.
+            rng_seed -- random number generator seed
             in_memory --
                 load data into memory (True) or use HDF5?
+            iterate --
+                return data as an iterable? Only used if in_memory = True.
+                Produces behavior akin to in_memory=False, where each slice 
+                is returned as an iterator over (data, label) pairs.
             h5_path -- path to HDF5 file. Only used if in_memory is False
             overwrite_previous -- if h5_path is already a readable file,
                 overwrite it?
             
         @Returns
-            An list of tuples of iterable objects
-            or of generators over tuples. 
+            A list of iterables, where each iterable represents a 
+            slice of the data and generates (data, label) pairs
+            over individual records.
             If in_memory is False, this will be a list
             of H5Iterators, with each H5Iterator representing a
             slice of the data, yielding (data, labels).
-            If in_memory = True, this will be a list of 2-tuples of lists,
-            where each 2-tuple represents a slice of the data.
+            If in_memory is True and iterate is False, 
+            this function will return  a list of 2-tuples of numpy arrays,
+            where each 2-tuple is all of (data, labels) for each slice.
             
         
     '''
 
     # How many chunks to split into?
     nb_slices = len(splits) + 1
-    
+    np.random.seed(rng_seed)
     if in_memory:
         data_bins = None
         for data, labels in batch_iterator:
             bin_i = str(pick_splits(splits))
-            if data_bins = None:
-                data_bins = [ np.ndarray(((0,) + data.shape[1:])), 
-                              np.ndarray(((0,) + labels.shape[1:])) 
+            if data_bins == None:
+                data_bins = [ (np.ndarray(((0,) + data.shape[1:])), 
+                              np.ndarray(((0,) + labels.shape[1:]))) 
                               for a in range(nb_slices) ]
             # store batch in the proper bin, creating numpy arrays
             # for data and labels if needed
@@ -172,6 +187,10 @@ def split_data(batch_iterator,
                                 (data_bins[bin_i][0], data)),
                                np.concatenate(
                                 (data_bins[bin_i][1], labels)))              
+        if iterate == True:
+            for bin_i in range(nb_slices):
+                bin = data_bins[bin_i]
+                data_bins[bin_i] = iter(zip(iter(bin[0]), iter(bin[1])))
         return data_bins
                     
     else:
