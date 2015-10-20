@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import logging
 logging.basicConfig()
@@ -97,6 +99,13 @@ def pick_splits(splits):
         bin_num += 1
     
 class H5Iterator:
+"""
+Small utility class for iterating over an HDF5 file.
+Yields tuples of (data, label) from datasets in the
+file with the names given in data_name and labels_name.
+
+"""
+    
     # TODO: implement resetting
     def __init__(self, h5_path, data_name, labels_name):
         self.h5file = h5py.File(h5_path, "r")
@@ -122,18 +131,27 @@ def split_data(batch_iterator,
     
         @Arguments 
             batch_iterator --
-        
+                generator of tuples (data, label) where each of data, label
+                is a numpy array with the first dimension representing batch size.
             splits --
-            
+                list of floats indicating how to split the data. The data will
+                be split into len(splits) + 1 slices, with the final slice 
+                having 1-sum(splits) of the data.
             in_memory --
-            
-            amazon_url --
-            
-            h5dir --
-            
-            overwrite_previous --
+                load data into memory (True) or use HDF5?
+            h5_path -- path to HDF5 file. Only used if in_memory is False
+            overwrite_previous -- if h5_path is already a readable file,
+                overwrite it?
             
         @Returns
+            An list of tuples of iterable objects
+            or of generators over tuples. 
+            If in_memory is False, this will be a list
+            of H5Iterators, with each H5Iterator representing a
+            slice of the data, yielding (data, labels).
+            If in_memory = True, this will be a list of 2-tuples of lists,
+            where each 2-tuple represents a slice of the data.
+            
         
     '''
 
@@ -141,19 +159,19 @@ def split_data(batch_iterator,
     nb_slices = len(splits) + 1
     
     if in_memory:
-        data_bins = { str(i): {} for i in range(nb_slices) }
+        data_bins = None
         for data, labels in batch_iterator:
             bin_i = str(pick_splits(splits))
+            if data_bins = None:
+                data_bins = [ np.ndarray(((0,) + data.shape[1:])), 
+                              np.ndarray(((0,) + labels.shape[1:])) 
+                              for a in range(nb_slices) ]
             # store batch in the proper bin, creating numpy arrays
             # for data and labels if needed
-            data_bins[bin_i]["data"] = np.concatenate(
-                (data_bins[bin_i].get("data", 
-                                      np.ndarray(((0,) + data.shape[1:]))), 
-                data))
-            data_bins[bin_i]["labels"] = np.concatenate(
-                (data_bins[bin_i].get("labels", 
-                                      np.ndarray(((0,) + labels.shape[1:]))), 
-                labels))
+            data_bins[bin_i] = (np.concatenate(
+                                (data_bins[bin_i][0], data)),
+                               np.concatenate(
+                                (data_bins[bin_i][1], labels)))              
         return data_bins
                     
     else:
