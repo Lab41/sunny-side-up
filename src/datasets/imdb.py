@@ -9,7 +9,7 @@ from data_utils import get_file
 pos_label = 1
 neg_label = 0
 
-def load_data(file_path=None, dest_path="./.downloads"):
+def load_data(file_path=None, download_path="./.downloads", dest_path="./.downloads"):
     ''' Function that takes in a path to the IMDB movie review dataset
         word analogy file, opens it, removes topic tags and returns a list
         of the analogies
@@ -25,7 +25,8 @@ def load_data(file_path=None, dest_path="./.downloads"):
     # Open file path
     if not file_path:
         print "Downloading IMDB dataset"
-        file_path = get_file("http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz")
+        file_path = get_file("http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz",
+                             download_path)
 
     # If file has not been extracted, then extract it 
     # to the downloads folder. This will save a lot of time
