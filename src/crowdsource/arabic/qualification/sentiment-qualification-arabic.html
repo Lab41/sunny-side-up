@@ -1,0 +1,356 @@
+
+<!-- Bootstrap v3.0.3 -->
+<!-- Latest compiled and minified CSS -->
+
+
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+</head>
+
+<style type="text/css">
+
+.accordion-toggle:after {
+    /* symbol for "opening" panels */
+    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+    content: "\e252";    /* adjust as needed, taken from bootstrap.css */
+    float: right;        /* adjust as needed */
+    color: grey;         /* adjust as needed */
+}
+.accordion-toggle.collapsed:after {
+    /* symbol for "collapsed" panels */
+    content: "\e251";    /* adjust as needed, taken from bootstrap.css */
+}
+
+body {
+	font-size: 200%;
+}
+
+.explanation {
+	color: grey;
+	font-style: italic;
+}
+
+h1 {
+	font-size: 24px;	
+}
+
+h2 {
+	font-size: 20px;
+}
+
+h3 {
+	font-size: 18px;
+	margin-left: 25px;
+}
+
+h4 a {
+	font-size: 20px;
+}
+
+.form-control option {
+	font-size: 150%;
+}
+
+.likertRadio {
+    display:inline-block;
+    text-align:center;
+}
+.likertRadio label {
+    display:block;
+	margin: 0em 0em 2em 2em;
+}
+
+.likertPrompt {
+	color: #428bca;
+	display: block;
+	margin-bottom: .3em;
+	font-style:italic;
+}
+
+.likertTable {
+	border: 0px solid black;
+	margin-bottom:20px;
+}
+
+.likertTable td {
+	width: 8em;
+}
+
+.likertTable tr td {
+	border: 1px solid black;
+	text-align: center
+}
+
+.panel-body {
+	font-family: "Simplified Arabic";
+}
+
+.panel-heading {
+	font-family: "Simplified Arabic";
+	font-size: 150%;
+}
+
+/* override float and margin-right properties so buttons align right */
+.radio input[type="radio"],
+.radio-inline input[type="radio"],
+.checkbox input[type="checkbox"],
+.checkbox-inline input[type="checkbox"] {
+  float: right;
+  margin-right: -20px;
+}
+
+/* override padding-right so buttons don't overlap text */
+.radio,
+.checkbox {
+  padding-right: 20px;
+}
+
+table, th, td {
+	border-collapse: collapse;
+	font-family: "Simplified Arabic";
+	/*border: 1px solid black;*/
+}
+
+td {
+	font-size: 150%;
+	text-align:center;
+	padding: 5px;
+}
+
+th {
+	font-size: 150%;
+	padding: 5px;
+	text-align:center;
+}
+
+tr {
+	border: 1px solid grey;
+}
+
+td.tweet {
+	text-align: center;
+}
+
+</style>
+
+<section class="container" id="Survey" style="margin-bottom:15px; padding: 10px 10px; font-family: Verdana, Geneva, sans-serif; color:#333333; font-size:0.9em;">
+<div class="row col-xs-12 col-md-12"><!-- Instructions -->
+<div class="panel panel-primary">
+<div class="panel-heading" style="display:block";><strong>تعليمات</strong></div>
+
+<div class="panel-body" dir="rtl" lang="ar">
+<img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/ClickToExpand.png">
+<br><br>
+<!-- Overall instructions --> 
+      <h4 class="panel-title">
+        <a class="accordion-toggle" data-toggle="collapse" href="#overallInstructions">
+        <img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/InstructionsHeadingOverall.png">
+        </a>
+      </h4>
+<div id="overallInstructions" class= "collapse in">
+<img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/InstructionsOverall.png" style="max-width:120%;"/>
+
+<!--<p>You will categorize each Tweet into one of the following five categories:</p>-->
+</div>
+<!-- Objective or Neutral Sentiment -->
+      <h4 class="panel-title">
+        <a  class="accordion-toggle" data-toggle="collapse" href="#objectiveSentiment">
+        <img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/InstructionsHeading1.png" />
+        </a>
+      </h4>
+<div id="objectiveSentiment" class= "collapse in">
+<!-- <h2>(1) 	احساس عام موضوعي او محايد </h2> -->
+<img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/InstructionsSection1.png" />
+</div>
+
+<!-- Positive tweets -->
+      <h4 class="panel-title">
+        <a  class="accordion-toggle" data-toggle="collapse" href="#positiveSentiment">
+        <img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/InstructionsHeading2.png" />
+        </a>
+      </h4>
+<div id="positiveSentiment" class= "collapse in">
+<!-- <h2>(2) 	احساس عام إيجابي </h2> -->
+<img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/InstructionsSection2.png" />
+</div>
+
+
+<!-- Negative Tweets -->
+      <h4 class="panel-title">
+        <a  class="accordion-toggle" data-toggle="collapse" href="#negativeSentiment">
+        <img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/InstructionsHeading3.png" />
+        </a>
+      </h4>
+<div id="negativeSentiment" class= "collapse in">
+<img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/InstructionsSection3.png" />
+</div>
+
+<!-- Mixed Sentiment -->
+      <h4 class="panel-title">
+        <a  class="accordion-toggle" data-toggle="collapse" href="#mixedSentiment">
+		<img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/InstructionsHeading4.png" />
+        </a>
+      </h4>
+<div id="mixedSentiment" class= "collapse in">
+<img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/InstructionsSection4.png" />
+</div>
+
+<!-- Unclear sentiment -->
+      <h4 class="panel-title">
+        <a  class="accordion-toggle" data-toggle="collapse" href="#unclearSentiment">
+        <img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/InstructionsHeading5.png" />
+        </a>
+      </h4>
+<div id="unclearSentiment" class= "collapse in">
+<img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/InstructionsSection5.png" />
+</div>
+</div>
+<!-- End Instructions --><!-- Survey Body -->
+
+<section dir="rtl" lang="ar">
+<fieldset>
+<table>
+	<tr>
+        <th>التغريدة</th>
+        <th width="25%">لإحساس العام</th>
+    </tr>
+    <tr>
+        <td class="tweet"><img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/PositiveTweet2.png"></td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>   
+	</tr>
+    <tr>
+        <td class="tweet"><img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/MixedTweet2.png"></td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>
+	</tr>
+    <tr>
+        <td class="tweet"><img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/NeutralTweet1.png"></td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>
+	</tr>
+    <tr>
+        <td class="tweet"><img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/UnclearTweet1.png"></td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>
+	</tr>
+    <tr>
+        <td class="tweet"><img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/MixedTweet1.png"></td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>
+	</tr>
+        <tr>
+        <td class="tweet"><img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/UnclearTweet2.png"></td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>
+	</tr>
+        <tr>
+        <td class="tweet"><img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/NegativeTweet1.png"></td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>
+	</tr>
+        <tr>
+        <td class="tweet"><img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/NegativeTweet2.png"></td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>
+	</tr>
+        <tr>
+        <td class="tweet"><img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/PositiveTweet2.png"></td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>
+	</tr>
+        <tr>
+        <td class="tweet"><img src="https://googledrive.com/host/0B9sx_MZ992t6dTNMQjBzYWdiY0U/NeutralTweet2.png"></td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>
+	</tr>
+</table>  
+	
+</fieldset>
+
+</section>
+
+<!-- End Survey Body --><!-- close container -->
+<style type="text/css">fieldset {
+    padding: 10px;
+    background:#fbfbfb;
+    border-radius:5px;
+    margin-bottom:5px;
+}
+</style>
+</div>
+</section>

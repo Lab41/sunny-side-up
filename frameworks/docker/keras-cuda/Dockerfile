@@ -14,7 +14,17 @@ RUN pip install numpy \
                 cython \
                 h5py \
                 pyyaml \
-                six==1.9.0
+                six==1.9.0 \
+                pandas \
+                passage
+
+
+# Adding ipython
+RUN pip install ipython \
+                pyzmq \
+                jinja2 \
+                tornado \
+                jsonschema
 
 
 # install CUDA
@@ -38,17 +48,6 @@ RUN cd /tmp && \
     cd keras && \
     python setup.py install && \
     rm -rf /tmp/keras
-
-
-# Adding ipython
-RUN pip install ipython \
-                pyzmq \
-                jinja2 \
-                tornado \
-                jsonschema
-
-# Add Passage
-RUN pip install passage
 
 
 # setup data volume
