@@ -42,7 +42,7 @@ from data_utils import from_one_hot
 
 class DiskDataIterator(NervanaObject):
 
-    def __init__(self, batch_gen_fun, ndata, batch_size, doclength=1014, nvocab=69, nlabels=2):
+    def __init__(self, batch_gen_fun, ndata, batch_size, doclength=1014, nvocab=67, nlabels=2):
         """
         Implements loading of given data into backend tensor objects. If the
         backend is specific to an accelarator device, the data is copied over
@@ -54,7 +54,7 @@ class DiskDataIterator(NervanaObject):
             ndata (int): The number of records in the given data
             batch_size (int): How many records will the batching generator return per iteration?
             nlabels (int, optional): The number of possible types of labels. 2 for binary good/bad
-            nvocab  (int, optional): Tne number of letter tocans
+            nvocab  (int, optional): Tne number of letter tokens
                 (not necessary if not providing labels)
         """
         # Treat singletons like list so that iteration follows same syntax
@@ -108,6 +108,7 @@ class DiskDataIterator(NervanaObject):
             tuple: The next minibatch. A minibatch includes both features and
             labels.
         """
+        self.reset()
         for i1 in range(0, self.ndata, self.be.bsz):
             i2 = min(i1 + self.be.bsz, self.ndata)
             bsz = i2 - i1
@@ -116,11 +117,15 @@ class DiskDataIterator(NervanaObject):
             #self.start = self.be.bsz - bsz
             # copy labels from HDF5 file/generator
             X, y = next(self.datagen)
-            logger.info("Dest shape: {}, Src shape: {}, Xbuf flat shape: {}, Xbuf shape: {}".format(
+            logger.info("Dest shape: {}, Src shape: {}, Xbuf flat shape: {}, Xbuf shape: {}"
+                        "\nY labels shape: {}, Y buffer shape: {}, Y input shape: {}".format(
                     self.xlabels.shape,
                     X.T.shape,
                     self.Xbuf_flat.shape,
-                    self.Xbuf.shape))
+                    self.Xbuf.shape,
+                    self.ylabels.shape,
+                    self.ybuf.shape,
+                    y.shape))
             #self.xlabels[:] = X.T.copy()
             self.ylabels[:] = y.T.copy()
             # wraparound condition
