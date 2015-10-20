@@ -12,7 +12,7 @@ class TextTooShortException(DataException):
 
 def normalize(txt, vocab=None, replace_char=' ',
                 min_length=100, max_length=1014, pad_out=True, 
-                to_lower=False, reverse = True, encoding="latin1"):
+                to_lower=True, reverse = True, encoding="latin1"):
     ''' Takes a single string object and truncates it to max_length,
     raises an exception if its length does not exceed min_length, and
     performs case normalization if to_lower is True. Optionally
@@ -46,9 +46,6 @@ def normalize(txt, vocab=None, replace_char=' ',
     @Raises:
         DataException, TextTooShortException
     '''
-    # replace chars
-    if vocab is not None:
-        txt = ''.join([c if c in vocab else replace_char for c in txt])
     # reject txt if too short
     if len(txt) < min_length:
         raise TextTooShortException("Too short: {}".format(len(txt)))
@@ -60,6 +57,9 @@ def normalize(txt, vocab=None, replace_char=' ',
     # Reverse order
     if reverse == True:
         txt = txt[::-1]
+    # replace chars
+    if vocab is not None:
+        txt = ''.join([c if c in vocab else replace_char for c in txt])
     # pad out if needed
     if pad_out==True:
         txt = replace_char * (max_length - len(txt)) + txt        
@@ -82,6 +82,16 @@ def to_one_hot(txt, vocab=zhang_lecun_vocab, vocab_hash=zhang_lecun_vocab_hash):
         except KeyError:
             pass
     return one_hot_vec
+
+def from_one_hot(oh, vocab=zhang_lecun_vocab):
+    vocab_hash = { a: b for a, b in enumerate(vocab) }
+    txt = []
+    for col_i in range(oh.shape[1]):
+        if oh[:,col_i].sum() > 0:
+            txt.append(vocab_hash[oh[:, col_i].argmax()])
+        else:
+            txt.append(" ")
+    return txt
 
 def latin_csv_reader(csv_data, dialect=csv.excel, **kwargs):
     ''' Function that takes an opened CSV file with
