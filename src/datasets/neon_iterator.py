@@ -42,7 +42,7 @@ from data_utils import from_one_hot
 
 class DiskDataIterator(NervanaObject):
 
-    def __init__(self, batch_gen_fun, ndata, batch_size, doclength=1014, nvocab=67, nlabels=2):
+    def __init__(self, batch_gen_fun, ndata, doclength=1014, nvocab=67, nlabels=2):
         """
         Implements loading of given data into backend tensor objects. If the
         backend is specific to an accelarator device, the data is copied over
@@ -52,7 +52,6 @@ class DiskDataIterator(NervanaObject):
             batch_gen_fun (function): function that returns an iterator over 
                 batches (tuples of numpy arrays)
             ndata (int): The number of records in the given data
-            batch_size (int): How many records will the batching generator return per iteration?
             nlabels (int, optional): The number of possible types of labels. 2 for binary good/bad
             nvocab  (int, optional): Tne number of letter tokens
                 (not necessary if not providing labels)
@@ -67,7 +66,7 @@ class DiskDataIterator(NervanaObject):
         self.reset()
         
         #might not work, beware
-        self.be.bsz=batch_size
+        #self.be.bsz=batch_size
 
         self.nlabels = nlabels
         self.nvocab = nvocab
