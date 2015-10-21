@@ -3,6 +3,10 @@ import logging
 import random
 from urllib2 import urlopen, HTTPError, URLError
 import numpy as np
+import logging
+logging.basicConfig()
+logger=logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 class DataException(Exception):
     pass
@@ -60,12 +64,12 @@ def normalize(txt, vocab=None, replace_char=' ',
     # replace chars
     if vocab is not None:
         txt = ''.join([c if c in vocab else replace_char for c in txt])
+    # re-encode text
+    if encoding is not None:
+        txt = txt.encode(encoding, errors="ignore")
     # pad out if needed
     if pad_out==True:
         txt = replace_char * (max_length - len(txt)) + txt        
-    # re-encode text
-    if encoding is not None:
-        txt = txt.encode(encoding)
     return txt
 
 zhang_lecun_vocab=list("abcdefghijklmnopqrstuvwxyz0123456789,;.!?:'\"/|_@#$%^&*~`+-=<>()[]{}")
