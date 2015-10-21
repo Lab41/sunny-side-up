@@ -59,6 +59,12 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=data_utils.normalize,
     logger.debug(data_loader)
     logger.debug(dir(data_loader))
 
+    # set (near) identity functions for transformation functions set to None
+    if transformer_fun is None:
+        transformer_fun = lambda x: np.array(x)
+    if normalizer_fun is None:
+        normalizer_fun = lambda x: x
+
     for doc_text, label in data_loader:
         try:
             doc_text = normalizer_fun(doc_text)
@@ -69,14 +75,19 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=data_utils.normalize,
         except data_utils.DataException as e:
             logger.info(e)
             continue
+            
         
         if len(docs) >= batch_size:
+            logger.debug(type(docs))
+            for doc in docs:
+                logger.debug(doc.shape)
+            logger.debug("")
             docs_np = np.array(docs)
             if flatten==True:
                 # transform to form (batch_size, w*h); flattening doc
-                docs_np = docs_np.reshape(batch_size,-1)
+                docs_np = docs_np.reshape((batch_size,-1))
             # labels come out in a separate (batch_size, 1) np array
-            labels_np = np.array(labels).reshape(batch_size, -1)
+            labels_np = np.array(labels).reshape((batch_size, -1))
             docs = []
             labels = []
 
@@ -177,7 +188,7 @@ def split_data(batch_iterator,
         data_bins = None
         bin_sizes = [0]*nb_slices
         for data, labels in batch_iterator:
-            bin_i = str(pick_splits(splits))
+            bin_i = pick_splits(splits)
             if data_bins == None:
                 data_bins = [ (np.ndarray(((0,) + data.shape[1:])), 
                               np.ndarray(((0,) + labels.shape[1:]))) 
@@ -238,11 +249,21 @@ def split_data(batch_iterator,
                     h5_file["data_" + bin_name][start_i:end_i, ...] = new_data
                     h5_file["labels_" + bin_name][start_i:end_i, ...] = new_labels
                     data_i[bin_id] = data_i.get(bin_id,0) + new_data.shape[0]
-                    logger.debug("Data shape: {}".format(new_data.shape))
-                    logger.debug("Output data shape: {}".format(h5_file["data_" + bin_name].shape))
+                    #logger.debug("Data shape: {}".format(new_data.shape))
+                    #logger.debug("Output data shape: {}".format(h5_file["data_" + bin_name].shape))
                     logger.debug("Wrote from {} to {}.\nData bookmarks: {}".format(start_i, end_i, data_i))
-                    
-        # now to return iterators over the HDF5 datasets for each slice
+        else:
+            # fill in counts of each data slice
+            data_i = {}
+            with h5py.File(h5_path, "r") as f:
+                for bin_i in range(nb_slices):
+                    try:
+                        data_i[bin_i] = f['data_' + str(bin_i)].shape[0]
+                    except KeyError:
+                        pass
+                
+
+        #now to return iterators over the HDF5 datasets for each slice
         # these can, in turn, be batched with batch_data (auughhh)
         data_iterators = []
         for bin_i in range(nb_slices):
