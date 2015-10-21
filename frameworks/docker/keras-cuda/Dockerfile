@@ -50,6 +50,16 @@ RUN cd /tmp && \
     rm -rf /tmp/keras
 
 
+# add viz
+RUN apt-get update && \
+    apt-get install --assume-yes libpng12-dev libfreetype6-dev libpng++-dev libfreetype6 libfreetype6-dev libpng12-dev pkg-config
+RUN pip install matplotlib
+
+
+# add datasci packages
+RUN pip install pandas simplejson
+
+
 # setup data volume
 VOLUME ["/data"]
 WORKDIR /data
