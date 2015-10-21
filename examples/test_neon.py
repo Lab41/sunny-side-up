@@ -34,22 +34,32 @@ def get_data():
         batch_size=batch_size)
 
     h5_repo = "/root/data/pcallier/amazon/demo_split.h5"
-    a, b = split_data(amz_data, in_memory=False, 
+    (a, b), (a_size, b_size) = split_data(amz_data, in_memory=False, 
                       h5_path=h5_repo)
     logger.debug("Test iteration: {}".format(a.next()[0].shape))
     def a_batcher():
-        a,b=split_data(None, h5_path=h5_repo, overwrite_previous=False)
+        (a,b),(a_size,b_size)=split_data(None, h5_path=h5_repo, overwrite_previous=False)
         return batch_data(a, normalizer_fun=lambda x: x,
             transformer_fun=lambda x: x, flatten=False,
             batch_size=batch_size)
     def b_batcher():
-        a,b=split_data(None, h5_path=h5_repo, overwrite_previous=False)
+        (a,b),(a_size,b_size)=split_data(None, h5_path=h5_repo, overwrite_previous=False)
         return batch_data(b, normalizer_fun=lambda x: x, 
             transformer_fun=lambda x: x, flatten=False,
             batch_size=batch_size)
 
-    return a_batcher, b_batcher
+    return (a_batcher, b_batcher), (a_size, b_size)
 
+def lstm_model(nvocab=67, doclength=1014):
+    layers = [
+        neon.layers.LSTM(hidden_size, neon.initializers.GlorotUniform(),
+                         activation=neon.transforms.Tanh(), 
+                         gate_activation=neon.transforms.Logistic(),
+                         reset_cells=True),
+        neon.layers.RecurrentSum(),
+        neon.layers.Dropout(0.5),
+        neon.layers.Affine(2, neon.initializers.GlorotUniform())
+        ]
 def simple_model(nvocab=67,
                  doclength=1014):
     layers = [
@@ -139,12 +149,12 @@ class MyCallback(Callback):
 def main():
     batch_size=32
     be = gen_backend(backend='gpu', batch_size=batch_size)
-    train_get, test_get = get_data()
+    (train_get, test_get), (train_size, test_size) = get_data()
     train_batch_beta = test_get()
     logger.debug("First record shape: {}".format(train_batch_beta.next()[0].shape))
 
-    train_iter = DiskDataIterator(train_get, ndata=int(0.8*3000), batch_size=batch_size)
-    test_iter = DiskDataIterator(test_get, ndata=int(0.2*3000), batch_size=batch_size)
+    train_iter = DiskDataIterator(train_get, ndata=train_size, batch_size=batch_size)
+    test_iter = DiskDataIterator(test_get, ndata=test_size, batch_size=batch_size)
     #print ''.join(from_one_hot(a.next()[0][0].reshape((-1,1014))))[::-1]
     model = simple_model()
     mlp = neon.models.Model(model)
