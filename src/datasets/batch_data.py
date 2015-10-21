@@ -175,6 +175,7 @@ def split_data(batch_iterator,
     np.random.seed(rng_seed)
     if in_memory:
         data_bins = None
+        bin_sizes = [0]*nb_slices
         for data, labels in batch_iterator:
             bin_i = str(pick_splits(splits))
             if data_bins == None:
@@ -186,12 +187,13 @@ def split_data(batch_iterator,
             data_bins[bin_i] = (np.concatenate(
                                 (data_bins[bin_i][0], data)),
                                np.concatenate(
-                                (data_bins[bin_i][1], labels)))              
+                                (data_bins[bin_i][1], labels)))
+            bin_sizes[bin_i] += data.shape[0]
         if iterate == True:
             for bin_i in range(nb_slices):
                 bin = data_bins[bin_i]
                 data_bins[bin_i] = iter(zip(iter(bin[0]), iter(bin[1])))
-        return data_bins
+        return data_bins, bin_sizes
                     
     else:
         # Check for HDF5 file already on disk
@@ -245,7 +247,8 @@ def split_data(batch_iterator,
         data_iterators = []
         for bin_i in range(nb_slices):
             data_iterators.append((H5Iterator(h5_path, "data_" + str(bin_i), "labels_" + str(bin_i))))
-        return data_iterators
+        bin_sizes = [ data_i.get(i, 0) for i in range(nb_slices) ]
+        return data_iterators, bin_sizes
         
                
                 
