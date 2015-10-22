@@ -4,7 +4,7 @@ import os
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 
 import numpy as np
 import h5py
@@ -49,8 +49,6 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=data_utils.normalize,
         generator that yields 2-tuples of (data, label), where data
         and label are numpy arrays representing a batch of data,  
         equally sized in the first dimension
-
-    
     '''
 
     docs = []
@@ -59,7 +57,17 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=data_utils.normalize,
     logger.debug(data_loader)
     logger.debug(dir(data_loader))
 
+    # set (near) identity functions for transformation functions set to None
+    if transformer_fun is None:
+        transformer_fun = lambda x: np.array(x)
+    if normalizer_fun is None:
+        normalizer_fun = lambda x: x
+
+    # loop over data, applying transforming fns,
+    # accumulating records into batches,
+    # and yielding them when batch size is reached
     for doc_text, label in data_loader:
+        # transformation and normalization
         try:
             doc_text = normalizer_fun(doc_text)
             # transform document into a numpy array
@@ -68,15 +76,15 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=data_utils.normalize,
             labels.append(label)
         except data_utils.DataException as e:
             logger.info(e)
-            continue
-        
+
+        # dispatch once batch is of appropriate size 
         if len(docs) >= batch_size:
             docs_np = np.array(docs)
             if flatten==True:
                 # transform to form (batch_size, w*h); flattening doc
-                docs_np = docs_np.reshape(batch_size,-1)
+                docs_np = docs_np.reshape((batch_size,-1))
             # labels come out in a separate (batch_size, 1) np array
-            labels_np = np.array(labels).reshape(batch_size, -1)
+            labels_np = np.array(labels).reshape((batch_size, -1))
             docs = []
             labels = []
 
@@ -121,12 +129,44 @@ class H5Iterator:
     def next(self):
         return (self.data.next(), self.labels.next())
         
-            
+def write_batch_to_h5(splits, h5_file, data_sizes, new_data, new_labels):
+    """ Takes some information about a minibatch of data and 
+        writes it into the given HDF5 file
+
+        @Arguments
+            splits -- akin to split data, a series of probabilities
+                that sum to less than one. The nth probability is the 
+                probability of landing in the nth bin. 1-sum(splits) is 
+                the probability of landing in the last bin
+            h5_file -- an h5py File object, representing an HDF5
+                file open for writing
+            data_sizes -- a dictionary with an integer key for
+                each bin of data. Values are the counts of data in each bin
+            new_data -- a numpy array with a new minibatch
+            new_labels -- a numpy array with a new set of labels
+    """
+    # check that data and labels are the same size
+    assert new_data.shape[0] == new_labels.shape[0]
+    # pick which bin to assign data to
+    bin_id = pick_splits(splits)
+    bin_name = str(bin_id)
+    # get slice indexes
+    start_i = data_sizes.get(bin_id, 0)
+    end_i = start_i + new_data.shape[0]
+    # resize HDF5 datasets
+    h5_file["data_" + bin_name].resize(end_i, 0)
+    h5_file["labels_" + bin_name].resize(end_i, 0)
+    # write data
+    h5_file["data_" + bin_name][start_i:end_i, ...] = new_data
+    h5_file["labels_" + bin_name][start_i:end_i, ...] = new_labels
+    # create and return updated dictionary of bin counts
+    data_sizes[bin_id] = end_i
+    return data_sizes
+
 def split_data(batch_iterator,
                splits = [0.8],
                rng_seed=888,
                in_memory=False,
-               iterate=True,
                h5_path='/data/amazon/data.hd5',
                overwrite_previous=False):
     ''' Splits data into slices and returns a list of
@@ -148,26 +188,17 @@ def split_data(batch_iterator,
             rng_seed -- random number generator seed
             in_memory --
                 load data into memory (True) or use HDF5?
-            iterate --
-                return data as an iterable? Only used if in_memory = True.
-                Produces behavior akin to in_memory=False, where each slice 
-                is returned as an iterator over (data, label) pairs.
             h5_path -- path to HDF5 file. Only used if in_memory is False
             overwrite_previous -- if h5_path is already a readable file,
                 overwrite it?
             
         @Returns
-            A list of iterables, where each iterable represents a 
-            slice of the data and generates (data, label) pairs
-            over individual records.
-            If in_memory is False, this will be a list
-            of H5Iterators, with each H5Iterator representing a
-            slice of the data, yielding (data, labels).
-            If in_memory is True and iterate is False, 
-            this function will return  a list of 2-tuples of numpy arrays,
-            where each 2-tuple is all of (data, labels) for each slice.
-            
-        
+            A 2-tuple:
+            The first element is a  list of generators, where each generator
+            represents a slice of the data and yields 2-tuples
+            of (data,label), each representing one record.
+            The second element is an integer-indexed iterable
+            with the counts of records in each bin
     '''
 
     # How many chunks to split into?
@@ -177,22 +208,26 @@ def split_data(batch_iterator,
         data_bins = None
         bin_sizes = [0]*nb_slices
         for data, labels in batch_iterator:
-            bin_i = str(pick_splits(splits))
+            bin_i = pick_splits(splits)
             if data_bins == None:
                 data_bins = [ (np.ndarray(((0,) + data.shape[1:])), 
                               np.ndarray(((0,) + labels.shape[1:]))) 
                               for a in range(nb_slices) ]
             # store batch in the proper bin, creating numpy arrays
             # for data and labels if needed
+            accumulated_data = data_bins[bin_i][0]
+            accumulated_labels = data_bins[bin_i][1]
             data_bins[bin_i] = (np.concatenate(
-                                (data_bins[bin_i][0], data)),
+                                (accumulated_data, data)),
                                np.concatenate(
-                                (data_bins[bin_i][1], labels)))
+                                (accumulated_labels, labels)))
+            # update running tally of data count per bin
             bin_sizes[bin_i] += data.shape[0]
-        if iterate == True:
-            for bin_i in range(nb_slices):
-                bin = data_bins[bin_i]
-                data_bins[bin_i] = iter(zip(iter(bin[0]), iter(bin[1])))
+        # return iterators over each bin rather than a list of tuples of np arrays
+        # (used to be optional)
+        for bin_i in range(nb_slices):
+            bin_data, bin_labels = data_bins[bin_i]
+            data_bins[bin_i] = iter(zip(bin_data, bin_labels))
         return data_bins, bin_sizes
                     
     else:
@@ -216,32 +251,21 @@ def split_data(batch_iterator,
                                        dtype=first_labels.dtype)
                 # loop batches into dataset
                 # write first batch in
-                first_bin_id = pick_splits(splits)
-                logger.debug("Data shape: {}".format(first_data.shape))
-                data_i = {}
-                data_i[first_bin_id] = first_data.shape[0]
-                h5_file["data_" + bin_names[first_bin_id]][0:data_i[first_bin_id]] = first_data
-                h5_file["labels_" + bin_names[first_bin_id]][0:data_i[first_bin_id]] = first_labels
+                data_sizes = {}
+                data_sizes = write_batch_to_h5(splits,h5_file,data_sizes,first_data,first_labels)
                 # then do rest
                 for new_data, new_labels in batch_iterator:
-                    assert new_data.shape[0] == new_labels.shape[0]
-                    # pick which bin to assign data to
-                    bin_id = pick_splits(splits)
-                    bin_name = bin_names[bin_id]
-                    # get slice indexes
-                    start_i = data_i.get(bin_id, 0)
-                    end_i = start_i + new_data.shape[0]
-                    # resize HDF5 datasets
-                    h5_file["data_" + bin_name].resize(end_i, 0)
-                    h5_file["labels_" + bin_name].resize(end_i, 0)
-                    # write data
-                    h5_file["data_" + bin_name][start_i:end_i, ...] = new_data
-                    h5_file["labels_" + bin_name][start_i:end_i, ...] = new_labels
-                    data_i[bin_id] = data_i.get(bin_id,0) + new_data.shape[0]
-                    logger.debug("Data shape: {}".format(new_data.shape))
-                    logger.debug("Output data shape: {}".format(h5_file["data_" + bin_name].shape))
-                    logger.debug("Wrote from {} to {}.\nData bookmarks: {}".format(start_i, end_i, data_i))
-                    
+                    data_sizes = write_batch_to_h5(splits, h5_file, data_sizes, new_data, new_labels)
+        else:
+            # fill in counts of each data slice
+            data_i = {}
+            with h5py.File(h5_path, "r") as f:
+                for bin_i in range(nb_slices):
+                    try:
+                        data_i[bin_i] = f['data_' + str(bin_i)].shape[0]
+                    except KeyError:
+                        pass
+                
         # now to return iterators over the HDF5 datasets for each slice
         # these can, in turn, be batched with batch_data (auughhh)
         data_iterators = []
@@ -252,7 +276,51 @@ def split_data(batch_iterator,
         
                
                 
-            
+if __name__=="__main__":
+    # some demo code
+    import imdb
+    import amazon_reviews
+    import batch_data
+    import data_utils
+
+    # get training and testing sets, and their sizes for amazon.
+    # this HDF5 file uses an 80/20 train/test split and lives at /data/pcallier/amazon
+    (amtr, amte), (amntr, amnte) = datasets, sizes = batch_data.split_data(
+        None, 
+        h5_path="/data/pcallier/amazon/amazon_split.hd5", 
+        overwrite_previous=False,
+        in_memory=False)
+    import sys
+
+    # batch training, testing sets
+    am_train_batch = batch_data.batch_data(amtr,
+        normalizer_fun=None,transformer_fun=None)
+    am_test_batch = batch_data.batch_data(amte,
+        normalizer_fun=None,transformer_fun=None)
+    
+    # Spit out some sample data
+    next_batch = am_train_batch.next()
+    data, label = next_batch
+    np.set_printoptions(threshold=np.nan)
+    print "Batch properties:"
+    print "Length: {}".format(len(data))
+    print "Type: {}".format(type(data))
+    print
+    print "First record of first batch:"
+    print "Type (1 level in): {}".format(type(data[0]))
+    print "Type (2 levels in): {}".format(type(data[0][0]))
+    # first index pulls the record from the 
+    print data[0][0]
+    print "Sentiment label: {}".format(label[0])
+    print "In numpy format:"
+    oh = data_utils.to_one_hot(data[0][0])
+    print np.array_str(np.argmax(oh,axis=0))
+    print "Translated back into characters:\n"
+    print data_utils.from_one_hot(oh)
+
+
+
+
             
             
             

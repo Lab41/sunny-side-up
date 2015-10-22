@@ -13,6 +13,11 @@ class BoringException(Exception):
     pass
 
 def process_amazon_json(json_line):
+    '''
+    Ingest a single JSON recor of an Amazon review. Return
+    text and rating. Raises an exception when the review has a
+    3 star rating
+    '''
     json_obj = json.loads(json_line)
         
     if json_obj['overall'] == 3.0:
@@ -57,7 +62,9 @@ def load_data(file_path='/data/amazon/reviews_Home_and_Kitchen.json.gz',
                 logger.info(e)
                 continue
 
-
+if __name__=="__main__":
+    data = amazon_reviews.load_data()
+    print data.next()
                 
 
         
