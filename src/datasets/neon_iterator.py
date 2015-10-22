@@ -26,7 +26,7 @@ import gzip
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 from neon import NervanaObject
 
@@ -73,12 +73,12 @@ class DiskDataIterator(NervanaObject):
         self.nsteps = doclength  # removing 1 for the label at the front
 
         # on device tensor for review chars and one hot
-        self.xlabels_flat = self.be.iobuf((1, self.nsteps), dtype=np.int32)
+        self.xlabels_flat = self.be.iobuf((1, self.nsteps), dtype=np.int16)
         self.xlabels = self.xlabels_flat.reshape((self.nsteps, self.be.bsz))
         self.Xbuf_flat = self.be.iobuf((self.nvocab, self.nsteps))
         self.Xbuf = self.Xbuf_flat.reshape((self.nvocab * self.nsteps, self.be.bsz))
 
-        self.ylabels = self.be.iobuf(1, dtype=np.int32)
+        self.ylabels = self.be.iobuf(1, dtype=np.int16)
         self.ybuf = self.be.iobuf(self.nlabels)
 
         # This makes upstream layers interpret each example as a 1d image
@@ -134,6 +134,7 @@ class DiskDataIterator(NervanaObject):
 
             #self.Xbuf_flat[:] = self.be.onehot(self.xlabels_flat, axis=0)
             self.Xbuf[:] = X.T.copy()
+            logger.debug(self.Xbuf.shape)
             self.ybuf[:] = self.be.onehot(self.ylabels, axis=0)
             yield (self.Xbuf, self.ybuf)
 

@@ -28,8 +28,7 @@ from src.datasets.batch_data import batch_data, split_data
 from src.datasets.data_utils import from_one_hot
 from src.datasets.neon_iterator import DiskDataIterator
 
-def get_data():
-    batch_size=32
+def get_data(batch_size):
     amz_data = batch_data(amazon.load_data("/root/data/amazon/test_amazon.json.gz"),
         batch_size=batch_size)
 
@@ -37,10 +36,12 @@ def get_data():
     (a, b), (a_size, b_size) = split_data(amz_data, in_memory=False, 
                       h5_path=h5_repo)
     logger.debug("Test iteration: {}".format(a.next()[0].shape))
+    logger.debug("Test iteration: {}".format(a.next()[0]))
+
     def a_batcher():
         (a,b),(a_size,b_size)=split_data(None, h5_path=h5_repo, overwrite_previous=False)
         return batch_data(a, normalizer_fun=lambda x: x,
-            transformer_fun=lambda x: x, flatten=False,
+            transformer_fun=lambda x: None, flatten=False,
             batch_size=batch_size)
     def b_batcher():
         (a,b),(a_size,b_size)=split_data(None, h5_path=h5_repo, overwrite_previous=False)
@@ -50,16 +51,22 @@ def get_data():
 
     return (a_batcher, b_batcher), (a_size, b_size)
 
-def lstm_model(nvocab=67, doclength=1014):
+def lstm_model(nvocab=67, hidden_size=20, embedding_dim=60):
+    init_emb = neon.initializers.Uniform(low=-0.1/embedding_dim, high=0.1/embedding_dim)
     layers = [
+        neon.layers.LookupTable(vocab_size=nvocab, embedding_dim=embedding_dim, init=init_emb),
         neon.layers.LSTM(hidden_size, neon.initializers.GlorotUniform(),
                          activation=neon.transforms.Tanh(), 
                          gate_activation=neon.transforms.Logistic(),
                          reset_cells=True),
         neon.layers.RecurrentSum(),
         neon.layers.Dropout(0.5),
-        neon.layers.Affine(2, neon.initializers.GlorotUniform())
+        neon.layers.Affine(2, neon.initializers.GlorotUniform(),
+                           bias=neon.initializers.GlorotUniform(),
+                           activation=neon.transforms.Softmax())
         ]
+    return layers
+
 def simple_model(nvocab=67,
                  doclength=1014):
     layers = [
@@ -147,25 +154,25 @@ class MyCallback(Callback):
         logger.debug("Epoch {}/Minibatch {} done".format(epoch,minibatch))
 
 def main():
-    batch_size=32
+    batch_size=64
     be = gen_backend(backend='gpu', batch_size=batch_size)
-    (train_get, test_get), (train_size, test_size) = get_data()
+    (train_get, test_get), (train_size, test_size) = get_data(batch_size)
     train_batch_beta = test_get()
     logger.debug("First record shape: {}".format(train_batch_beta.next()[0].shape))
 
-    train_iter = DiskDataIterator(train_get, ndata=train_size, batch_size=batch_size)
-    test_iter = DiskDataIterator(test_get, ndata=test_size, batch_size=batch_size)
+    train_iter = DiskDataIterator(train_get, ndata=train_size)
+    test_iter = DiskDataIterator(test_get, ndata=test_size)
     #print ''.join(from_one_hot(a.next()[0][0].reshape((-1,1014))))[::-1]
-    model = simple_model()
+    model = lstm_model()
     mlp = neon.models.Model(model)
     cost = neon.layers.GeneralizedCost(neon.transforms.CrossEntropyBinary())
     callbacks = Callbacks(mlp,train_iter,valid_set=test_iter,valid_freq=3,progress_bar=True)
     my_callback = MyCallback()
-    callbacks.add_callback(my_callback, 0)
+    # callbacks.add_callback(my_callback, 0)
     logger.debug(callbacks.callbacks)
     mlp.fit(train_iter, optimizer=neon.optimizers.RMSProp(), 
               num_epochs=10, cost=cost, callbacks=callbacks)
-    print "Misclassification error: {}".format(model.eval(test_iter, metric=neon.layers.Misclassification()))
+    print "Misclassification error: {}".format(mlp.eval(test_iter, metric=neon.transforms.Misclassification()))
 
 if __name__=="__main__":
     main()
