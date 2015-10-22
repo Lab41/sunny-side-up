@@ -2,7 +2,100 @@ import os, re, csv
 import logging
 import random
 from urllib2 import urlopen, HTTPError, URLError
+import numpy as np
+import logging
+logging.basicConfig()
+logger=logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
+class DataException(Exception):
+    pass
+
+class TextTooShortException(DataException):
+    pass
+
+def normalize(txt, vocab=None, replace_char=' ',
+                min_length=100, max_length=1014, pad_out=True, 
+                to_lower=True, reverse = True, encoding="latin1"):
+    ''' Takes a single string object and truncates it to max_length,
+    raises an exception if its length does not exceed min_length, and
+    performs case normalization if to_lower is True. Optionally
+    replaces characters not in vocab with replace_char
+
+    @Arguments:
+        txt -- a text object to be normalized
+
+        vocab -- an iterable of allowable characters; characters
+            out of vocab will be replaced with replace_char
+
+        replace_char -- replace out-of-vocab chars with this
+
+        min_length -- if len(txt) is less than this, raise
+            TextTooShortException. Set to None or 0 to disable
+
+        max_length -- txt longer than this will be truncated to
+            max_length. Set to None to disable
+        
+        pad_out -- pad out texts shorter than max_length to max_length,
+            using replace_char
+    
+        to_lower -- if True, all characters in txt wil be
+            coerced to lower case
+            
+        encoding -- if not None, encode txt using this encoding
+
+    @Returns:
+        Normalized version of txt
+
+    @Raises:
+        DataException, TextTooShortException
+    '''
+    # reject txt if too short
+    if len(txt) < min_length:
+        raise TextTooShortException("Too short: {}".format(len(txt)))
+    # truncate if too long
+    txt = txt[0:max_length]
+    # change case
+    if to_lower==True:
+        txt = txt.lower()
+    # Reverse order
+    if reverse == True:
+        txt = txt[::-1]
+    # replace chars
+    if vocab is not None:
+        txt = ''.join([c if c in vocab else replace_char for c in txt])
+    # re-encode text
+    if encoding is not None:
+        txt = txt.encode(encoding, errors="ignore")
+    # pad out if needed
+    if pad_out==True:
+        txt = replace_char * (max_length - len(txt)) + txt        
+    return txt
+
+zhang_lecun_vocab=list("abcdefghijklmnopqrstuvwxyz0123456789,;.!?:'\"/|_@#$%^&*~`+-=<>()[]{}")
+zhang_lecun_vocab_hash = {b: a for a, b in enumerate(zhang_lecun_vocab)}
+def to_one_hot(txt, vocab=zhang_lecun_vocab, vocab_hash=zhang_lecun_vocab_hash):
+    vocab_size = len(vocab)
+    one_hot_vec = np.zeros((vocab_size, len(txt)))
+    # run through txt and "switch on" relevant positions in one-hot vector
+    for idx, char in enumerate(txt):
+        try:
+            vocab_idx = vocab_hash[char]
+            one_hot_vec[vocab_idx, idx] = 1
+        # raised if character is out of vocabulary
+        except KeyError:
+            pass
+    return one_hot_vec
+
+def from_one_hot(oh, vocab=zhang_lecun_vocab):
+    vocab_hash = { a: b for a, b in enumerate(vocab) }
+    txt = []
+    for col_i in range(oh.shape[1]):
+        if oh[:,col_i].sum() > 0:
+            txt.append(vocab_hash[oh[:, col_i].argmax()])
+        else:
+            txt.append(" ")
+    return txt
 
 def latin_csv_reader(csv_data, dialect=csv.excel, **kwargs):
     ''' Function that takes an opened CSV file with
@@ -29,30 +122,35 @@ def latin_csv_reader(csv_data, dialect=csv.excel, **kwargs):
         yield [unicode(cell, 'latin-1') for cell in row]
 
 
-def get_file(url, file_path=os.path.dirname(os.path.abspath(__file__))):
+def get_file(url, dest_path="./downloads"):
     ''' Takes in a file url from the web and dowloads that file to
-    to a local directory called {file_path}/.downloads
+    to a directory given in dest_path
 
     @Arguments:
         url -- the url of the chosen dataset
         file_path -- the directory in which the hidden downloads folder 
             is created. (defaults to pwd)
 
+        dest_path -- the destination path
+
     @Raises:
         HTTPError, URLError
     '''
     try:
         # Prevents redownloading
-        downloads_path = os.path.join(file_path, './.downloads')
-        fname = os.path.join(file_path, '.downloads', url.split('/')[-1])
-        if '.downloads' in os.listdir(file_path):
-            if url.split('/')[-1] in os.listdir(downloads_path):
-                logging.info("File has already been dowloaded")
-                return fname
+        #file_path = os.path.dirname(os.path.abspath(__file__))
+        #downloads_path = os.path.join(file_path, './.downloads')
+        fname = os.path.join(dest_path, url.split('/')[-1])
+        #if '.downloads' in os.listdir(file_path):
+        #    if url.split('/')[-1] in os.listdir(downloads_path):
+        #        logging.info("File has already been dowloaded")
+        #        return fname
+        if os.path.exists(fname):
+            return fname
 
         # Create hidden folder to hold zip file
-        if not os.path.exists(downloads_path):
-            os.mkdir(downloads_path)
+        if not os.path.exists(dest_path):
+            os.mkdir(dest_path)
 
         response = urlopen(url)
 
