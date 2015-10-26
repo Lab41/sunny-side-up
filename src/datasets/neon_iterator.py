@@ -26,7 +26,7 @@ import gzip
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 
 from neon import NervanaObject
 
@@ -42,7 +42,7 @@ from data_utils import from_one_hot
 
 class DiskDataIterator(NervanaObject):
 
-    def __init__(self, batch_gen_fun, ndata, doclength=1014, nvocab=67, nlabels=2):
+    def __init__(self, batch_gen_fun, ndata, doclength, nvocab, nlabels=2):
         """
         Implements loading of given data into backend tensor objects. If the
         backend is specific to an accelarator device, the data is copied over
@@ -53,7 +53,7 @@ class DiskDataIterator(NervanaObject):
                 batches (tuples of numpy arrays)
             ndata (int): The number of records in the given data
             nlabels (int, optional): The number of possible types of labels. 2 for binary good/bad
-            nvocab  (int, optional): Tne number of letter tokens
+            nvocab  (int, optional): The number of letter tokens
                 (not necessary if not providing labels)
         """
         # Treat singletons like list so that iteration follows same syntax
