@@ -60,6 +60,7 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=data_utils.normalize,
     if transformer_fun is None:
         transformer_fun = lambda x: np.array(x)
     if normalizer_fun is None:
+        logger.debug("Default normalization")
         normalizer_fun = lambda x: x
 
     # loop over data, applying transforming fns,
@@ -68,6 +69,7 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=data_utils.normalize,
     for doc_text, label in data_loader:
         # transformation and normalization
         try:
+            logger.debug("Normalization........")
             doc_text = normalizer_fun(doc_text)
             # transform document into a numpy array
             transformed_doc = transformer_fun(doc_text)
@@ -139,18 +141,20 @@ def write_batch_to_h5(splits, h5_file, data_sizes, new_data, new_labels):
                 the probability of landing in the last bin
             h5_file -- an h5py File object, representing an HDF5
                 file open for writing
-            data_sizes -- a list or dictionary with an integer key for
+            data_sizes -- a list of length len(splits) + 1 for
                 each bin of data. Values are the counts of data in each bin
             new_data -- a numpy array with a new minibatch
             new_labels -- a numpy array with a new set of labels
     """
     # check that data and labels are the same size
     assert new_data.shape[0] == new_labels.shape[0]
+    # make a copy of data_sizes
+    data_sizes = data_sizes[:]
     # pick which bin to assign data to
     bin_id = pick_splits(splits)
     bin_name = str(bin_id)
     # get slice indexes
-    start_i = data_sizes.get(bin_id, 0)
+    start_i = data_sizes[bin_id]
     end_i = start_i + new_data.shape[0]
     # resize HDF5 datasets
     h5_file["data_" + bin_name].resize(end_i, 0)
@@ -283,7 +287,8 @@ if __name__=="__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('h5_path', help="Path to pre-split HDF5 file", 
-                        default="/data/pcallier/amazon/amazon_split.hd5")
+                        default="/data/pcallier/amazon/amazon_split.hd5",
+                        nargs='?')
     args = parser.parse_args()
 
     # get training and testing sets, and their sizes for amazon.
@@ -297,7 +302,10 @@ if __name__=="__main__":
 
     # batch training, testing sets
     am_train_batch = batch_data.batch_data(amtr,
-        normalizer_fun=None,transformer_fun=None)
+        normalizer_fun=lambda x: data_utils.normalize(x[0], 
+            max_length=300, 
+            truncate_left=True),
+        transformer_fun=None)
     am_test_batch = batch_data.batch_data(amte,
         normalizer_fun=None,transformer_fun=None)
     
