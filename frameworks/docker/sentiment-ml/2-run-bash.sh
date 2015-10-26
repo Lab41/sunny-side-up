@@ -9,5 +9,7 @@ __volume_cntr=/data
 
 # run image
 docker run -it \
+           --env="DISPLAY=$DISPLAY" \
+           --volume=/tmp/.X11-unix:/tmp/.X11-unix \
            --volume=$__volume_host:$__volume_cntr \
             $__image bash
