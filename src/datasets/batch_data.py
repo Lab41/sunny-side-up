@@ -180,7 +180,8 @@ def split_data(batch_iterator,
                rng_seed=None,
                in_memory=False,
                h5_path='/data/amazon/data.hd5',
-               overwrite_previous=False):
+               overwrite_previous=False,
+               shuffle=False):
     ''' Splits data into slices and returns a list of
         iterators over each slice. Slice size is configurable.
         Probabilistic, so may not produce exactly the expected bin sizes, 
@@ -203,6 +204,7 @@ def split_data(batch_iterator,
             h5_path -- path to HDF5 file. Only used if in_memory is False
             overwrite_previous -- if h5_path is already a readable file,
                 overwrite it?
+            shuffle -- should the iterators return records in shuffled order?
             
         @Returns
             A 2-tuple:
@@ -281,7 +283,10 @@ def split_data(batch_iterator,
         # these can, in turn, be batched with batch_data (auughhh)
         data_iterators = []
         for bin_i in range(nb_slices):
-            data_iterators.append((H5Iterator(h5_path, "data_" + str(bin_i), "labels_" + str(bin_i))))
+            data_iterators.append((H5Iterator(h5_path, 
+                "data_" + str(bin_i), 
+                "labels_" + str(bin_i),
+                shuffle=shuffle)))
         return data_iterators, bin_sizes
         
                
