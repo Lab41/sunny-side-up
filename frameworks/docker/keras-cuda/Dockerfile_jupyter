@@ -4,7 +4,7 @@ MAINTAINER Kyle F <kylef@lab41.org>
 
 
 # install jupyter
-RUN pip install jupyter
+RUN pip install jupyter psutil
 RUN cd /tmp && \
     git clone https://github.com/ipython-contrib/IPython-notebook-extensions.git && \
     cd IPython-notebook-extensions && \
