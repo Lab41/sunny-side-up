@@ -12,4 +12,15 @@ train-wiki:
 
 all-wiki: get-wiki process-wiki train-wiki
 
-.PHONY: all get-wiki process-wiki train-wiki
+glove-get-analogies:
+  wget --output-document=./data/questions-words.txt https://word2vec.googlecode.com/svn/trunk/questions-words.txt
+
+glove-build-stanford:
+  python data/models-load-stanford.py -o /data/src/glove/data
+
+glove-evaluate-analogies:
+  python -m examples/analogy_tasks_evaluation -t ./data/questions-words.txt -m glove.6B.50d.obj
+
+all-analogies: glove-get-analogies glove-build-stanford glove-evaluate-analogies
+
+.PHONY: all get-wiki process-wiki train-wiki glove-get-analogies glove-build-stanford glove-evaluate-analogies
