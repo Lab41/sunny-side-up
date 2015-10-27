@@ -56,7 +56,7 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=data_utils.normalize,
 
     logger.debug(data_loader)
 
-    # set (near) identity functions for transformation functions set to None
+    # set (near) identity functions for transformation functions when None
     if transformer_fun is None:
         transformer_fun = lambda x: np.array(x)
     if normalizer_fun is None:
@@ -176,11 +176,11 @@ def write_batch_to_h5(splits, h5_file, data_sizes, new_data, new_labels):
     return data_sizes
 
 def split_data(batch_iterator,
+               h5_path,
                splits = [0.8],
                rng_seed=None,
-               in_memory=False,
-               h5_path='/data/amazon/data.hd5',
-               overwrite_previous=False):
+               overwrite_previous=False,
+               shuffle=False):
     ''' Splits data into slices and returns a list of
         iterators over each slice. Slice size is configurable.
         Probabilistic, so may not produce exactly the expected bin sizes, 
@@ -193,16 +193,15 @@ def split_data(batch_iterator,
                 This can be none if in_memory is False, h5_path is valid, and
                 overwrite_previous=False (uses existing data, does not re-shuffle 
                 or rearrange).
+            h5_path -- path to HDF5 file
             splits --
                 list of floats indicating how to split the data. The data will
                 be split into len(splits) + 1 slices, with the final slice 
                 having 1-sum(splits) of the data.
             rng_seed -- random number generator seed
-            in_memory --
-                load data into memory (True) or use HDF5?
-            h5_path -- path to HDF5 file. Only used if in_memory is False
             overwrite_previous -- if h5_path is already a readable file,
                 overwrite it?
+            shuffle -- should the iterators return records in shuffled order?
             
         @Returns
             A 2-tuple:
@@ -217,72 +216,51 @@ def split_data(batch_iterator,
     nb_slices = len(splits) + 1
     np.random.seed(rng_seed)
     bin_sizes = [0]*nb_slices
-    if in_memory:
-        data_bins = None
-        for data, labels in batch_iterator:
-            bin_i = pick_splits(splits)
-            if data_bins == None:
-                data_bins = [ (np.ndarray(((0,) + data.shape[1:])), 
-                              np.ndarray(((0,) + labels.shape[1:]))) 
-                              for a in range(nb_slices) ]
-            # store batch in the proper bin, creating numpy arrays
-            # for data and labels if needed
-            accumulated_data = data_bins[bin_i][0]
-            accumulated_labels = data_bins[bin_i][1]
-            data_bins[bin_i] = (np.concatenate(
-                                (accumulated_data, data)),
-                               np.concatenate(
-                                (accumulated_labels, labels)))
-            # update running tally of data count per bin
-            bin_sizes[bin_i] += data.shape[0]
-        # return iterators over each bin rather than a list of tuples of np arrays
-        # (used to be optional)
-        for bin_i in range(nb_slices):
-            bin_data, bin_labels = data_bins[bin_i]
-            data_bins[bin_i] = iter(zip(bin_data, bin_labels))
-        return data_bins, bin_sizes
-                    
-    else:
-        # Check for HDF5 file already on disk
-        if overwrite_previous or not os.path.isfile(h5_path):
-            with h5py.File(h5_path, "w") as  h5_file:
-            
-                # get one batch to diagnose dimensions and dtypes
-                first_data, first_labels = batch_iterator.next()
 
-                # create one dataset for each slice
-                bin_names = [str(bin_i) for bin_i in range(nb_slices)]
-                for bin_name in bin_names:
-                    h5_file.create_dataset(name="data_" + bin_name,
-                                       shape=first_data.shape,
-                                       maxshape=(None,) +  first_data.shape[1:],
-                                       dtype=first_data.dtype)
-                    h5_file.create_dataset(name="labels_" + bin_name,
-                                       shape=first_labels.shape,
-                                       maxshape=(None,) +  first_labels.shape[1:],
-                                       dtype=first_labels.dtype)
-                # loop batches into dataset
-                # write first batch in
-                #data_sizes = {}
-                bin_sizes = write_batch_to_h5(splits,h5_file,bin_sizes,first_data,first_labels)
-                # then do rest
-                for new_data, new_labels in batch_iterator:
-                    bin_sizes = write_batch_to_h5(splits, h5_file, bin_sizes, new_data, new_labels)
-        else:
-            # fill in counts of each data slice
-            with h5py.File(h5_path, "r") as f:
-                for bin_i in range(nb_slices):
-                    try:
-                        bin_sizes[bin_i] = f['data_' + str(bin_i)].shape[0]
-                    except KeyError:
-                        pass
-                
-        # now to return iterators over the HDF5 datasets for each slice
-        # these can, in turn, be batched with batch_data (auughhh)
-        data_iterators = []
-        for bin_i in range(nb_slices):
-            data_iterators.append((H5Iterator(h5_path, "data_" + str(bin_i), "labels_" + str(bin_i))))
-        return data_iterators, bin_sizes
+                    
+    # Check for HDF5 file already on disk
+    if overwrite_previous or not os.path.isfile(h5_path):
+        with h5py.File(h5_path, "w") as  h5_file:
+        
+            # get one batch to diagnose dimensions and dtypes
+            first_data, first_labels = batch_iterator.next()
+
+            # create one dataset for each slice
+            bin_names = [str(bin_i) for bin_i in range(nb_slices)]
+            for bin_name in bin_names:
+                h5_file.create_dataset(name="data_" + bin_name,
+                                   shape=first_data.shape,
+                                   maxshape=(None,) +  first_data.shape[1:],
+                                   dtype=first_data.dtype)
+                h5_file.create_dataset(name="labels_" + bin_name,
+                                   shape=first_labels.shape,
+                                   maxshape=(None,) +  first_labels.shape[1:],
+                                   dtype=first_labels.dtype)
+            # loop batches into dataset
+            # write first batch in
+            #data_sizes = {}
+            bin_sizes = write_batch_to_h5(splits,h5_file,bin_sizes,first_data,first_labels)
+            # then do rest
+            for new_data, new_labels in batch_iterator:
+                bin_sizes = write_batch_to_h5(splits, h5_file, bin_sizes, new_data, new_labels)
+    else:
+        # fill in counts of each data slice
+        with h5py.File(h5_path, "r") as f:
+            for bin_i in range(nb_slices):
+                try:
+                    bin_sizes[bin_i] = f['data_' + str(bin_i)].shape[0]
+                except KeyError:
+                    pass
+            
+    # now to return iterators over the HDF5 datasets for each slice
+    # these can, in turn, be batched with batch_data (auughhh)
+    data_iterators = []
+    for bin_i in range(nb_slices):
+        data_iterators.append((H5Iterator(h5_path,
+            "data_" + str(bin_i),
+            "labels_" + str(bin_i),
+            shuffle=shuffle)))
+    return data_iterators, bin_sizes
         
                
                 
