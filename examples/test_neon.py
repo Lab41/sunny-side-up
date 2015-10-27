@@ -49,7 +49,10 @@ def get_data(batch_size, doclength=300):
     # TODO: create proper iterator classes and use those
     # these functions are returend, alongside the batch sizes
     def a_batcher():
-        (a,b),(a_size,b_size)=split_data(None, h5_path=h5_repo, overwrite_previous=False)
+        (a,b),(a_size,b_size)=split_data(None, 
+            h5_path=h5_repo, 
+            overwrite_previous=False, 
+            shuffle=True)
         return batch_data(a, 
             normalizer_fun=lambda x: x,
             transformer_fun=lambda x: data_utils.to_one_hot(x[0]), 
@@ -102,38 +105,38 @@ def simple_model(nvocab=67,
     ]
     return layers
 
-def crepe_model(nvocab=67, nframes=256):
+def crepe_model(nvocab=67, nframes=256, batch_norm=True):
     init_gaussian = neon.initializers.Gaussian(0, 0.05)
     layers = [
         neon.layers.Conv((nvocab, 7, nframes), 
-            batch_norm=False,
+            batch_norm=batch_norm,
             init=init_gaussian,
             activation=neon.transforms.Rectlin()),
         neon.layers.Pooling((1, 3)),
 
         neon.layers.Conv((1, 7, nframes), 
-            batch_norm=False,
+            batch_norm=batch_norm,
             init=init_gaussian,
             activation=neon.transforms.Rectlin()),
         neon.layers.Pooling((1, 3)),
 
         neon.layers.Conv((1, 3, nframes),
-            batch_norm=False,
+            batch_norm=batch_norm,
             init=init_gaussian,
             activation=neon.transforms.Rectlin()),
         
         neon.layers.Conv((1, 3, nframes),
-            batch_norm=False,
+            batch_norm=batch_norm,
             init=init_gaussian,
             activation=neon.transforms.Rectlin()),
             
         neon.layers.Conv((1, 3, nframes), 
-            batch_norm=False,
+            batch_norm=batch_norm,
             init=init_gaussian,
             activation=neon.transforms.Rectlin()),
 
         neon.layers.Conv((1, 3, nframes), 
-            batch_norm=False,
+            batch_norm=batch_norm,
             init=init_gaussian,
             activation=neon.transforms.Rectlin()),
         neon.layers.Pooling((1, 3)),
@@ -184,7 +187,7 @@ def main():
     gpu_id=0
     nframes=256
 
-    model_state_path="/data/pcallier/amazon/neon_crepe_model.hd5"
+    model_state_path="/root/data/pcallier/amazon/neon_crepe_model.hd5"
     logger.info("Getting backend...")
     be = gen_backend(backend='gpu', batch_size=batch_size, device_id=0)
     logger.info("Getting data...")
@@ -204,7 +207,7 @@ def main():
     cost = neon.layers.GeneralizedCost(neon.transforms.CrossEntropyBinary())
     callbacks = Callbacks(mlp,train_iter,valid_set=test_iter,valid_freq=3,progress_bar=True)
     callbacks.add_save_best_state_callback(model_state_path)
-    callbacks.add_validation_callback(test_iter, 2)
+    #callbacks.add_validation_callback(test_iter, 2)
     optimizer = neon.optimizers.GradientDescentMomentum(
         learning_rate=0.01,
         momentum_coef=0.9,
@@ -215,7 +218,7 @@ def main():
     logger.info("Doing training...")
     mlp.fit(train_iter, optimizer=optimizer, 
               num_epochs=10, cost=cost, callbacks=callbacks)
-    print "Misclassification error: {}".format(mlp.eval(test_iter, metric=neon.transforms.Misclassification()))
+    logger.info("Misclassification error: {}".format(mlp.eval(test_iter, metric=neon.transforms.Misclassification())))
 
 if __name__=="__main__":
     main()
