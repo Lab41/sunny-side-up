@@ -1,0 +1,458 @@
+<QuestionForm xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2005-10-01/QuestionForm.xsd">
+  <Overview>
+    <Title>لإحساس العام</Title>
+    <Text>After taking this qualification test, you may be redirected away from our HIT. If this occurs, please search "Arabic Tweet Sentiment Rater" to take our survey.</Text>
+    <FormattedContent><![CDATA[
+    <!-- Overall instructions -->
+    <h4 align="right">
+      <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/InstructionsHeadingOverall.png" />
+    </h4>
+    <p align="right">
+      <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/InstructionsOverall.png" />
+    </p>
+
+    <!-- Objective or Neutral Sentiment -->
+    <h4 align="right">
+      <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/InstructionsHeading1.png" />
+    </h4>
+    <p align="right">
+      <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/InstructionsSection1.png" />
+    </p>
+
+    <!-- Positive tweets -->
+    <h4 align="right">
+      <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/InstructionsHeading2.png" />
+    </h4>
+    <p align="right">
+      <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/InstructionsSection2.png" />
+    </p>
+
+    <!-- Negative Tweets -->
+    <h4 align="right">
+      <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/InstructionsHeading3.png" />
+    </h4>
+    <p align="right">
+      <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/InstructionsSection3.png" />
+    </p>
+
+    <!-- Mixed Sentiment -->
+    <h4 align="right">
+        <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/InstructionsHeading4.png" />
+    </h4>
+    <p align="right">
+      <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/InstructionsSection4.png" />
+    </p>
+
+    <!-- Unclear sentiment -->
+    <h4 align="right">
+      <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/InstructionsHeading5.png" />
+    </h4>
+    <p align="right">
+      <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/InstructionsSection5.png" />
+    </p>
+    <!-- End Instructions --><!-- Survey Body -->
+    ]]></FormattedContent>
+  </Overview>
+
+
+  <Question>
+    <QuestionIdentifier>tweet1</QuestionIdentifier>
+    <DisplayName>لإحساس العام</DisplayName>
+    <IsRequired>true</IsRequired>
+    <QuestionContent>
+      <FormattedContent><![CDATA[
+        <p align="right">
+          <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/PositiveTweet2.png" />
+        </p>
+      ]]></FormattedContent>
+    </QuestionContent>
+    <AnswerSpecification>
+      <SelectionAnswer>
+        <StyleSuggestion>dropdown</StyleSuggestion>
+        <Selections>
+          <Selection>
+            <SelectionIdentifier>neutralSentiment</SelectionIdentifier>
+            <Text>احساس عام موضوعي او محايد</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>positiveSentiment</SelectionIdentifier>
+            <Text>احساس عام إيجابي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>negativeSentiment</SelectionIdentifier>
+            <Text>احساس عام سلبي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>mixedSentiment</SelectionIdentifier>
+            <Text>احساس عام مزدوج</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>unclearSentiment</SelectionIdentifier>
+            <Text>احساس عام غير واضح</Text>
+          </Selection>
+        </Selections>
+      </SelectionAnswer>
+    </AnswerSpecification>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet2</QuestionIdentifier>
+    <DisplayName>لإحساس العام</DisplayName>
+    <IsRequired>true</IsRequired>
+    <QuestionContent>
+      <FormattedContent><![CDATA[
+        <p align="right">
+          <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/MixedTweet2.png" />
+        </p>
+      ]]></FormattedContent>
+    </QuestionContent>
+    <AnswerSpecification>
+      <SelectionAnswer>
+        <StyleSuggestion>dropdown</StyleSuggestion>
+        <Selections>
+          <Selection>
+            <SelectionIdentifier>neutralSentiment</SelectionIdentifier>
+            <Text>احساس عام موضوعي او محايد</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>positiveSentiment</SelectionIdentifier>
+            <Text>احساس عام إيجابي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>negativeSentiment</SelectionIdentifier>
+            <Text>احساس عام سلبي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>mixedSentiment</SelectionIdentifier>
+            <Text>احساس عام مزدوج</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>unclearSentiment</SelectionIdentifier>
+            <Text>احساس عام غير واضح</Text>
+          </Selection>
+        </Selections>
+      </SelectionAnswer>
+    </AnswerSpecification>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet3</QuestionIdentifier>
+    <DisplayName>لإحساس العام</DisplayName>
+    <IsRequired>true</IsRequired>
+    <QuestionContent>
+      <FormattedContent><![CDATA[
+        <p align="right">
+          <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/NeutralTweet1.png" />
+        </p>
+      ]]></FormattedContent>
+    </QuestionContent>
+    <AnswerSpecification>
+      <SelectionAnswer>
+        <StyleSuggestion>dropdown</StyleSuggestion>
+        <Selections>
+          <Selection>
+            <SelectionIdentifier>neutralSentiment</SelectionIdentifier>
+            <Text>احساس عام موضوعي او محايد</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>positiveSentiment</SelectionIdentifier>
+            <Text>احساس عام إيجابي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>negativeSentiment</SelectionIdentifier>
+            <Text>احساس عام سلبي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>mixedSentiment</SelectionIdentifier>
+            <Text>احساس عام مزدوج</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>unclearSentiment</SelectionIdentifier>
+            <Text>احساس عام غير واضح</Text>
+          </Selection>
+        </Selections>
+      </SelectionAnswer>
+    </AnswerSpecification>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet4</QuestionIdentifier>
+    <DisplayName>لإحساس العام</DisplayName>
+    <IsRequired>true</IsRequired>
+    <QuestionContent>
+      <FormattedContent><![CDATA[
+        <p align="right">
+          <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/UnclearTweet1.png" />
+        </p>
+      ]]></FormattedContent>
+    </QuestionContent>
+    <AnswerSpecification>
+      <SelectionAnswer>
+        <StyleSuggestion>dropdown</StyleSuggestion>
+        <Selections>
+          <Selection>
+            <SelectionIdentifier>neutralSentiment</SelectionIdentifier>
+            <Text>احساس عام موضوعي او محايد</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>positiveSentiment</SelectionIdentifier>
+            <Text>احساس عام إيجابي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>negativeSentiment</SelectionIdentifier>
+            <Text>احساس عام سلبي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>mixedSentiment</SelectionIdentifier>
+            <Text>احساس عام مزدوج</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>unclearSentiment</SelectionIdentifier>
+            <Text>احساس عام غير واضح</Text>
+          </Selection>
+        </Selections>
+      </SelectionAnswer>
+    </AnswerSpecification>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet5</QuestionIdentifier>
+    <DisplayName>لإحساس العام</DisplayName>
+    <IsRequired>true</IsRequired>
+    <QuestionContent>
+      <FormattedContent><![CDATA[
+        <p align="right">
+          <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/MixedTweet1.png" />
+        </p>
+      ]]></FormattedContent>
+    </QuestionContent>
+    <AnswerSpecification>
+      <SelectionAnswer>
+        <StyleSuggestion>dropdown</StyleSuggestion>
+        <Selections>
+          <Selection>
+            <SelectionIdentifier>neutralSentiment</SelectionIdentifier>
+            <Text>احساس عام موضوعي او محايد</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>positiveSentiment</SelectionIdentifier>
+            <Text>احساس عام إيجابي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>negativeSentiment</SelectionIdentifier>
+            <Text>احساس عام سلبي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>mixedSentiment</SelectionIdentifier>
+            <Text>احساس عام مزدوج</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>unclearSentiment</SelectionIdentifier>
+            <Text>احساس عام غير واضح</Text>
+          </Selection>
+        </Selections>
+      </SelectionAnswer>
+    </AnswerSpecification>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet6</QuestionIdentifier>
+    <DisplayName>لإحساس العام</DisplayName>
+    <IsRequired>true</IsRequired>
+    <QuestionContent>
+      <FormattedContent><![CDATA[
+        <p align="right">
+          <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/UnclearTweet2.png" />
+        </p>
+      ]]></FormattedContent>
+    </QuestionContent>
+    <AnswerSpecification>
+      <SelectionAnswer>
+        <StyleSuggestion>dropdown</StyleSuggestion>
+        <Selections>
+          <Selection>
+            <SelectionIdentifier>neutralSentiment</SelectionIdentifier>
+            <Text>احساس عام موضوعي او محايد</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>positiveSentiment</SelectionIdentifier>
+            <Text>احساس عام إيجابي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>negativeSentiment</SelectionIdentifier>
+            <Text>احساس عام سلبي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>mixedSentiment</SelectionIdentifier>
+            <Text>احساس عام مزدوج</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>unclearSentiment</SelectionIdentifier>
+            <Text>احساس عام غير واضح</Text>
+          </Selection>
+        </Selections>
+      </SelectionAnswer>
+    </AnswerSpecification>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet7</QuestionIdentifier>
+    <DisplayName>لإحساس العام</DisplayName>
+    <IsRequired>true</IsRequired>
+    <QuestionContent>
+      <FormattedContent><![CDATA[
+        <p align="right">
+          <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/NegativeTweet1.png" />
+        </p>
+      ]]></FormattedContent>
+    </QuestionContent>
+    <AnswerSpecification>
+      <SelectionAnswer>
+        <StyleSuggestion>dropdown</StyleSuggestion>
+        <Selections>
+          <Selection>
+            <SelectionIdentifier>neutralSentiment</SelectionIdentifier>
+            <Text>احساس عام موضوعي او محايد</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>positiveSentiment</SelectionIdentifier>
+            <Text>احساس عام إيجابي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>negativeSentiment</SelectionIdentifier>
+            <Text>احساس عام سلبي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>mixedSentiment</SelectionIdentifier>
+            <Text>احساس عام مزدوج</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>unclearSentiment</SelectionIdentifier>
+            <Text>احساس عام غير واضح</Text>
+          </Selection>
+        </Selections>
+      </SelectionAnswer>
+    </AnswerSpecification>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet8</QuestionIdentifier>
+    <DisplayName>لإحساس العام</DisplayName>
+    <IsRequired>true</IsRequired>
+    <QuestionContent>
+      <FormattedContent><![CDATA[
+        <p align="right">
+          <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/NegativeTweet2.png" />
+        </p>
+      ]]></FormattedContent>
+    </QuestionContent>
+    <AnswerSpecification>
+      <SelectionAnswer>
+        <StyleSuggestion>dropdown</StyleSuggestion>
+        <Selections>
+          <Selection>
+            <SelectionIdentifier>neutralSentiment</SelectionIdentifier>
+            <Text>احساس عام موضوعي او محايد</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>positiveSentiment</SelectionIdentifier>
+            <Text>احساس عام إيجابي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>negativeSentiment</SelectionIdentifier>
+            <Text>احساس عام سلبي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>mixedSentiment</SelectionIdentifier>
+            <Text>احساس عام مزدوج</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>unclearSentiment</SelectionIdentifier>
+            <Text>احساس عام غير واضح</Text>
+          </Selection>
+        </Selections>
+      </SelectionAnswer>
+    </AnswerSpecification>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet9</QuestionIdentifier>
+    <DisplayName>لإحساس العام</DisplayName>
+    <IsRequired>true</IsRequired>
+    <QuestionContent>
+      <FormattedContent><![CDATA[
+        <p align="right">
+          <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/PositiveTweet2.png" />
+        </p>
+      ]]></FormattedContent>
+    </QuestionContent>
+    <AnswerSpecification>
+      <SelectionAnswer>
+        <StyleSuggestion>dropdown</StyleSuggestion>
+        <Selections>
+          <Selection>
+            <SelectionIdentifier>neutralSentiment</SelectionIdentifier>
+            <Text>احساس عام موضوعي او محايد</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>positiveSentiment</SelectionIdentifier>
+            <Text>احساس عام إيجابي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>negativeSentiment</SelectionIdentifier>
+            <Text>احساس عام سلبي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>mixedSentiment</SelectionIdentifier>
+            <Text>احساس عام مزدوج</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>unclearSentiment</SelectionIdentifier>
+            <Text>احساس عام غير واضح</Text>
+          </Selection>
+        </Selections>
+      </SelectionAnswer>
+    </AnswerSpecification>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet10</QuestionIdentifier>
+    <DisplayName>لإحساس العام</DisplayName>
+    <IsRequired>true</IsRequired>
+    <QuestionContent>
+      <FormattedContent><![CDATA[
+        <p align="right">
+          <img alt="Overview" src="http://res.cloudinary.com/lab41/image/upload/NeutralTweet2.png" />
+        </p>
+      ]]></FormattedContent>
+    </QuestionContent>
+    <AnswerSpecification>
+      <SelectionAnswer>
+        <StyleSuggestion>dropdown</StyleSuggestion>
+        <Selections>
+          <Selection>
+            <SelectionIdentifier>neutralSentiment</SelectionIdentifier>
+            <Text>احساس عام موضوعي او محايد</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>positiveSentiment</SelectionIdentifier>
+            <Text>احساس عام إيجابي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>negativeSentiment</SelectionIdentifier>
+            <Text>احساس عام سلبي</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>mixedSentiment</SelectionIdentifier>
+            <Text>احساس عام مزدوج</Text>
+          </Selection>
+          <Selection>
+            <SelectionIdentifier>unclearSentiment</SelectionIdentifier>
+            <Text>احساس عام غير واضح</Text>
+          </Selection>
+        </Selections>
+      </SelectionAnswer>
+    </AnswerSpecification>
+  </Question>
+
+</QuestionForm>

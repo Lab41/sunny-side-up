@@ -2,24 +2,10 @@
 
 # image name
 __image=lab41/keras-cuda-jupyter
-
-# data volume
 __volume_host=/data
 __volume_cntr=/data
-
-# source code
-__volume_host_src=$__volume_host/sunny-side-up/src/notebooks
-__volume_host_dst=$__volume_host/ipython-notebooks
-
-# server port
 __port_host=80
 __port_cntr=8888
-
-
-# ensure notebook links exist
-if [ ! -h $__volume_host_dst ]; then
-  sudo ln -s $__volume_host_src $__volume_host_dst
-fi
 
 # run image
 docker run -d \

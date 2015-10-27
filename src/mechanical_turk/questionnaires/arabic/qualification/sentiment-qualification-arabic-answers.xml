@@ -1,0 +1,88 @@
+<AnswerKey xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2005-10-01/AnswerKey.xsd">
+
+  <Question>
+    <QuestionIdentifier>tweet1</QuestionIdentifier>
+    <AnswerOption>
+      <SelectionIdentifier>positiveSentiment</SelectionIdentifier>
+      <AnswerScore>1</AnswerScore>
+    </AnswerOption>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet2</QuestionIdentifier>
+    <AnswerOption>
+      <SelectionIdentifier>mixedSentiment</SelectionIdentifier>
+      <AnswerScore>1</AnswerScore>
+    </AnswerOption>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet3</QuestionIdentifier>
+    <AnswerOption>
+      <SelectionIdentifier>neutralSentiment</SelectionIdentifier>
+      <AnswerScore>1</AnswerScore>
+    </AnswerOption>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet4</QuestionIdentifier>
+    <AnswerOption>
+      <SelectionIdentifier>unclearSentiment</SelectionIdentifier>
+      <AnswerScore>1</AnswerScore>
+    </AnswerOption>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet5</QuestionIdentifier>
+    <AnswerOption>
+      <SelectionIdentifier>mixedSentiment</SelectionIdentifier>
+      <AnswerScore>1</AnswerScore>
+    </AnswerOption>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet6</QuestionIdentifier>
+    <AnswerOption>
+      <SelectionIdentifier>unclearSentiment</SelectionIdentifier>
+      <AnswerScore>1</AnswerScore>
+    </AnswerOption>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet7</QuestionIdentifier>
+    <AnswerOption>
+      <SelectionIdentifier>negativeSentiment</SelectionIdentifier>
+      <AnswerScore>1</AnswerScore>
+    </AnswerOption>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet8</QuestionIdentifier>
+    <AnswerOption>
+      <SelectionIdentifier>negativeSentiment</SelectionIdentifier>
+      <AnswerScore>1</AnswerScore>
+    </AnswerOption>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet9</QuestionIdentifier>
+    <AnswerOption>
+      <SelectionIdentifier>positiveSentiment</SelectionIdentifier>
+      <AnswerScore>1</AnswerScore>
+    </AnswerOption>
+  </Question>
+
+  <Question>
+    <QuestionIdentifier>tweet10</QuestionIdentifier>
+    <AnswerOption>
+      <SelectionIdentifier>neutralSentiment</SelectionIdentifier>
+      <AnswerScore>1</AnswerScore>
+    </AnswerOption>
+  </Question>
+
+  <QualificationValueMapping>
+    <PercentageMapping>
+      <MaximumSummedScore>10</MaximumSummedScore>
+    </PercentageMapping>
+  </QualificationValueMapping>
+</AnswerKey>
