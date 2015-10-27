@@ -188,6 +188,7 @@ def main():
     nframes=256
 
     model_state_path="/root/data/pcallier/amazon/neon_crepe_model.hd5"
+    model_weights_history_path="/root/data/pcallier/amazon/neon_crepe_weights.hd5"
     logger.info("Getting backend...")
     be = gen_backend(backend='gpu', batch_size=batch_size, device_id=0)
     logger.info("Getting data...")
@@ -204,9 +205,17 @@ def main():
     logger.info("Building model...")
     model_layers = crepe_model(nframes=nframes)
     mlp = neon.models.Model(model_layers)
+
+    # try to load a model from a saved location
+    try:
+        model_weights_path = "/root/data/pcallier/amazon/neon_crepe_model_1027_1.hd5"
+        mlp.load_weights(model_weights_path)
+    except IOError as e:
+        logger.exception("Model weights file not found.")
     cost = neon.layers.GeneralizedCost(neon.transforms.CrossEntropyBinary())
     callbacks = Callbacks(mlp,train_iter,valid_set=test_iter,valid_freq=3,progress_bar=True)
     callbacks.add_save_best_state_callback(model_state_path)
+    callbacks.add_serialize_callback(1, model_weights_history_path,history=5)
     #callbacks.add_validation_callback(test_iter, 2)
     optimizer = neon.optimizers.GradientDescentMomentum(
         learning_rate=0.01,
