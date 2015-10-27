@@ -43,10 +43,10 @@ if __name__ == '__main__':
     # save glove object to file
     glove.save_obj('glove.model.obj')
 
-    # give me the 5 words most similar to each word in the words list in this 
+    # give me the 5 words most similar to each word in the words list in this
     # corpus and show me how similar the words are in this corpus to each word
     # in the words list in general
     words = ['sky', 'queen', 'car']
 
     for word in words:
-        glove.most_similar(word, show_hist=True)
+        glove.most_similar(word, show_hist=False)

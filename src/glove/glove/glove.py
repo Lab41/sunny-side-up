@@ -330,13 +330,18 @@ class Glove(object):
                / np.linalg.norm(self.word_vectors, axis=1)
                / np.linalg.norm(word_vec))
         word_ids = np.argsort(-dst)
-        
+
+        # build histogram
+        n, bins, patches = plt.hist(dst, range=(-1, 1), weights=np.ones_like(dst)/float(len(dst)), facecolor='green', alpha=0.5)
+        plt.xlabel('Similarity')
+        plt.ylabel('Probability')
+        plt.title('Histogram of word similarities for `'+self.inverse_dictionary[word_ids[0]]+'`')
+
+        # show or save
         if show_hist:
-            n, bins, patches = plt.hist(dst, range=(-1, 1), weights=np.ones_like(dst)/float(len(dst)), facecolor='green', alpha=0.5)
-            plt.xlabel('Similarity')
-            plt.ylabel('Probability')
-            plt.title('Histogram of word similarities for `'+self.inverse_dictionary[word_ids[0]]+'`')
             plt.show()
+        else:
+            plt.savefig('./similarity_vs_probability.png')
 
         if similar:
             return [(self.inverse_dictionary[x], dst[x]) for x in word_ids[:number]
