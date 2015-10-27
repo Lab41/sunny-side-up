@@ -8,4 +8,5 @@ __volume_cntr=/data
 # run image
 docker run -it \
            --volume=$__volume_host:$__volume_cntr \
+           --env-file=docker.env \
             $__image
