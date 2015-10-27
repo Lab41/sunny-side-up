@@ -21,6 +21,14 @@ glove-build-stanford:
 glove-evaluate-analogies:
   python -m examples/analogy_tasks_evaluation -t ./data/questions-words.txt -m glove.6B.50d.obj
 
+glove-evaluate-similarities:
+  python examples/models-test-similarity.py -m data/glove.6B/glove.6B.50d.obj
+
+glove-save-and-load:
+  python examples/save_and_load.py
+
 all-analogies: glove-get-analogies glove-build-stanford glove-evaluate-analogies
 
-.PHONY: all get-wiki process-wiki train-wiki glove-get-analogies glove-build-stanford glove-evaluate-analogies
+all-similarities: glove-evaluate-similarities glove-save-and-load
+
+.PHONY: all get-wiki process-wiki train-wiki glove-get-analogies glove-build-stanford glove-evaluate-analogies glove-evaluate-similarities glove-save-and-load
