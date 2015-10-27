@@ -41,9 +41,9 @@ def get_data(batch_size, doclength=300):
     (a, b), (a_size, b_size) = split_data(amz_data, 
                       in_memory=False, 
                       h5_path=h5_repo,
-                      overwrite_previous=True)
-    logger.debug("Test iteration (shape of one record): {}".format(a.next()[0].shape))
-    logger.debug("Test iteration (one record): {}".format(a.next()[0]))
+                      overwrite_previous=False)
+    logger.debug("Test iteration (shape of one record): {}".format(iter(a).next()[0].shape))
+    logger.debug("Test iteration (one record): {}".format(iter(a).next()[0]))
 
     # define functions for use with neon_iterator
     # TODO: create proper iterator classes and use those
@@ -152,7 +152,7 @@ def crepe_model(nvocab=67, nframes=256):
 
         neon.layers.Affine(2,
             init=neon.initializers.Uniform(),
-            activation=neon.transforms.Rectlin())
+            activation=neon.transforms.Logistic())
         
     ]
     return layers
