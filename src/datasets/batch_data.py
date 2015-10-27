@@ -112,23 +112,32 @@ def pick_splits(splits):
     
 class H5Iterator:
     """Small utility class for iterating over an HDF5 file.
-    Yields tuples of (data, label) from datasets in the
+    Iterating over it yields tuples of (data, label) from datasets in the
     file with the names given in data_name and labels_name.
+    By default, will randomly access records in any given iteration
     """    
-    # TODO: implement resetting
-    def __init__(self, h5_path, data_name, labels_name):
+    def __init__(self, h5_path, data_name, labels_name, shuffle=True):
         self.h5file = h5py.File(h5_path, "r")
-        self.data = iter(self.h5file[data_name])
-        self.labels = iter(self.h5file[labels_name])
+        self.shuffle = shuffle
+        self.data = self.h5file[data_name]
+        self.labels = self.h5file[labels_name]
+
+        self.indices = range(self.data.shape[0])
         
     def __del__(self):
         self.h5file.close()
     
     def __iter__(self):
-        return self
+        if self.shuffle == True:
+            indices = np.random.permutation(self.indices)
+        else:
+            indices = self.indices
 
-    def next(self):
-        return (self.data.next(), self.labels.next())
+        for which_index in indices:
+            yield (self.data[which_index], self.labels[which_index])
+
+    #def next(self):
+    #    return (self.data.next(), self.labels.next())
         
 def write_batch_to_h5(splits, h5_file, data_sizes, new_data, new_labels):
     """ Takes some information about a minibatch of data and 
@@ -168,7 +177,7 @@ def write_batch_to_h5(splits, h5_file, data_sizes, new_data, new_labels):
 
 def split_data(batch_iterator,
                splits = [0.8],
-               rng_seed=888,
+               rng_seed=None,
                in_memory=False,
                h5_path='/data/amazon/data.hd5',
                overwrite_previous=False):
@@ -335,20 +344,3 @@ if __name__=="__main__":
     print "Data object type: ", type(second_batch_data)
     print second_batch_data.shape
     
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
