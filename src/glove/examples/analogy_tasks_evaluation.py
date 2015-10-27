@@ -6,7 +6,7 @@ from glove import Glove, metrics
 
 
 if __name__ == '__main__':
-    
+
     parser = argparse.ArgumentParser(description=('Evaluate a trained GloVe '
                                                   'model on an analogy task.'))
     parser.add_argument('--test', '-t', action='store',
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     print('\nREMEMBER: The lower the rank, the better! With random word vectors' \
         ' we would expect a rank of 0.5.')
-    
+
     for section, words in sections.items():
         evaluation_ids = metrics.construct_analogy_test_set(words,
                                                             glove.dictionary,
@@ -56,19 +56,18 @@ if __name__ == '__main__':
         # Get the rank array.
         ranks = metrics.analogy_rank_score(evaluation_ids, glove.word_vectors,
                                            no_threads=int(args.parallelism))
-                                           
+
         # get best answer array
         ans = metrics.finish_analogy(evaluation_ids, glove.word_vectors,
                                          no_threads=int(args.parallelism))
         print('Section `%s` best answers: %s' %  (section, [glove.inverse_dictionary[c] for c in ans]))
-        
+
         section_ranks.append(ranks)
 
-        print('Section `%s` mean rank: %s, accuracy: %s' % (section, ranks.mean(), 
+        print('Section `%s` mean rank: %s, accuracy: %s' % (section, ranks.mean(),
                                                           (ranks == 0).sum() / float(len(ranks))))
-    
+
     ranks = np.hstack(section_ranks)
 
-    print('Overall mean rank: %s, accuracy: %s' % (ranks.mean(), 
+    print('Overall mean rank: %s, accuracy: %s' % (ranks.mean(),
                                               (ranks == 0).sum() / float(len(ranks))))
-

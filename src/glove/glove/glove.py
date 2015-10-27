@@ -31,7 +31,7 @@ class Glove(object):
         Parameters:
         - int no_components: number of latent dimensions
         - float learning_rate: learning rate for SGD estimation.
-        - float alpha, float max_count: parameters for the 
+        - float alpha, float max_count: parameters for the
           weighting function (see the paper).
         - float max_loss: the maximum absolute value of calculated
                           gradient for any single co-occurrence pair.
@@ -39,7 +39,7 @@ class Glove(object):
                           are experiencing problems with numerical
                           stability.
         """
-        
+
         self.no_components = no_components
         self.learning_rate = float(learning_rate)
         self.alpha = float(alpha)
@@ -54,7 +54,7 @@ class Glove(object):
 
         self.dictionary = None
         self.inverse_dictionary = None
-        
+
         self.pca = None
 
     def fit(self, matrix, epochs=5, no_threads=2, verbose=False):
@@ -80,7 +80,7 @@ class Glove(object):
         self.word_vectors = ((np.random.rand(shape[0],
                                              self.no_components) - 0.5)
                                              / self.no_components)
-        self.word_biases = np.zeros(shape[0], 
+        self.word_biases = np.zeros(shape[0],
                                     dtype=np.float64)
 
         self.vectors_sum_gradients = np.ones_like(self.word_vectors)
@@ -91,7 +91,7 @@ class Glove(object):
         if verbose:
             print('Performing %s training epochs '
                   'with %s threads' % (epochs, no_threads))
-                  
+
             # initialize lists that will hold the learning rates
             vectors_gradients = list()
             biases_gradients = list()
@@ -118,19 +118,19 @@ class Glove(object):
                         self.alpha,
                         self.max_loss,
                         int(no_threads))
-                        
+
             if not np.isfinite(self.word_vectors).all():
                 raise Exception('Non-finite values in word vectors. '
                                 'Try reducing the learning rate or the '
                                 'max_loss parameter.')
-                                
+
             if verbose:
                 vectors_gradients.append(np.mean([self.learning_rate/np.sqrt(a) for a in self.vectors_sum_gradients]))
                 biases_gradients.append(np.mean(self.learning_rate/np.sqrt(self.biases_sum_gradients)))
 
                 endtime = dt.datetime.now()
                 print('    Epoch %s took %s minutes' % (epoch, (endtime-starttime).total_seconds() / 60))
-                
+
         if verbose:
             # show the learning rates
             plt.plot(vectors_gradients, 'k--', biases_gradients, 'k:')
@@ -138,22 +138,22 @@ class Glove(object):
             plt.xlabel('Epoch')
             plt.ylabel('Mean learning rate')
             plt.title('Change in mean learning rates across epochs')
-            plt.show()                
+            plt.show()
 
     def perform_PCA(self, num_components=None):
         """
         Performs PCA on the word vectors in the model
         Uses the number of components passed in if any
         """
-        
+
         if self.word_vectors is None:
             raise Exception('Model must be fit trying to perform PCA')
-        
+
         if num_components:
             self.pca = PCA(n_components=num_components)
         else:
             self.pca = PCA()
-        
+
         self.pca.fit(self.word_vectors)
 
     def transform_paragraph(self, paragraph, epochs=50, ignore_missing=False, use_pca=False):
@@ -162,11 +162,11 @@ class Glove(object):
         (a paragraph vector).
 
         Experimental. This will return something close to a tf-idf
-        weighted average of constituent token vectors by fitting 
+        weighted average of constituent token vectors by fitting
         rare words (with low word bias values) more closely. If use_pca is True,
         the token vectors will be transformed using PCA before the weighted
         average is calculated.
-        
+
         Added the PCA thing because of this paper: http://courses.cs.tau.ac.il/~wolf/papers/qagg.pdf
         """
 
@@ -178,7 +178,7 @@ class Glove(object):
                             'transform paragraphs')
 
         cooccurrence = collections.defaultdict(lambda: 0.0)
-            
+
         for token in paragraph:
             try:
                 cooccurrence[self.dictionary[token]] += self.max_count / 10.0
@@ -194,9 +194,9 @@ class Glove(object):
         # if a PCA model should be used, use it first to transform the vectors
 
         if use_pca:
-            if self.pca is None:                
+            if self.pca is None:
                 self.perform_PCA()
-                
+
             paragraph_vector = np.mean(self.pca.transform(self.word_vectors[word_ids]), axis=0)
         else:
             paragraph_vector = np.mean(self.word_vectors[word_ids], axis=0)
@@ -254,30 +254,30 @@ class Glove(object):
         """
         save glove object to file
         """
-        
+
         with open(filename, 'wb') as savefile:
             pickle.dump(self, savefile, protocol=pickle.HIGHEST_PROTOCOL)
 
     @classmethod
     def load_obj(cls, filename):
         """
-        load glove object from file        
-        """        
-        
+        load glove object from file
+        """
+
         instance = Glove()
-        
+
         with open(filename, 'rb') as savefile:
             instance = pickle.load(savefile)
-            
+
         return instance
-        
+
 
     @classmethod
     def load(cls, filename):
         """
         Load model from filename.
         """
-        
+
         instance = Glove()
 
         with open(filename, 'rb') as savefile:
@@ -297,7 +297,7 @@ class Glove(object):
 
         dct = {}
         vectors = array.array('d')
-        
+
         # Read in the data.
         with io.open(filename, 'r', encoding='utf-8') as savefile:
             for i, line in enumerate(savefile):
@@ -339,10 +339,10 @@ class Glove(object):
             plt.show()
 
         if similar:
-            return [(self.inverse_dictionary[x], dst[x]) for x in word_ids[:number] 
+            return [(self.inverse_dictionary[x], dst[x]) for x in word_ids[:number]
                 if x in self.inverse_dictionary]
         else:
-            return [(self.inverse_dictionary[x], dst[x]) for x in word_ids[-number:] 
+            return [(self.inverse_dictionary[x], dst[x]) for x in word_ids[-number:]
                 if x in self.inverse_dictionary]
 
     def most_similar(self, word, number=5, show_hist=False):
@@ -356,7 +356,7 @@ class Glove(object):
 
         if self.dictionary is None:
             raise Exception('No word dictionary supplied')
-        
+
         try:
             word_idx = self.dictionary[word]
         except KeyError:
@@ -376,7 +376,7 @@ class Glove(object):
 
         if self.dictionary is None:
             raise Exception('No word dictionary supplied')
-        
+
         try:
             word_idx = self.dictionary[word]
         except KeyError:
@@ -402,22 +402,22 @@ class Glove(object):
         Returns the similarity score of two words
         Both words must be in the dictionary
         """
-        
+
         if self.word_vectors is None:
             raise Exception('Model must be fit before querying')
 
         if self.dictionary is None:
             raise Exception('No word dictionary supplied')
-        
+
         try:
             word_idx1 = self.dictionary[word1]
             word_idx2 = self.dictionary[word2]
         except KeyError:
             raise Exception('One of your words was not in dictionary')
-            
-            
+
+
         dst = (np.dot(self.word_vectors[word_idx1], self.word_vectors[word_idx2])
         / np.linalg.norm(self.word_vectors[word_idx1])
         / np.linalg.norm(self.word_vectors[word_idx2]))
-        
+
         return dst

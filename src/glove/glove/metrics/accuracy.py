@@ -32,7 +32,7 @@ def construct_analogy_test_set(test_examples, dictionary, ignore_missing=False):
 
     Arguments:
     - test_examples: iterable of 4-word iterables
-    - dictionay: a mapping from words to ids
+    - dictionary: a mapping from words to ids
     - boolean ignore_missing: if True, words in the test set
                               that are not in the dictionary
                               will be dropped.
@@ -42,7 +42,7 @@ def construct_analogy_test_set(test_examples, dictionary, ignore_missing=False):
     """
 
     test = []
-    
+
     for example in test_examples:
         try:
             test.append([dictionary[word] for word in example])
