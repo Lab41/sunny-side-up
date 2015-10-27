@@ -17,10 +17,10 @@ RUN ipython profile create nbserver
 
 
 # setup git preferences
-ENV GIT_REMOTE_URL 'git@github.com:gitbot41/sunny-side-up.git'
-ENV GIT_REPO_UPSTREAM 'Lab41/sunny-side-up'
-ENV GIT_USER "gitbot41"
-ENV GIT_EMAIL "gitbot41@gmail.com"
+ENV GIT_REMOTE_URL git@github.com:gitbot41/sunny-side-up.git
+ENV GIT_REPO_UPSTREAM Lab41/sunny-side-up
+ENV GIT_USER gitbot41
+ENV GIT_EMAIL gitbot41@gmail.com
 
 
 # install extensions
