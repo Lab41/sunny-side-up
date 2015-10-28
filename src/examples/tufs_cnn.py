@@ -30,7 +30,7 @@ from keras.optimizers import RMSprop, SGD
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation, Flatten, Reshape
 from keras.layers.embeddings import Embedding
-from keras.layers.convolutional import Convolution1D, MaxPooling1D
+from keras.layers.convolutional import Convolution1D, MaxPooling1D, MaxPooling2D, Convolution2D
 from keras.layers.normalization import BatchNormalization
 from keras.utils import np_utils,generic_utils
 from keras.datasets import cifar10, imdb
@@ -48,20 +48,27 @@ def model_defn():
     
     model = Sequential()
 
-    model.add(Convolution1D(256,7,input_shape=(67,1014)))
-    model.add(MaxPooling1D(pool_length=3))
-
-    model.add(Convolution1D(256,7))
+    model.add(Convolution2D(256,67,7,input_shape=(1,67,1014),border_mode="valid"))
+    #model.add(Convolution1D(256,7,input_dim=1,input_shape=(67,1014),border_mode="valid"))
     #model.add(MaxPooling1D(pool_length=3))
+    model.add(MaxPooling2D(pool_size=(1,3)))
 
-    model.add(Convolution1D(256,3))
-
-    model.add(Convolution1D(256,3))
-
-    model.add(Convolution1D(256,3))
-
-    model.add(Convolution1D(256,3))
+    #model.add(Convolution1D(256,7))
+    #model.add(MaxPooling2D(pool_size=(3,1)))
+    model.add(Convolution2D(256,1,7))
     #model.add(MaxPooling1D(pool_length=3))
+    model.add(MaxPooling2D(pool_size=(1,3)))
+
+    #model.add(Convolution1D(256,3))
+    model.add(Convolution2D(256,1,3))
+
+    model.add(Convolution2D(256,1,3))
+
+    model.add(Convolution2D(256,1,3))
+
+    model.add(Convolution2D(256,1,3))
+    #model.add(MaxPooling1D(pool_length=3))
+    model.add(MaxPooling2D(pool_size=(1,3)))
 
     model.add(Flatten())
 
@@ -118,13 +125,14 @@ if __name__=="__main__":
         normalizer_fun=None,transformer_fun=None)
     am_test_batch = batch_data.batch_data(amte,
         normalizer_fun=None,transformer_fun=None)
-    
-    #reviews,labels = am_train_batch.next()
-    #print(reviews[0].sum(axis=1))
-    #print("shape of stuffs",reviews.shape)
+    '''
+    reviews,labels = am_train_batch.next()
+    print(reviews[0].sum(axis=1))
+    print("shape of stuffs",reviews.shape)
+    #trans = numpy.array(map(lambda x:numpy.array((x,x*2,x*3)), my_ar))
     #print("sizes of train", amntr)
     #print("sizes of test", amnte)
-    '''
+    
 
     num_epochs = 1
     model = model_defn()
