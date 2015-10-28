@@ -67,7 +67,7 @@ def load_data(file_dir="./.downloads", download_dir="./.downloads"):
     for (file_path, sentiment) in all_data:
         # Open the movie review
         f = open(file_path, 'r')
-        yield (f.read(), sentiment)
+        yield (f.read().decode('utf-8'), sentiment)
         # Closes f on the following next() call by user
         f.close()
 
