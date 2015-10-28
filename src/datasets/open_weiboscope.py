@@ -113,6 +113,7 @@ def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_rec
     logger.debug("Shuffle order: {}, split on {}".format(ow_files, split_on))
     data_sets['train'], data_sets['test'] = ow_files[:split_on], ow_files[split_on:]
     logger.debug(data_sets)
+    nr_yielded = 0
     for table_path in data_sets[which_set]:
         with codecs.open(table_path, "r", encoding="utf-8") as f:
             logging.debug("In file {}".format(table_path))
