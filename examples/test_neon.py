@@ -24,6 +24,7 @@ import neon.callbacks
 from neon.callbacks.callbacks import Callbacks, Callback
 from neon.backends import gen_backend
 
+import src.datasets.imdb as imdb
 import src.datasets.amazon_reviews as amazon
 import src.datasets.data_utils as data_utils
 from src.datasets.batch_data import batch_data, split_data
@@ -33,7 +34,27 @@ from src.datasets.neon_iterator import DiskDataIterator
 def get_imdb(batch_size, doclength, 
              imdb_path="/root/data/pcallier/imdb/",
              h5_path="/root/data/pcallier/imdb/imdb_split.hd5"):
-    imdb_data = imdb.load_data(
+    imdb_data = imdb.load_data(imdb_path, None)
+    imdb_batches = batch_data(imdb_data, batch_size,
+        normalizer_fun=lambda x: data_utils.normalize(x, max_length=doclength),
+        transformer_fun=None)
+    (_, _), (train_size, test_size) = split_data(imdb_data, h5_path, overwrite_previous=False)
+    def train_batcher():
+        (a,b),(a_size,b_size)=split_data(None, h5_path=h5_path, overwrite_previous=False, shuffle=True)
+        return batch_data(a,
+            normalizer_fun=lambda x: x,
+            transformer_fun=lambda x: data_utils.to_one_hot(x[0]),
+            flatten=True,
+            batch_size=batch_size)
+    def test_batcher():
+        (a,b),(a_size,b_size)=split_data(None, h5_path, overwrite_previous=False,shuffle=False)
+        return batch_data(b,
+            normalizer_fun=lambda x: x,
+            transformer_fun=lambda x: data_utils.to_one_hot(x[0]),
+            flatten=True,
+            batch_size=batch_size)
+
+    return (train_batcher, test_batcher), (train_size, test_size)
 
 def get_amazon(batch_size, doclength, 
              amazon_path="/root/data/amazon/reviews_Home_and_Kitchen.json.gz",
@@ -46,7 +67,6 @@ def get_amazon(batch_size, doclength,
         normalizer_fun=lambda x: data_utils.normalize(x, max_length=doclength),
         transformer_fun=None)
     (a, b), (a_size, b_size) = split_data(amz_data, 
-                      in_memory=False, 
                       h5_path=h5_repo,
                       overwrite_previous=False)
     logger.debug("Test iteration (shape of one record): {}".format(iter(a).next()[0].shape))
@@ -167,7 +187,7 @@ def crepe_model(nvocab=67, nframes=256, batch_norm=True):
     ]
     return layers
 
-def do_amazon():
+def do_model(get_data=get_imdb, base_dir="/root/data/pcallier/imdb/"):
     batch_size=64
     doc_length=1014
     vocab_size=67
@@ -175,8 +195,8 @@ def do_amazon():
     nframes=256
 
     present_time = datetime.datetime.strftime(datetime.datetime.now(),"%m%d_%I%p")
-    model_state_path="/root/data/pcallier/amazon/neon_crepe_model_{}.pkl".format(present_time)
-    model_weights_history_path="/root/data/pcallier/amazon/neon_crepe_weights_{}.pkl".format(present_time)
+    model_state_path=os.path.join(base_dir, "neon_crepe_model_{}.pkl".format(present_time))
+    model_weights_history_path=os.path.join(base_dir, "neon_crepe_weights_{}.pkl".format(present_time))
     logger.info("Getting backend...")
     be = gen_backend(backend='gpu', batch_size=batch_size, device_id=0)
     logger.info("Getting data...")
@@ -194,13 +214,6 @@ def do_amazon():
     model_layers = crepe_model(nframes=nframes)
     mlp = neon.models.Model(model_layers)
 
-    # try to load a model from a saved location
-    try:
-        model_weights_path = "/root/data/pcallier/amazon/neon_crepe_model_1027_1.hd5"
-        #mlp.load_weights(model_weights_path)
-    except IOError as e:
-        logger.exception("Model weights file not found.")
-
     cost = neon.layers.GeneralizedCost(neon.transforms.CrossEntropyBinary())
     callbacks = Callbacks(mlp,train_iter,valid_set=test_iter,valid_freq=3,progress_bar=True)
     callbacks.add_save_best_state_callback(model_state_path)
@@ -216,11 +229,8 @@ def do_amazon():
               num_epochs=10, cost=cost, callbacks=callbacks)
     logger.info("Testing accuracy: {}".format(mlp.eval(test_iter, metric=neon.transforms.Accuracy())))
 
-def do_imdb():
-    (train_get, test_get), (train_size, test_size) = get_imdb()
-
 def main():
-    do_imdb()
+    do_model(get_imdb)
 
 if __name__=="__main__":
     main()
