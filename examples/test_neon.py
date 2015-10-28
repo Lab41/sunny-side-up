@@ -30,7 +30,12 @@ from src.datasets.batch_data import batch_data, split_data
 from src.datasets.data_utils import from_one_hot
 from src.datasets.neon_iterator import DiskDataIterator
 
-def get_data(batch_size, doclength, 
+def get_imdb(batch_size, doclength, 
+             imdb_path="/root/data/pcallier/imdb/",
+             h5_path="/root/data/pcallier/imdb/imdb_split.hd5"):
+    imdb_data = imdb.load_data(
+
+def get_amazon(batch_size, doclength, 
              amazon_path="/root/data/amazon/reviews_Home_and_Kitchen.json.gz",
              h5_repo="/root/data/pcallier/amazon/home_kitch_split.hd5"):
     # batch data and split it to HDF5
@@ -162,7 +167,7 @@ def crepe_model(nvocab=67, nframes=256, batch_norm=True):
     ]
     return layers
 
-def main():
+def do_amazon():
     batch_size=64
     doc_length=1014
     vocab_size=67
@@ -210,6 +215,12 @@ def main():
     mlp.fit(train_iter, optimizer=optimizer, 
               num_epochs=10, cost=cost, callbacks=callbacks)
     logger.info("Testing accuracy: {}".format(mlp.eval(test_iter, metric=neon.transforms.Accuracy())))
+
+def do_imdb():
+    (train_get, test_get), (train_size, test_size) = get_imdb()
+
+def main():
+    do_imdb()
 
 if __name__=="__main__":
     main()
