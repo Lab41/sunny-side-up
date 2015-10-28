@@ -64,7 +64,7 @@ def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_rec
 
     @Arguments:
         file_path -- path to downloaded, unzipped Open Weiboscope
-            datai (a directory). If this path does not exist or is not given, load_data
+            data (a directory). If this path does not exist or is not given, load_data
             will create the path and download the data (string)
         which_set -- whether to iterate over train or testing set. You should
             also set train_pct and rng_seed to non-default values if you specify this
@@ -72,6 +72,8 @@ def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_rec
         form -- return results in hanzi, pinyin romanization?
             can take values of 'hanzi', 'pinyin' (string)
         train_pct -- what percent of dataset should go to training (remainder goes to test)?  (float)
+        nr_records -- if not None, gives the maximum number of records this generator should yield.
+            will yield fewer records if the corpus exhausted before nr_records records are yielded
         rng_seed -- value for seeding random number generator
         min_length -- enforce a minimum length, in characters, for the 
             dataset? Counted in hanzi for form='hanzi' and in roman characters 
