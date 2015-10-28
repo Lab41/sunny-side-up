@@ -6,16 +6,14 @@ import random
 import logging
 logging.basicConfig()
 logger=logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 from data_utils import get_file
 
 pos_label = 1
 neg_label = 0
 
 def load_data(file_dir="./.downloads", download_dir="./.downloads"):
-    ''' Function that takes in a path to the IMDB movie review dataset
-        word analogy file, opens it, removes topic tags and returns a list
-        of the analogies
+    ''' Function that yields records from the IMDB reviews dataset
 
         @Arguments:
             file_dir -- personal system file path to the
@@ -29,20 +27,20 @@ def load_data(file_dir="./.downloads", download_dir="./.downloads"):
             A generator over a tuples of Movie reviews and their sentiment
     '''
     # Open file path
-    if not os.path.isdir(file_dir):
-        logging.info("Downloading IMDB dataset")
+    imdb_root = os.path.join(file_dir, "aclImdb")
+    if not os.path.isdir(imdb_root):
+        logger.info("Downloading IMDB dataset")
         if download_dir is None:
             download_dir = os.path.dirname(os.path.normpath(file_dir))
         downloaded_file_path = get_file("http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz",
                              download_dir)
         # then extract it 
         if not os.path.isdir(os.path.join(file_dir, 'aclImdb')):
-            logging.info("Extracting IMDB dataset")
+            logger.info("Extracting IMDB dataset")
             tar = tarfile.open(downloaded_file_path, mode="r:gz")
             tar.extractall(path=file_dir)
             tar.close()
 
-    imdb_root = os.path.join(file_dir, "aclImdb")
     imdb_train = os.path.join(imdb_root, "train")
     imdb_test = os.path.join(imdb_root, "test")
     imdb_train_pos = os.path.join(imdb_train, "pos")
@@ -74,7 +72,7 @@ def load_data(file_dir="./.downloads", download_dir="./.downloads"):
         f.close()
 
 def main():
-    data = load_data()
+    data = load_data("/root/data/pcallier/imdb",None)
     print data.next()
 
 if __name__=="__main__":
