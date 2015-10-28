@@ -2,6 +2,32 @@
 import sys, os
 import csv, codecs, base64, HTMLParser
 from subprocess import call
+from PIL import Image
+
+
+def image_trim_and_save(path, padding=5):
+		'''
+
+			trim whitespace around image and re-save
+
+		'''
+
+		# open image and get outermost dimensions
+		image = Image.open(path)
+		bbox = image.getbbox()
+
+		# update box to add padding
+		x,y,w,h = bbox
+		x -= padding
+		y -= padding
+		w += padding
+		h += padding
+		bbox = (x,y,w,h)
+
+		# crop and save image
+		if bbox:
+				image = image.crop(bbox)
+				image.save(path)
 
 
 def text_to_png(dir_input, dir_output, tempfile = '/tmp/tweet.txt', debug=False, limit=None):
@@ -52,7 +78,10 @@ def text_to_png(dir_input, dir_output, tempfile = '/tmp/tweet.txt', debug=False,
                         outfile.write(data)
 
                 # render the text as an image
-                call(['pango-view',tempfile,'--no-display','--font','Scheherazade 24','-o',file_out])
+                call(['pango-view',tempfile,'--no-display','--font','Scheherazade 30','--background','transparent','-o',file_out])
+
+                # create a trimmed version
+                image_trim_and_save(file_out)
 
                 # track number processed (for building rows)
                 counter += 1
@@ -67,7 +96,7 @@ def text_to_png(dir_input, dir_output, tempfile = '/tmp/tweet.txt', debug=False,
         print(e)
 
 
-def png_to_csv(dir_input, filename='output.csv', csv_output_head = ['batch_id', 'tweet1', 'tweet2', 'tweet3', 'tweet4', 'tweet5'], debug=False, limit=None):
+def png_to_csv(dir_input, filename='output.csv', csv_output_head = ['batch_id', 'tweet1', 'tweet1_id', 'tweet2', 'tweet2_id', 'tweet3', 'tweet3_id', 'tweet4', 'tweet4_id', 'tweet5', 'tweet5_id'], debug=False, limit=None):
     '''
 
       base64-encode all png files in directory and save to single csv file
@@ -80,7 +109,7 @@ def png_to_csv(dir_input, filename='output.csv', csv_output_head = ['batch_id', 
     # store csv as list of lists
     data = []
     row = []
-    images_per_row = len(csv_output_head)
+    images_per_row = 5
 
     # iterate and count number of results
     counter = 0
@@ -106,6 +135,14 @@ def png_to_csv(dir_input, filename='output.csv', csv_output_head = ['batch_id', 
             # add base64-encoded image to CSV row
             encoded = base64.b64encode(open(file_in, "rb").read())
             row.append(encoded)
+            row.append(pathname.replace('.txt.png',''))
+
+            # track number processed (for building rows)
+            counter += 1
+
+            # optional upper limit
+            if (counter >= limit):
+              break
 
             # create list-of-lists structure for csv
             if (counter % images_per_row == 0):
@@ -117,22 +154,21 @@ def png_to_csv(dir_input, filename='output.csv', csv_output_head = ['batch_id', 
                 data.append(row)
                 row = []
 
-            # track number processed (for building rows)
-            counter += 1
 
-            # optional upper limit
-            if (counter >= limit):
-              break
 
 
     # add the last row
     if (len(row) > 0):
+        # add id to row
+        row.insert(0, counter / images_per_row)
+
+        # add row to CSV
         data.append(row)
 
 
     # write CSV
     filename_full = "{}_{}".format(os.path.basename(dir_input), filename)
-    with open(os.path.join(dir_input, filename_full), "wb") as fh:
+    with open(os.path.join(dir_input, filename_full), "w+") as fh:
         writer = csv.writer(fh)
 
         # write header
@@ -149,7 +185,7 @@ if __name__ == "__main__":
     if (len(sys.argv) < 3):
       msg = """
         Insufficient arguments!  Usage: \n\
-          {} <input-directory> <output-directory>
+          {} <input-directory> <output-directory> <limit>
         """.format(sys.argv[0])
       raise Exception(msg)
 
