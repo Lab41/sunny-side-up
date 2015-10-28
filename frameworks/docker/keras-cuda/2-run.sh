@@ -10,4 +10,5 @@ docker run -it \
            --device /dev/nvidiactl:/dev/nvidiactl --device /dev/nvidia-uvm:/dev/nvidia-uvm \
            --device /dev/nvidia0:/dev/nvidia0 --device /dev/nvidia1:/dev/nvidia1 \
            --volume=$__volume_host:$__volume_cntr \
+           --env-file=docker-env.sh \
             $__image
