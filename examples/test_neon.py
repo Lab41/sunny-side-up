@@ -7,6 +7,7 @@ import sys
 import os
 current_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(current_path))
+import datetime
 
 import logging
 logging.basicConfig()
@@ -29,15 +30,16 @@ from src.datasets.batch_data import batch_data, split_data
 from src.datasets.data_utils import from_one_hot
 from src.datasets.neon_iterator import DiskDataIterator
 
-def get_data(batch_size, doclength=300):
+def get_data(batch_size, doclength, 
+             amazon_path="/root/data/amazon/reviews_Home_and_Kitchen.json.gz",
+             h5_repo="/root/data/pcallier/amazon/home_kitch_split.hd5"):
     # batch data and split it to HDF5
     # the generators obtained here are not 
     # used except for debugging
-    amz_data = batch_data(amazon.load_data("/root/data/amazon/reviews_Home_and_Kitchen.json.gz"),
+    amz_data = batch_data(amazon.load_data(amazon_path),
         batch_size=batch_size,
         normalizer_fun=lambda x: data_utils.normalize(x, max_length=doclength),
         transformer_fun=None)
-    h5_repo = "/root/data/pcallier/amazon/home_kitch_split.hd5"
     (a, b), (a_size, b_size) = split_data(amz_data, 
                       in_memory=False, 
                       h5_path=h5_repo,
@@ -47,7 +49,7 @@ def get_data(batch_size, doclength=300):
 
     # define functions for use with neon_iterator
     # TODO: create proper iterator classes and use those
-    # these functions are returend, alongside the batch sizes
+    # these functions are returned, alongside the batch sizes
     def a_batcher():
         (a,b),(a_size,b_size)=split_data(None, 
             h5_path=h5_repo, 
@@ -160,26 +162,6 @@ def crepe_model(nvocab=67, nframes=256, batch_norm=True):
     ]
     return layers
 
-class MyCallback(Callback):
-    def __init__(self, epoch_freq=1, minibatch_freq=1):
-        super(MyCallback, self).__init__(epoch_freq, minibatch_freq)
-
-    def on_train_begin(self, epochs):
-        logger.debug("Beginning training ({})".format(epochs))
-        logger.debug(dir(self))
-
-    def on_epoch_begin(self, epoch):
-        logger.debug("Beginning epoch {}".format(epoch))
-
-    def on_epoch_end(self, epoch):
-        logger.debug("Ending epoch {}".format(epoch))
-
-    def on_minibatch_begin(self, epoch, minibatch):
-        logger.debug("Epoch {}/Minibatch {} starting".format(epoch,minibatch))
-    
-    def on_minibatch_end(self, epoch, minibatch):
-        logger.debug("Epoch {}/Minibatch {} done".format(epoch,minibatch))
-
 def main():
     batch_size=64
     doc_length=1014
@@ -187,8 +169,9 @@ def main():
     gpu_id=0
     nframes=256
 
-    model_state_path="/root/data/pcallier/amazon/neon_crepe_model.hd5"
-    model_weights_history_path="/root/data/pcallier/amazon/neon_crepe_weights.hd5"
+    present_time = datetime.datetime.strftime(datetime.datetime.now(),"%m%d_%I%p")
+    model_state_path="/root/data/pcallier/amazon/neon_crepe_model_{}.pkl".format(present_time)
+    model_weights_history_path="/root/data/pcallier/amazon/neon_crepe_weights_{}.pkl".format(present_time)
     logger.info("Getting backend...")
     be = gen_backend(backend='gpu', batch_size=batch_size, device_id=0)
     logger.info("Getting data...")
@@ -209,25 +192,24 @@ def main():
     # try to load a model from a saved location
     try:
         model_weights_path = "/root/data/pcallier/amazon/neon_crepe_model_1027_1.hd5"
-        mlp.load_weights(model_weights_path)
+        #mlp.load_weights(model_weights_path)
     except IOError as e:
         logger.exception("Model weights file not found.")
+
     cost = neon.layers.GeneralizedCost(neon.transforms.CrossEntropyBinary())
     callbacks = Callbacks(mlp,train_iter,valid_set=test_iter,valid_freq=3,progress_bar=True)
     callbacks.add_save_best_state_callback(model_state_path)
     callbacks.add_serialize_callback(1, model_weights_history_path,history=5)
-    #callbacks.add_validation_callback(test_iter, 2)
+
     optimizer = neon.optimizers.GradientDescentMomentum(
         learning_rate=0.01,
         momentum_coef=0.9,
         schedule=neon.optimizers.Schedule([2,5,8], 0.5))
-    #optimizer = neon.optimizers.Adadelta()
-    # my_callback = MyCallback()
-    # callbacks.add_callback(my_callback, 0)
+
     logger.info("Doing training...")
     mlp.fit(train_iter, optimizer=optimizer, 
               num_epochs=10, cost=cost, callbacks=callbacks)
-    logger.info("Misclassification error: {}".format(mlp.eval(test_iter, metric=neon.transforms.Misclassification())))
+    logger.info("Testing accuracy: {}".format(mlp.eval(test_iter, metric=neon.transforms.Accuracy())))
 
 if __name__=="__main__":
     main()
