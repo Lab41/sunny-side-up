@@ -31,6 +31,13 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
     
 
     def write_to_json(obj, path_base, path_decorator):
+        """
+        Writes (or overwrites) a JSON file located via a regular 
+        combination of path base and path_decorator, dumping a JSON
+        representation of obj to that file. Utility function for various 
+        callback events.
+        """
+        # path decorator goes between filename and extension
         path_part, ext = os.path.splitext(path_base)
         full_path = "{}{}{}".format(path_part, path_decorator, ext)
         with open(full_path, "w") as f:
@@ -58,12 +65,9 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         # append and serialize
         self.train_accuracies.append(train_accuracy)
         self.test_accuracies.append(test_accuracy)
-        accuracies_path_base, ext = 
-        accuracies_path = "{}_accuracies{}".format(accuracies_path_base,ext)
-        with open(accuracies_path, "w") as f:
-            json.dump({'train': self.train_accuracies,
-                       'test' : self.test_accuracies}, f)
-
+        train_test_acc = { 'train': self.train_accuracies,
+                           'test' : self.test_accuracies }
+        self.write_to_json(train_test_acc, self.save_path, "_accuracies")
         # finish writing costs to disk
         self.write_to_json(self.costs, self.save_path, "_costs")
         # TODO:  plot loss over the epoch
