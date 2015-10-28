@@ -3,10 +3,10 @@ FROM kaixhin/cuda-theano
 MAINTAINER Kyle F <kylef@lab41.org>
 
 
-#TODO install HDFS?
+# install base packages
 RUN apt-get update
-RUN apt-get install --assume-yes  python-dev \
-                                  libhdf5-dev
+RUN apt-get install --assume-yes  python-dev libhdf5-dev libpng12-dev libfreetype6-dev libpng++-dev libfreetype6 libfreetype6-dev libpng12-dev pkg-config
+
 
 # install python modules
 RUN pip install numpy \
@@ -16,7 +16,9 @@ RUN pip install numpy \
                 pyyaml \
                 six==1.9.0 \
                 pandas \
-                passage
+                passage \
+                simplejson \
+                matplotlib
 
 
 # Adding ipython
@@ -37,7 +39,7 @@ RUN cd /tmp && \
     rm -rf *
 
 
-# Add to path
+# Add CUDA to path
 ENV PATH=/usr/local/cuda/bin:$PATH \
     LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
