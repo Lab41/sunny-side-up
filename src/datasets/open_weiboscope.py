@@ -57,14 +57,14 @@ def enforce_length(txt, min_length=None, max_length=None, pad_out=False):
         txt = txt +  ' ' * (max_length - len(txt))
     return txt
 
-def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, rng_seed=None, min_length=None, max_length=None, pad_out=False):
+def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_records=None, rng_seed=None, min_length=None, max_length=None, pad_out=False):
     """
     Load data from Open Weiboscope corpus of Sina Weibo posts. Options are available for encoding
     of returned text data. 
 
     @Arguments:
         file_path -- path to downloaded, unzipped Open Weiboscope
-            data. If this path does not exist or is not given, load_data
+            datai (a directory). If this path does not exist or is not given, load_data
             will create the path and download the data (string)
         which_set -- whether to iterate over train or testing set. You should
             also set train_pct and rng_seed to non-default values if you specify this
@@ -145,19 +145,19 @@ def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, r
                         else:
                             raise Exception("Unknown form '{}' (should be 'hanzi' "
                                             "or 'pinyin')".format(form))
-
+                        # limit number of records retrieved?
+                        nr_yielded += 1
+                        if nr_records is not None and nr_yielded >= nr_records:
+                            raise StopIteration()
+                # log various exception cases from loop body
                 except TextTooShortException:
                     logger.info("Record {} thrown out (too short)".format(post_id))
-                    continue
                 except BadRecordException as e:
                     logger.info(e)
-                    continue
                 except IndexError as e:
                     logger.info(e)
-                    continue
                 except UnicodeEncodeError as e:
                     logger.info(e)
-                    continue
 
                 except GeneratorExit:
                     return
