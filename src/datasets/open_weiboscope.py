@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 import numpy as np
-import pandas as pd
+#import pandas as pd
 
-from data_utils import get_file
+from data_utils import get_file, to_one_hot
 
 
 vocabulary=ur"""abcdefghijklmnopqrstuvwxyz0123456789-,;.!?:'"/\|_@#$%^&*~`+-=<>()[]{}""" + "\n"
@@ -69,8 +69,8 @@ def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, r
         which_set -- whether to iterate over train or testing set. You should
             also set train_pct and rng_seed to non-default values if you specify this
             (string)
-        form -- return results in hanzi, pinyin romanization, or one-hot encodings of romanization?
-            can take values of 'hanzi', 'pinyin', or 'onehot' (string)
+        form -- return results in hanzi, pinyin romanization?
+            can take values of 'hanzi', 'pinyin' (string)
         train_pct -- what percent of dataset should go to training (remainder goes to test)?  (float)
         rng_seed -- value for seeding random number generator
         min_length -- enforce a minimum length, in characters, for the 
@@ -142,14 +142,9 @@ def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, r
                                 romanize_tweet(post_text), min_length, 
                                 max_length, pad_out), post_deleted
                             yield record_txt, sentiment
-                        elif form=='onehot':
-                            record_txt, sentiment = enforce_length(
-                                romanize_tweet(post_text), min_length, 
-                                max_length, pad_out), post_deleted 
-                            yield text_to_one_hot(record_txt, vocabulary), sentiment
                         else:
-                            raise Exception("Unknown form '{}' (should be 'hanzi', "
-                                            "'pinyin', or 'onehot')".format(form))
+                            raise Exception("Unknown form '{}' (should be 'hanzi' "
+                                            "or 'pinyin')".format(form))
 
                 except TextTooShortException:
                     logger.info("Record {} thrown out (too short)".format(post_id))
@@ -167,15 +162,15 @@ def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, r
                 except GeneratorExit:
                     return
 
-def text_to_one_hot(txt, vocabulary=vocabulary):
-    # setup the vocabulary for one-hot encoding
-    vocab_chars = set(list(vocabulary))
-
-    # create the output list
-    chars = list(txt)
-    categorical_chars = pd.Categorical(chars, categories=vocab_chars)
-    vectorized_chars = np.array(pd.get_dummies(categorical_chars))
-    return vectorized_chars
+#def text_to_one_hot(txt, vocabulary=vocabulary):
+#    # setup the vocabulary for one-hot encoding
+#    vocab_chars = set(list(vocabulary))
+#
+#    # create the output list
+#    chars = list(txt)
+#    categorical_chars = pd.Categorical(chars, categories=vocab_chars)
+#    vectorized_chars = np.array(pd.get_dummies(categorical_chars))
+#    return vectorized_chars
 
 def romanize_tweet(txt):
     """
