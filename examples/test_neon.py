@@ -38,7 +38,7 @@ def get_imdb(batch_size, doclength,
     imdb_batches = batch_data(imdb_data, batch_size,
         normalizer_fun=lambda x: data_utils.normalize(x, max_length=doclength),
         transformer_fun=None)
-    (_, _), (train_size, test_size) = split_data(imdb_data, h5_path, overwrite_previous=False)
+    (_, _), (train_size, test_size) = split_data(imdb_batches, h5_path, overwrite_previous=False)
     def train_batcher():
         (a,b),(a_size,b_size)=split_data(None, h5_path=h5_path, overwrite_previous=False, shuffle=True)
         return batch_data(a,
