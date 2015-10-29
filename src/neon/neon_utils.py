@@ -62,12 +62,14 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         # get accuracy scores
         train_accuracy = self.model.eval(self.train_data, neon.transforms.Accuracy())
         test_accuracy = self.model.eval(self.test_data, neon.transforms.Accuracy())
+        test_confusion = self.model.eval(self.test_data, ConfusionMatrixBinary())
         # append and serialize
         self.train_accuracies.append(train_accuracy)
         self.test_accuracies.append(test_accuracy)
         train_test_acc = { 'train': self.train_accuracies,
                            'test' : self.test_accuracies }
         self.write_to_json(train_test_acc, self.save_path, "_accuracies")
+        self.writ
         # finish writing costs to disk
         self.write_to_json(self.costs, self.save_path, "_costs")
         # TODO:  plot loss over the epoch
@@ -112,18 +114,18 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
         self.hyps[:] = self.be.argmax(t, axis=0)
         self.outputs[:] = self.be.equal(self.preds, self.hyps)
 
-        conf_matrix = np.zeros((2,2), dtype=int)
+        conf_matrix = dict()
         predictions = self.preds.get()
         truth = self.hyps.get()
         matches = self.outputs.get()
         
         # true positives
-        conf_matrix[0,0] = np.sum(matches & truth)
+        conf_matrix['tp'] = np.sum(matches & truth)
         # true negatives
-        conf_matrix[1,1] = np.sum(matches & np.logical_not(truth))
+        conf_matrix['tn'] = np.sum(matches & np.logical_not(truth))
         # false positives
-        conf_matrix[0,1] = np.sum(np.logical_not(matches) & np.logical_not(truth))
+        conf_matrix['fp'] = np.sum(np.logical_not(matches) & np.logical_not(truth))
         # false negatives
-        conf_matrix[1,0] = np.sum(np.logical_not(matches) & truth)
+        conf_matrix['fn'] = np.sum(np.logical_not(matches) & truth)
 
         return conf_matrix
