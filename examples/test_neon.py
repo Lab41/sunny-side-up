@@ -30,6 +30,7 @@ import src.datasets.data_utils as data_utils
 from src.datasets.batch_data import batch_data, split_data
 from src.datasets.data_utils import from_one_hot
 from src.datasets.neon_iterator import DiskDataIterator
+from src.neon.neon_utils import ConfusionMatrixBinary
 
 def get_imdb(batch_size, doclength, 
              imdb_path="/root/data/pcallier/imdb/",
