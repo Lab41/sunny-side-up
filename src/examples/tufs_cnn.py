@@ -42,24 +42,24 @@ def model_defn():
     
     model = Sequential()
 
-    #alphabet x 1014
+    #Input = #alphabet x 1014
     model.add(Convolution2D(256,67,7,input_shape=(1,67,1014)))
     model.add(MaxPooling2D(pool_size=(1,3)))
 
-    #336 x 256
+    #Input = 336 x 256
     model.add(Convolution2D(256,1,7))
     model.add(MaxPooling2D(pool_size=(1,3)))
 
-    #110 x 256
+    #Input = 110 x 256
     model.add(Convolution2D(256,1,3))
 
-    #108 x 256
+    #Input = 108 x 256
     model.add(Convolution2D(256,1,3))
 
-    #106 x 256
+    #Input = 106 x 256
     model.add(Convolution2D(256,1,3))
 
-    #104 X 256
+    #Input = 104 X 256
     model.add(Convolution2D(256,1,3))
     model.add(MaxPooling2D(pool_size=(1,3)))
 
@@ -89,6 +89,15 @@ def model_defn():
 
 if __name__=="__main__":
 
+    #Set batch size for input data
+    batch_size = 128
+
+    #Set the number of epochs to run
+    num_epochs = 10
+
+    #Import model 
+    model,sgd = model_defn()
+
     # Get training and testing sets, and their sizes for the amazon dataset
     # from HDF5 file that uses an 80/20 train/test split 
     (amtr,amte),(amntr,amnte) = datasets, sizes = batch_data.split_data(None,
@@ -97,21 +106,14 @@ if __name__=="__main__":
     #Generator that outputs Amazon training data in batches with specificed parameters
     am_train_batch = batch_data.batch_data(amtr,normalizer_fun=lambda x: x,
         transformer_fun=lambda x: data_utils.to_one_hot(x[0]),
-        flatten=False, batch_size=128)
+        flatten=False, batch_size=batch_size)
 
     #Generator that outputs Amazon testing data in batches with specificed parameters
     am_test_batch = batch_data.batch_data(amte,normalizer_fun=lambda x: x,
         transformer_fun=lambda x: data_utils.to_one_hot(x[0]),
-        flatten=False, batch_size=128)
+        flatten=False, batch_size=batch_size)
 
-    #Import model 
-    model,sgd = model_defn()
-
-    #Set the number of epochs to run
-    num_epochs = 10
-    batch_size = 128
-    count = 0
-
+    #Begin runs of training and testing    
     for e in range(num_epochs):
         print('-'*10)
         print('Epoch', e)
@@ -125,28 +127,27 @@ if __name__=="__main__":
         progbar = generic_utils.Progbar(amntr)
 
         for X_batch, Y_batch in am_train_batch:
-            if (count > 3):
-                break
+
+            #Reshape input from a 3D Input to a 4D input for training    
             X_batch = X_batch[:,np.newaxis]
-            print("Optimizer learning rate", sgd.lr.get_value())
+            
             loss,acc = model.train_on_batch(X_batch, Y_batch, accuracy=True)
             progbar.add(batch_size, values=[("train loss", loss),("train acc",acc)])
-            model.save_weights('tufs_keras_weights.hd5',overwrite=True)
-            count = count + 1
+        
+        #Save the model every epoch into hd5 file    
+        model.save_weights('tufs_keras_weights.hd5',overwrite=True) 
 
         print("\nTesting...")
 
         progbar = generic_utils.Progbar(amnte)
 
-        count = 0
         for X_batch, Y_batch in am_test_batch:
-            if (count > 3):
-                break
+            
+            #Reshape input from a 3D Input to a 4D input for training
             X_batch = X_batch[:,np.newaxis]
+
             loss,acc = model.train_on_batch(X_batch, Y_batch, accuracy=True)
             progbar.add(batch_size, values=[("test loss", loss),("test acc",acc)])
-            count = count + 1   
-
-        count = 0
+             
         print("\n")
 
