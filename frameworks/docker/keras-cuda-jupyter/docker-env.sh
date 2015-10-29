@@ -1,3 +1,6 @@
+## TODO docker injects variables as is
+##      ensure all variables below are hardcoded and avoid string expansion
+##      (i.e. VAR="VAL" and VAR=$VAL will not expand; use VAR=VAL only)
 GIT_PARENT_DIR=FIXME
 GIT_REPO_NAME=FIXME
 GIT_BRANCH_NAME=FIXME
@@ -11,7 +14,7 @@ PORT_CNTR=8888
 VOL_HOST=/data
 VOL_CNTR=/data
 
-THEANO_FLAGS="mode=FAST_RUN,device=gpu1,floatX=float32"
+THEANO_FLAGS=mode=FAST_RUN,device=gpu1,floatX=float32
 
 
 ############################################################################
