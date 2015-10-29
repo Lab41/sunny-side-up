@@ -112,4 +112,18 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
         self.hyps[:] = self.be.argmax(t, axis=0)
         self.outputs[:] = self.be.equal(self.preds, self.hyps)
 
-        return self.outputs.get().mean()
+        conf_matrix = np.zeros((2,2), dtype=int)
+        predictions = self.preds.get()
+        truth = self.hyps.get()
+        matches = self.outputs.get()
+        
+        # true positives
+        conf_matrix[0,0] = np.sum(matches & truth)
+        # true negatives
+        conf_matrix[1,1] = np.sum(matches & np.logical_not(truth))
+        # false positives
+        conf_matrix[0,1] = np.sum(np.logical_not(matches) & np.logical_not(truth))
+        # false negatives
+        conf_matrix[1,0] = np.sum(np.logical_not(matches) & truth)
+
+        return conf_matrix
