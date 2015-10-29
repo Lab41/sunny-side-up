@@ -148,6 +148,8 @@ if __name__=="__main__":
         print('-'*10)
         print("Training...")
 
+        print("Optimizer learning rate", keras.optimizer.lr.get_value())
+
         progbar = generic_utils.Progbar(amntr)
 
         
@@ -167,6 +169,7 @@ if __name__=="__main__":
         for X_batch, Y_batch in am_test_batch:
             #if (count > 10):
             #    break
+            X_batch = X_batch[:,np.newaxis]
             loss,acc = model.train_on_batch(X_batch, Y_batch, accuracy=True)
             progbar.add(128, values=[("test loss", loss),("test acc",acc)])
             count = count + 1   
