@@ -127,8 +127,12 @@ if __name__=="__main__":
         normalizer_fun=None,transformer_fun=None)
     '''
     reviews,labels = am_train_batch.next()
-    print(reviews[0].sum(axis=1))
+    
+    #print(reviews[0].sum(axis=1))
+    print(type(reviews))
     print("shape of stuffs",reviews.shape)
+    trans = reviews[:,np.newaxis]
+    print("Transformed shape", trans.shape)
     #trans = numpy.array(map(lambda x:numpy.array((x,x*2,x*3)), my_ar))
     #print("sizes of train", amntr)
     #print("sizes of test", amnte)
@@ -150,6 +154,7 @@ if __name__=="__main__":
         for X_batch, Y_batch in am_train_batch:
             #if (count > 10):
             #    break
+            X_batch = X_batch[:,np.newaxis]
             loss,acc = model.train_on_batch(X_batch, Y_batch, accuracy=True)
             progbar.add(128, values=[("train loss", loss),("train acc",acc)])
             #model.save_weights('testSave.hd5',overwrite=True)
