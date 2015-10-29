@@ -84,3 +84,32 @@ class NeonCallbacks(neon.callbacks.callbacks.Callbacks):
                                        metrics_path))
                                        
 
+class ConfusionMatrixBinary(neon.transforms.cost.Metric):
+
+    """
+    Compute the confusion matrix for a binary problem
+    """
+
+    def __init__(self):
+        self.preds = self.be.iobuf(1)
+        self.hyps = self.be.iobuf(1)
+        self.outputs = self.preds  # Contains per record metric
+        self.metric_names = ['ConfusionMatrixBinary']
+
+    def __call__(self, y, t):
+        """
+        Compute the accuracy metric
+
+        Args:
+            y (Tensor or OpTree): Output of previous layer or model
+            t (Tensor or OpTree): True targets corresponding to y
+
+        Returns:
+            numpy.array: Returns the metric
+        """
+        # convert back from onehot and compare
+        self.preds[:] = self.be.argmax(y, axis=0)
+        self.hyps[:] = self.be.argmax(t, axis=0)
+        self.outputs[:] = self.be.equal(self.preds, self.hyps)
+
+        return self.outputs.get().mean()
