@@ -75,12 +75,12 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         """Get train/test accuracy, produce
         epoch-wide charts of loss per minibatch"""
         # get accuracy scores
+        logger.info("Computing confusions")
+        test_confusion = self.conf_matrix_binary.get(self.model, self.test_data)
         logger.info("Computing training accuracy")
         train_accuracy = self.model.eval(self.train_data, neon.transforms.Accuracy()).tolist()
         logger.info("Computing testing accuracy")
         test_accuracy = self.model.eval(self.test_data, neon.transforms.Accuracy()).tolist()
-        logger.info("Computing confusions")
-        test_confusion = self.conf_matrix_binary.get(self.model, self.test_data)
         # append and serialize to disk
         self.train_accuracies.append(train_accuracy)
         self.test_accuracies.append(test_accuracy)
@@ -142,7 +142,7 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
         conf_matrix = dict()
         predictions = self.preds.get().astype(bool)
         truth = self.hyps.get().astype(bool)
-        matches = self.outputs.get().astype(bool)
+        matches = self.matches.get().astype(bool)
         
         # true positives
         conf_matrix['tp'] = np.sum(matches & truth)
