@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 import numpy as np
 import neon
-import matplotlib
+#import matplotlib
 #import sklearn.metrics
 
 class NeonCallback(neon.callbacks.callbacks.Callback):
@@ -24,18 +24,18 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
             - confusion matrix
     """
     def __init__(self, model, train_data, test_data, save_path):
+        self.conf_matrix_binary = ConfusionMatrixBinary()
+        super(NeonCallback, self).__init__()
         self.model = model
         self.train_data = train_data
         self.test_data = test_data
-        self.old_cost = 0
+        self.old_cost = self.be.zeros((1,1))
         self.save_path = save_path
         #self.minibatch_freq = minibatch_freq
         self.costs = []
         self.train_accuracies = []
         self.test_accuracies = []
         self.test_confusions = []
-        self.conf_matrix_binary = ConfusionMatrixBinary()
-        super(NeonCallback, self).__init__()
     
     @staticmethod
     def write_to_json(obj, path_base, path_decorator):
@@ -55,31 +55,33 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         """Check if it's time to do our metrics!"""
         # get cost
         new_cost = self.model.total_cost - self.old_cost
+        # fiddle with neon's MOP abstractions to get the metric out
+        cost_container = self.be.zeros((1,1))
+        cost_container[:] = new_cost
+        new_cost_scalar = float(cost_container.get()[0,0])
+        #logger.debug(new_cost_scalar)
         # add to costs structure
         if epoch >= len(self.costs):
             self.costs.append([])
             logger.debug("Epoch {}, adding to costs list, now len {}".format(epoch,len(self.costs)))
-        self.costs[epoch].append(new_cost)
-        self.old_cost = new_cost
+        self.costs[epoch].append(new_cost_scalar)
+        # save total cost to placeholder to compute difference in next batch
+        self.old_cost[:] = self.model.total_cost
         # serialize every so often
-        if len(self.costs[epoch]) % 1000 == 0:
+        if len(self.costs[epoch]) % 500 == 0:
             self.write_to_json(self.costs, self.save_path, "_costs")
 
     def on_epoch_end(self, epoch):
         """Get train/test accuracy, produce
         epoch-wide charts of loss per minibatch"""
-        # get accuracy scores and otehr metrics
-        # run through data to get results
-        #self.test_data.reset()
-        #confusion_partial = {'fn': 0, 'fp': 0, 'tn': 0, 'tp': 0}
-        #for x, t in self.test_data
-        #    y = self.model.fprop(x, t)
-        #    confusion
+        # get accuracy scores
+        logger.info("Computing training accuracy")
         train_accuracy = self.model.eval(self.train_data, neon.transforms.Accuracy()).tolist()
+        logger.info("Computing testing accuracy")
         test_accuracy = self.model.eval(self.test_data, neon.transforms.Accuracy()).tolist()
+        logger.info("Computing confusions")
         test_confusion = self.conf_matrix_binary.get(self.model, self.test_data)
-        logger.warning("Confusion: {}".format(test_confusion))
-        # append and serialize
+        # append and serialize to disk
         self.train_accuracies.append(train_accuracy)
         self.test_accuracies.append(test_accuracy)
         self.test_confusions.append(test_confusion)
@@ -106,7 +108,6 @@ class NeonCallbacks(neon.callbacks.callbacks.Callbacks):
         super(NeonCallbacks, self).__init__(model, train_set, output_file,
             valid_set, valid_freq, progress_bar)
         self.valid_set = valid_set
-                                       
 
 class ConfusionMatrixBinary(neon.transforms.cost.Metric):
 
@@ -124,7 +125,7 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
 
     def __call__(self, y, t):
         """
-        Compute the accuracy metric
+        Compute the confusion matrix metric
 
         Args:
             y (Tensor or OpTree): Output of previous layer or model
@@ -141,9 +142,7 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
         conf_matrix = dict()
         predictions = self.preds.get().astype(bool)
         truth = self.hyps.get().astype(bool)
-        matches = self.matches.get().astype(bool)
-        #logger.debug(matches)
-        #logger.debug(truth)
+        matches = self.outputs.get().astype(bool)
         
         # true positives
         conf_matrix['tp'] = np.sum(matches & truth)
@@ -168,6 +167,5 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
             conf_matrix = { a: conf_matrix[a] + new_conf_matrix[a] for a in conf_matrix.keys() }
             running_sums[0] += np.sum([1 for a in np.nditer(t.get()) if a == 1.])
             running_sums[1] += np.sum([1 for a in np.nditer(t.get()) if a == 0.])
-        logger.debug(t.get())
         return conf_matrix
 
