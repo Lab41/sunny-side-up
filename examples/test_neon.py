@@ -190,18 +190,18 @@ def crepe_model(nvocab=67, nframes=256, batch_norm=True):
     ]
     return layers
 
-def do_model(get_data=get_imdb, base_dir="/root/data/pcallier/imdb/"):
+def do_model(get_data, base_dir):
     batch_size=64
     doc_length=1014
     vocab_size=67
-    gpu_id=0
+    gpu_id=1
     nframes=256
 
     present_time = datetime.datetime.strftime(datetime.datetime.now(),"%m%d_%I%p")
     model_state_path=os.path.join(base_dir, "neon_crepe_model_{}.pkl".format(present_time))
     model_weights_history_path=os.path.join(base_dir, "neon_crepe_weights_{}.pkl".format(present_time))
     logger.info("Getting backend...")
-    be = gen_backend(backend='gpu', batch_size=batch_size, device_id=0)
+    be = gen_backend(backend='gpu', batch_size=batch_size, device_id=gpu_id)
     logger.info("Getting data...")
     (train_get, test_get), (train_size, test_size) = get_data(batch_size, doc_length)
     train_batch_beta = test_get()
@@ -219,7 +219,7 @@ def do_model(get_data=get_imdb, base_dir="/root/data/pcallier/imdb/"):
 
     cost = neon.layers.GeneralizedCost(neon.transforms.CrossEntropyBinary())
     callbacks = NeonCallbacks(mlp,train_iter,valid_set=test_iter,valid_freq=3,progress_bar=True)
-    callbacks.add_neon_callback(metrics_path="/root/data/pcallier/imdb/", insert_pos=0)
+    callbacks.add_neon_callback(metrics_path=os.path.join(base_dir, "metrics.json"), insert_pos=0)
     callbacks.add_save_best_state_callback(model_state_path)
     callbacks.add_serialize_callback(1, model_weights_history_path,history=5)
 
@@ -234,7 +234,7 @@ def do_model(get_data=get_imdb, base_dir="/root/data/pcallier/imdb/"):
     logger.info("Testing accuracy: {}".format(mlp.eval(test_iter, metric=neon.transforms.Accuracy())))
 
 def main():
-    do_model(get_imdb)
+    do_model(get_amazon, base_dir="/root/data/pcallier/amazon/")
 
 if __name__=="__main__":
     main()
