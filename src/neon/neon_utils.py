@@ -76,7 +76,7 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         train_test_acc = { 'train': self.train_accuracies,
                            'test' : self.test_accuracies }
         self.write_to_json(train_test_acc, self.save_path, "_accuracies")
-        self.writ
+        self.write_to_json(test_confusion, self.save_path, "_confusions")
         # finish writing costs to disk
         self.write_to_json(self.costs, self.save_path, "_costs")
         # TODO:  plot loss over the epoch
