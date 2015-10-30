@@ -34,6 +34,10 @@ ADD config/jupyter/extensions/github_commit_push.py /root/.local/share/jupyter/e
 ADD config/ssh /root/.ssh
 
 
+# customize Jupyter's logo
+ADD config/jupyter/logo.png /usr/local/lib/python2.7/dist-packages/notebook/static/base/images/logo.png
+
+
 # default to jupyter notebook
 ADD config/jupyter/run/notebook.sh /notebook.sh
 CMD ["/notebook.sh"]
