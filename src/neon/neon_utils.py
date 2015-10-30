@@ -6,7 +6,7 @@ evaluation of neon models"""
 import os
 import json
 import neon
-import matplotlib
+#import matplotlib
 #import sklearn.metrics
 
 class NeonCallback(neon.callbacks.callbacks.Callback):
@@ -22,7 +22,7 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         self.model = model
         self.train_data = train_data
         self.test_data = test_data
-        self.old_cost = 0
+        self.old_cost = self.be.zeros((1,1))
         self.save_path = save_path
         #self.minibatch_freq = minibatch_freq
         self.costs = []
@@ -47,13 +47,20 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         """Check if it's time to do our metrics!"""
         # get cost
         new_cost = self.model.total_cost - self.old_cost
+        # fiddle with neon's MOP abstractions to get the metric out
+        cost_container = self.be.zeros((1,1))
+        cost_container[:] = new_cost
+        new_cost_scalar = float(cost_container.get()[0,0])
+        #logger.debug(new_cost_scalar)
         # add to costs structure
         if epoch > len(self.costs):
             self.costs.append([])
-        self.costs[epoch].append(new_cost)
-        self.old_cost = new_cost
+            logger.debug("Epoch {}, adding to costs list, now len {}".format(epoch,len(self.costs)))
+        self.costs[epoch].append(new_cost_scalar)
+        # save total cost to placeholder to compute difference in next batch
+        self.old_cost[:] = self.model.total_cost
         # serialize every so often
-        if len(self.costs[epoch]) % 1000 == 0:
+        if len(self.costs[epoch]) % 100 == 0:
             self.write_to_json(self.costs, self.save_path, "_costs")
 
     def on_epoch_end(self, epoch, epochs):
@@ -129,3 +136,16 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
         conf_matrix['fn'] = np.sum(np.logical_not(matches) & truth)
 
         return conf_matrix
+
+    def get(self, model, data):
+        data.reset()
+        conf_matrix = {'tp':0, 'fp':0, 'tn':0, 'fn':0}
+        running_sums = [0,0]
+        for x,t in data:
+            y = model.fprop(x, t)
+            new_conf_matrix = self(y, t)
+            conf_matrix = { a: conf_matrix[a] + new_conf_matrix[a] for a in conf_matrix.keys() }
+            running_sums[0] += np.sum([1 for a in np.nditer(t.get()) if a == 1.])
+            running_sums[1] += np.sum([1 for a in np.nditer(t.get()) if a == 0.])
+        return conf_matrix
+
