@@ -97,6 +97,17 @@ def from_one_hot(oh, vocab=zhang_lecun_vocab):
             txt.append(" ")
     return txt
 
+def index_as_one_hot(indices, axis=0, dtype=np.int32):
+    encoding_size = np.max(indices)
+    encoding_length = len(indices)
+    encoded_indices = []
+    for index in indices:
+        encoded_index = np.zeros(encoding_length, dtype)
+        encoded_index[index] = 1
+        encoded_indices.append(encoded_index)
+    onehot_encoding = np.concatenate(encoded_indices, axis=axis)
+    return onehot_encoding
+
 def latin_csv_reader(csv_data, dialect=csv.excel, **kwargs):
     ''' Function that takes an opened CSV file with
         ASCII or UTF-8 encoding and convert's to Latin-1
