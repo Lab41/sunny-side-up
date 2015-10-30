@@ -24,7 +24,7 @@ import gzip
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.DEBUG)
 
 from neon import NervanaObject
 
@@ -97,15 +97,15 @@ class DiskDataIterator(NervanaObject):
             bsz = i2 - i1
             # TODO: implement wraparound. as of now, partial batches are discarded
             X, y = next(self.datagen)
-            logger.debug("Dest shape: {}, Src shape: {}, Xbuf flat shape: {}, Xbuf shape: {}"
-                        "\nY labels shape: {}, Y buffer shape: {}, Y input shape: {}".format(
-                    self.xlabels.shape,
-                    X.T.shape,
-                    self.Xbuf_flat.shape,
-                    self.Xbuf.shape,
-                    self.ylabels.shape,
-                    self.ybuf.shape,
-                    y.shape))
+            #logger.debug("Dest shape: {}, Src shape: {}, Xbuf flat shape: {}, Xbuf shape: {}"
+            #            "\nY labels shape: {}, Y buffer shape: {}, Y input shape: {}".format(
+            #        self.xlabels.shape,
+            #        X.T.shape,
+            #       self.Xbuf_flat.shape,
+            #        self.Xbuf.shape,
+            #        self.ylabels.shape,
+            #        self.ybuf.shape,
+            #        y.shape))
             # This is where data is copied from host memory
             # to the backend. For some reason, it is
             # best to transpose it. X is expected to 
@@ -114,8 +114,16 @@ class DiskDataIterator(NervanaObject):
             # y is expected to come as a count-from-zero integer,
             # which we convert to one-hot encoding here
             self.ylabels[:] = y.T.copy()
+            ylabels = self.ylabels.get()
+            logger.debug(ylabels.T.shape)
+            zerosum=np.sum([1 for _ in np.nditer(ylabels) if _ == 0])
+            onesum=np.sum([1 for _ in np.nditer(ylabels) if _ == 1])
+            othersum=np.sum([1 for _ in np.nditer(ylabels) if _ not in (0, 1)])
+            #logger.debug("Num 0: {}, Num 1: {}, Other: {}".format(zerosum, onesum, othersum))
             self.Xbuf[:] = X.T.copy()
             self.ybuf[:] = self.be.onehot(self.ylabels, axis=0)
+            logger.debug(y.T.shape)
+            logger.debug(np.concatenate((y, ylabels.T, self.ybuf.get().T), axis=1))
             yield (self.Xbuf, self.ybuf)
 
 

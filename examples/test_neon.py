@@ -14,6 +14,8 @@ logging.basicConfig()
 logger=logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+import numpy as np
+
 import neon
 import neon.layers
 import neon.initializers
@@ -30,7 +32,7 @@ import src.datasets.data_utils as data_utils
 from src.datasets.batch_data import batch_data, split_data
 from src.datasets.data_utils import from_one_hot
 from src.datasets.neon_iterator import DiskDataIterator
-from src.neon.neon_utils import ConfusionMatrixBinary
+from src.neon.neon_utils import ConfusionMatrixBinary, NeonCallbacks, NeonCallback
 
 def get_imdb(batch_size, doclength, 
              imdb_path="/root/data/pcallier/imdb/",
@@ -216,7 +218,8 @@ def do_model(get_data=get_imdb, base_dir="/root/data/pcallier/imdb/"):
     mlp = neon.models.Model(model_layers)
 
     cost = neon.layers.GeneralizedCost(neon.transforms.CrossEntropyBinary())
-    callbacks = Callbacks(mlp,train_iter,valid_set=test_iter,valid_freq=3,progress_bar=True)
+    callbacks = NeonCallbacks(mlp,train_iter,valid_set=test_iter,valid_freq=3,progress_bar=True)
+    callbacks.add_neon_callback(metrics_path="/root/data/pcallier/imdb/", insert_pos=0)
     callbacks.add_save_best_state_callback(model_state_path)
     callbacks.add_serialize_callback(1, model_weights_history_path,history=5)
 

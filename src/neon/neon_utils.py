@@ -5,6 +5,11 @@ evaluation of neon models"""
 
 import os
 import json
+import logging
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+import numpy as np
 import neon
 import matplotlib
 #import sklearn.metrics
@@ -28,8 +33,11 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         self.costs = []
         self.train_accuracies = []
         self.test_accuracies = []
+        self.test_confusions = []
+        self.conf_matrix_binary = ConfusionMatrixBinary()
+        super(NeonCallback, self).__init__()
     
-
+    @staticmethod
     def write_to_json(obj, path_base, path_decorator):
         """
         Writes (or overwrites) a JSON file located via a regular 
@@ -48,28 +56,37 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         # get cost
         new_cost = self.model.total_cost - self.old_cost
         # add to costs structure
-        if epoch > len(self.costs):
+        if epoch >= len(self.costs):
             self.costs.append([])
+            logger.debug("Epoch {}, adding to costs list, now len {}".format(epoch,len(self.costs)))
         self.costs[epoch].append(new_cost)
         self.old_cost = new_cost
         # serialize every so often
         if len(self.costs[epoch]) % 1000 == 0:
             self.write_to_json(self.costs, self.save_path, "_costs")
 
-    def on_epoch_end(self, epoch, epochs):
+    def on_epoch_end(self, epoch):
         """Get train/test accuracy, produce
         epoch-wide charts of loss per minibatch"""
-        # get accuracy scores
-        train_accuracy = self.model.eval(self.train_data, neon.transforms.Accuracy())
-        test_accuracy = self.model.eval(self.test_data, neon.transforms.Accuracy())
-        test_confusion = self.model.eval(self.test_data, ConfusionMatrixBinary())
+        # get accuracy scores and otehr metrics
+        # run through data to get results
+        #self.test_data.reset()
+        #confusion_partial = {'fn': 0, 'fp': 0, 'tn': 0, 'tp': 0}
+        #for x, t in self.test_data
+        #    y = self.model.fprop(x, t)
+        #    confusion
+        train_accuracy = self.model.eval(self.train_data, neon.transforms.Accuracy()).tolist()
+        test_accuracy = self.model.eval(self.test_data, neon.transforms.Accuracy()).tolist()
+        test_confusion = self.conf_matrix_binary.get(self.model, self.test_data)
+        logger.warning("Confusion: {}".format(test_confusion))
         # append and serialize
         self.train_accuracies.append(train_accuracy)
         self.test_accuracies.append(test_accuracy)
+        self.test_confusions.append(test_confusion)
         train_test_acc = { 'train': self.train_accuracies,
                            'test' : self.test_accuracies }
         self.write_to_json(train_test_acc, self.save_path, "_accuracies")
-        self.writ
+        self.write_to_json(self.test_confusions, self.save_path, "_confusions")
         # finish writing costs to disk
         self.write_to_json(self.costs, self.save_path, "_costs")
         # TODO:  plot loss over the epoch
@@ -79,11 +96,16 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
             
 
 class NeonCallbacks(neon.callbacks.callbacks.Callbacks):
-    def add_neon_callback(self, metrics_path):
+    def add_neon_callback(self, metrics_path, **kwargs):
         self.add_callback(NeonCallback(self.model,
                                        self.train_set,
                                        self.valid_set,
-                                       metrics_path))
+                                       metrics_path), **kwargs)
+    def __init__(self, model, train_set, output_file=None, valid_set=None,
+                 valid_freq=None, progress_bar=True):
+        super(NeonCallbacks, self).__init__(model, train_set, output_file,
+            valid_set, valid_freq, progress_bar)
+        self.valid_set = valid_set
                                        
 
 class ConfusionMatrixBinary(neon.transforms.cost.Metric):
@@ -95,8 +117,10 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
     def __init__(self):
         self.preds = self.be.iobuf(1)
         self.hyps = self.be.iobuf(1)
-        self.outputs = self.preds  # Contains per record metric
+        self.matches = self.be.iobuf(1)
+        self.outputs = self.be.zeros((2,2))
         self.metric_names = ['ConfusionMatrixBinary']
+        logger.debug("Initting ConfusionMatrixBinary metric")
 
     def __call__(self, y, t):
         """
@@ -107,17 +131,19 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
             t (Tensor or OpTree): True targets corresponding to y
 
         Returns:
-            numpy.array: Returns the metric
+            dict: Returns the metric
         """
         # convert back from onehot and compare
         self.preds[:] = self.be.argmax(y, axis=0)
         self.hyps[:] = self.be.argmax(t, axis=0)
-        self.outputs[:] = self.be.equal(self.preds, self.hyps)
+        self.matches[:] = self.be.equal(self.preds, self.hyps)
 
         conf_matrix = dict()
-        predictions = self.preds.get()
-        truth = self.hyps.get()
-        matches = self.outputs.get()
+        predictions = self.preds.get().astype(bool)
+        truth = self.hyps.get().astype(bool)
+        matches = self.matches.get().astype(bool)
+        #logger.debug(matches)
+        #logger.debug(truth)
         
         # true positives
         conf_matrix['tp'] = np.sum(matches & truth)
@@ -128,4 +154,20 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
         # false negatives
         conf_matrix['fn'] = np.sum(np.logical_not(matches) & truth)
 
+        self.outputs[:] = np.array([[conf_matrix['tp'], conf_matrix['fp']],[conf_matrix['fn'], conf_matrix['tn']]])
+
         return conf_matrix
+
+    def get(self, model, data):
+        data.reset()
+        conf_matrix = {'tp':0, 'fp':0, 'tn':0, 'fn':0}
+        running_sums = [0,0]
+        for x,t in data:
+            y = model.fprop(x, t)
+            new_conf_matrix = self(y, t)
+            conf_matrix = { a: conf_matrix[a] + new_conf_matrix[a] for a in conf_matrix.keys() }
+            running_sums[0] += np.sum([1 for a in np.nditer(t.get()) if a == 1.])
+            running_sums[1] += np.sum([1 for a in np.nditer(t.get()) if a == 0.])
+        logger.debug(t.get())
+        return conf_matrix
+
