@@ -120,6 +120,7 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
     def __init__(self):
         self.preds = self.be.iobuf(1)
         self.hyps = self.be.iobuf(1)
+        self.matches = self.be.iobuf(1)
         self.outputs = self.be.zeros((2,2))
         self.metric_names = ['ConfusionMatrixBinary']
         logger.debug("Initting ConfusionMatrixBinary metric")
