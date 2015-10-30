@@ -35,9 +35,9 @@ from src.datasets.neon_iterator import DiskDataIterator
 from src.neon.neon_utils import ConfusionMatrixBinary, NeonCallbacks, NeonCallback
 
 def get_imdb(batch_size, doclength, 
-             imdb_path="/root/data/pcallier/imdb/",
-             h5_path="/root/data/pcallier/imdb/imdb_split.hd5"):
-    imdb_data = imdb.load_data(imdb_path, None)
+             data_path,
+             h5_path):
+    imdb_data = imdb.load_data(data_path, None)
     imdb_batches = batch_data(imdb_data, batch_size,
         normalizer_fun=lambda x: data_utils.normalize(x, max_length=doclength),
         transformer_fun=None)
@@ -59,13 +59,11 @@ def get_imdb(batch_size, doclength,
 
     return (train_batcher, test_batcher), (train_size, test_size)
 
-def get_amazon(batch_size, doclength, 
-             amazon_path="/root/data/amazon/reviews_Home_and_Kitchen.json.gz",
-             h5_repo="/root/data/pcallier/amazon/home_kitch_split.hd5"):
+def get_amazon(batch_size, doclength, data_path, h5_path):
     # batch data and split it to HDF5
     # the generators obtained here are not 
     # used except for debugging
-    amz_data = batch_data(amazon.load_data(amazon_path),
+    amz_data = batch_data(amazon.load_data(data_path),
         batch_size=batch_size,
         normalizer_fun=lambda x: data_utils.normalize(x, max_length=doclength),
         transformer_fun=None)
@@ -80,7 +78,7 @@ def get_amazon(batch_size, doclength,
     # these functions are returned, alongside the batch sizes
     def a_batcher():
         (a,b),(a_size,b_size)=split_data(None, 
-            h5_path=h5_repo, 
+            h5_path=h5_path, 
             overwrite_previous=False, 
             shuffle=True)
         return batch_data(a, 
@@ -89,7 +87,7 @@ def get_amazon(batch_size, doclength,
             flatten=True,
             batch_size=batch_size)
     def b_batcher():
-        (a,b),(a_size,b_size)=split_data(None, h5_path=h5_repo, overwrite_previous=False)
+        (a,b),(a_size,b_size)=split_data(None, h5_path=h5_path, overwrite_previous=False)
         return batch_data(b, 
             normalizer_fun=lambda x: x, 
             transformer_fun=lambda x: data_utils.to_one_hot(x[0]), 
@@ -190,7 +188,7 @@ def crepe_model(nvocab=67, nframes=256, batch_norm=True):
     ]
     return layers
 
-def do_model(get_data, base_dir):
+def do_model(get_data, base_dir, data_filename, hdf5_name):
     batch_size=64
     doc_length=1014
     vocab_size=67
@@ -203,7 +201,11 @@ def do_model(get_data, base_dir):
     logger.info("Getting backend...")
     be = gen_backend(backend='gpu', batch_size=batch_size, device_id=gpu_id)
     logger.info("Getting data...")
-    (train_get, test_get), (train_size, test_size) = get_data(batch_size, doc_length)
+
+    data_path = os.path.join(base_dir, data_filename)
+    hdf5_path = os.path.join(base_dir, hdf5_name)
+    (train_get, test_get), (train_size, test_size) = get_data(batch_size, doc_length,
+        data_path, hdf5_path)
     train_batch_beta = test_get()
     logger.debug("First record shape: {}".format(train_batch_beta.next()[0].shape))
 
@@ -234,7 +236,14 @@ def do_model(get_data, base_dir):
     logger.info("Testing accuracy: {}".format(mlp.eval(test_iter, metric=neon.transforms.Accuracy())))
 
 def main():
-    do_model(get_amazon, base_dir="/root/data/pcallier/amazon/")
+    #do_model(get_amazon, 
+    #    base_dir="/root/data/pcallier/amazon/", 
+    #    data_filename="reviews_Health_and_Personal_Care.json.gz",
+    #    hdf5_name="home_kitch_split.hd5")
+    do_model(get_imdb,
+        base_dir="/root/data/pcallier/imdb",
+        data_filename="",
+        hdf5_name="imdb_split.hd5")
 
 if __name__=="__main__":
     main()
