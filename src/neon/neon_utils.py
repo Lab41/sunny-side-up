@@ -28,6 +28,7 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         self.costs = []
         self.train_accuracies = []
         self.test_accuracies = []
+        self.test_confusions = []
     
 
     def write_to_json(obj, path_base, path_decorator):
@@ -63,20 +64,21 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         if len(self.costs[epoch]) % 100 == 0:
             self.write_to_json(self.costs, self.save_path, "_costs")
 
+
     def on_epoch_end(self, epoch, epochs):
         """Get train/test accuracy, produce
         epoch-wide charts of loss per minibatch"""
         # get accuracy scores
         train_accuracy = self.model.eval(self.train_data, neon.transforms.Accuracy())
-        test_accuracy = self.model.eval(self.test_data, neon.transforms.Accuracy())
         test_confusion = self.model.eval(self.test_data, ConfusionMatrixBinary())
         # append and serialize
         self.train_accuracies.append(train_accuracy)
         self.test_accuracies.append(test_accuracy)
+        self.test_confusions.append(test_confusion)
         train_test_acc = { 'train': self.train_accuracies,
                            'test' : self.test_accuracies }
         self.write_to_json(train_test_acc, self.save_path, "_accuracies")
-        self.write_to_json(test_confusion, self.save_path, "_confusions")
+        self.write_to_json(test_confusions, self.save_path, "_confusions")
         # finish writing costs to disk
         self.write_to_json(self.costs, self.save_path, "_costs")
         # TODO:  plot loss over the epoch
