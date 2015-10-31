@@ -82,7 +82,7 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         #train_accuracy = self.model.eval(self.train_data, neon.transforms.Accuracy()).tolist()
         logger.info("Computing testing accuracy")
         #test_accuracy = self.model.eval(self.test_data, neon.transforms.Accuracy()).tolist()
-        test_accuracy = (test_confusion['tn'] + test_confusion['tp']) / sum(test_confusion.values())
+        test_accuracy = float(test_confusion['tn'] + test_confusion['tp']) / float(sum(test_confusion.values()))
         # append and serialize to disk
         self.train_accuracies.append(train_accuracy)
         self.test_accuracies.append(test_accuracy)
