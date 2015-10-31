@@ -77,10 +77,12 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         # get accuracy scores
         logger.info("Computing confusions")
         test_confusion = self.conf_matrix_binary.get(self.model, self.test_data)
-        logger.info("Computing training accuracy")
-        train_accuracy = self.model.eval(self.train_data, neon.transforms.Accuracy()).tolist()
+        # Training accuracy is really slow
+        #logger.info("Computing training accuracy")
+        #train_accuracy = self.model.eval(self.train_data, neon.transforms.Accuracy()).tolist()
         logger.info("Computing testing accuracy")
-        test_accuracy = self.model.eval(self.test_data, neon.transforms.Accuracy()).tolist()
+        #test_accuracy = self.model.eval(self.test_data, neon.transforms.Accuracy()).tolist()
+        test_accuracy = (test_confusion['tn'] + test_confusion['tp']) / sum(test_confusion.values())
         # append and serialize to disk
         self.train_accuracies.append(train_accuracy)
         self.test_accuracies.append(test_accuracy)
@@ -158,11 +160,16 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
         return conf_matrix
 
     def get(self, model, data):
+        """
+        neon's ordinary metric interface is too convoluted for ordinary
+        mortals, so this function takes a model and some data
+        and calculates the accuracy on that data.
+        """
         data.reset()
         conf_matrix = {'tp':0, 'fp':0, 'tn':0, 'fn':0}
         running_sums = [0,0]
         for x,t in data:
-            y = model.fprop(x, t)
+            y = model.fprop(x, t, inference=True)
             new_conf_matrix = self(y, t)
             conf_matrix = { a: conf_matrix[a] + new_conf_matrix[a] for a in conf_matrix.keys() }
             running_sums[0] += np.sum([1 for a in np.nditer(t.get()) if a == 1.])
