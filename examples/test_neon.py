@@ -68,7 +68,7 @@ def get_amazon(batch_size, doclength, data_path, h5_path):
         normalizer_fun=lambda x: data_utils.normalize(x, max_length=doclength),
         transformer_fun=None)
     (a, b), (a_size, b_size) = split_data(amz_data, 
-                      h5_path=h5_repo,
+                      h5_path=h5_path,
                       overwrite_previous=False)
     logger.debug("Test iteration (shape of one record): {}".format(iter(a).next()[0].shape))
     logger.debug("Test iteration (one record): {}".format(iter(a).next()[0]))
@@ -236,14 +236,14 @@ def do_model(get_data, base_dir, data_filename, hdf5_name):
     logger.info("Testing accuracy: {}".format(mlp.eval(test_iter, metric=neon.transforms.Accuracy())))
 
 def main():
-    #do_model(get_amazon, 
-    #    base_dir="/root/data/pcallier/amazon/", 
-    #    data_filename="reviews_Health_and_Personal_Care.json.gz",
-    #    hdf5_name="home_kitch_split.hd5")
-    do_model(get_imdb,
-        base_dir="/root/data/pcallier/imdb",
-        data_filename="",
-        hdf5_name="imdb_split.hd5")
+    do_model(get_amazon, 
+        base_dir="/root/data/pcallier/amazon/", 
+        data_filename="reviews_Health_and_Personal_Care.json.gz",
+        hdf5_name="home_kitch_split.hd5")
+    #do_model(get_imdb,
+    #    base_dir="/root/data/pcallier/imdb",
+    #    data_filename="",
+    #    hdf5_name="imdb_split.hd5")
 
 if __name__=="__main__":
     main()
