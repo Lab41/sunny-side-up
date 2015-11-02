@@ -43,13 +43,13 @@ $(document).ready(function () {
 .accordion-toggle:after {
     /* symbol for "opening" panels */
     font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
-    content: "\e252";    /* adjust as needed, taken from bootstrap.css */
+    content: "\25b2";    /* adjust as needed, taken from bootstrap.css */
     float: right;        /* adjust as needed */
     color: grey;         /* adjust as needed */
 }
 .accordion-toggle.collapsed:after {
     /* symbol for "collapsed" panels */
-    content: "\e251";    /* adjust as needed, taken from bootstrap.css */
+    content: "\25bc";    /* adjust as needed, taken from bootstrap.css */
 }
 
 .explanation {
@@ -58,7 +58,7 @@ $(document).ready(function () {
 }
 
 h1 {
-	font-size: 24px;	
+	font-size: 24px;
 }
 
 h2 {
@@ -164,15 +164,15 @@ td.tweet {
 <div class="panel-heading"><strong>تعليمات</strong></div>
 
 <div class="panel-body" dir="rtl" lang="ar">
-      
-<!-- Overall instructions --> 
+
+<!-- Overall instructions -->
       <h4 class="panel-title">
         <a class="accordion-toggle" data-toggle="collapse" href="#overallInstructions">
-        Overall Instructions
+          <img src="http://res.cloudinary.com/lab41/image/upload/InstructionsHeadingOverall.png">
         </a>
       </h4>
 <div id="overallInstructions" class= "collapse in">
-<img src="InstructionsOverall.png" style="max-width:120%;"/>
+<img src="http://res.cloudinary.com/lab41/image/upload/InstructionsOverall.png" style="max-width:120%;"/>
 
 <!--<p>You will categorize each Tweet into one of the following five categories:</p>-->
 </div>
@@ -180,54 +180,54 @@ td.tweet {
 <!-- Objective or Neutral Sentiment -->
       <h4 class="panel-title">
         <a  class="accordion-toggle" data-toggle="collapse" href="#objectiveSentiment">
-        <img src="InstructionsHeading1.png" />
+        <img src="http://res.cloudinary.com/lab41/image/upload/InstructionsHeading1.png" />
         </a>
       </h4>
 <div id="objectiveSentiment" class= "collapse in">
 <!-- <h2>(1) 	احساس عام موضوعي او محايد </h2> -->
-<img src="InstructionsSection1.png" />
+<img src="http://res.cloudinary.com/lab41/image/upload/InstructionsSection1.png" />
 </div>
 
 <!-- Positive tweets -->
       <h4 class="panel-title">
         <a  class="accordion-toggle" data-toggle="collapse" href="#positiveSentiment">
-        <img src="InstructionsHeading2.png" />
+        <img src="http://res.cloudinary.com/lab41/image/upload/InstructionsHeading2.png" />
         </a>
       </h4>
 <div id="positiveSentiment" class= "collapse in">
 <!-- <h2>(2) 	احساس عام إيجابي </h2> -->
-<img src="InstructionsSection2.png" />
+<img src="http://res.cloudinary.com/lab41/image/upload/InstructionsSection2.png" />
 </div>
 
 
 <!-- Negative Tweets -->
       <h4 class="panel-title">
         <a  class="accordion-toggle" data-toggle="collapse" href="#negativeSentiment">
-        <img src="InstructionsHeading3.png" />
+        <img src="http://res.cloudinary.com/lab41/image/upload/InstructionsHeading3.png" />
         </a>
       </h4>
 <div id="negativeSentiment" class= "collapse in">
-<img src="InstructionsSection3.png" />
+<img src="http://res.cloudinary.com/lab41/image/upload/InstructionsSection3.png" />
 </div>
 
 <!-- Mixed Sentiment -->
       <h4 class="panel-title">
         <a  class="accordion-toggle" data-toggle="collapse" href="#mixedSentiment">
-		<img src="InstructionsHeading4.png" />
+		<img src="http://res.cloudinary.com/lab41/image/upload/InstructionsHeading4.png" />
         </a>
       </h4>
 <div id="mixedSentiment" class= "collapse in">
-<img src="InstructionsSection4.png" />
+<img src="http://res.cloudinary.com/lab41/image/upload/InstructionsSection4.png" />
 </div>
 
 <!-- Unclear sentiment -->
       <h4 class="panel-title">
         <a  class="accordion-toggle" data-toggle="collapse" href="#unclearSentiment">
-        <img src="InstructionsHeading5.png" />
+        <img src="http://res.cloudinary.com/lab41/image/upload/InstructionsHeading5.png" />
         </a>
       </h4>
 <div id="unclearSentiment" class= "collapse in">
-<img src="InstructionsSection5.png" />
+<img src="http://res.cloudinary.com/lab41/image/upload/InstructionsSection5.png" />
 </div>
 </div>
 <!-- End Instructions --><!-- Survey Body -->
@@ -236,24 +236,13 @@ td.tweet {
 <fieldset>
 <table>
 	<tr>
-        <th><img src="Tweet.png"></th>
-        <th width="25%"><img src="OverallSentiment.png"></th>
+        <th><img src="http://res.cloudinary.com/lab41/image/upload/Tweet.png"></th>
+        <th width="25%"><img src="http://res.cloudinary.com/lab41/image/upload/OverallSentiment.png"></th>
     </tr>
     <tr>
 
-        <td class="tweet">اذا كنا نقاتل بعض في حرب وانت تقع اسيري فستطلب مني ان اسمح لك باخذ دش في الحمام</td>
-        <td><select class="form-control" name="sentiment">
-        		<option selected="selected" value="select one">اختر واحداً</option>
-                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
-                <option value="positiveSentiment">احساس عام إيجابي</option>
-                <option value="negativeSentiment">احساس عام سلبي</option>
-                <option value="mixedSentiment">احساس عام مزدوج</option>
-                <option value="unclearSentiment">احساس عام غير واضح</option>
-            </select>
-         </td>   
-	</tr>
-    <tr>
-        <td class="tweet">ممكن تجيب لي القطة من الثلاجة؟.</td>
+        <td class="tweet"><img src="data:image/png;base64, ${tweet1}
+"></td>
         <td><select class="form-control" name="sentiment">
         		<option selected="selected" value="select one">اختر واحداً</option>
                 <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
@@ -265,7 +254,8 @@ td.tweet {
          </td>
 	</tr>
     <tr>
-        <td class="tweet">الموت بكرامة هو حق من حقوق الانسان. اطالة معاناة الانسان امر قاسي ومخزي.  </td>
+        <td class="tweet"><img src="data:image/png;base64, ${tweet2}
+"></td>
         <td><select class="form-control" name="sentiment">
         		<option selected="selected" value="select one">اختر واحداً</option>
                 <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
@@ -277,7 +267,8 @@ td.tweet {
          </td>
 	</tr>
     <tr>
-        <td class="tweet">انا ليس لدي اي شك بانه اذا حُكم عليك بسبب اي جريمة،  فانت بالتالي ستفقد حق </td>
+        <td class="tweet"><img src="data:image/png;base64, ${tweet3}
+"></td>
         <td><select class="form-control" name="sentiment">
         		<option selected="selected" value="select one">اختر واحداً</option>
                 <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
@@ -289,7 +280,8 @@ td.tweet {
          </td>
 	</tr>
     <tr>
-        <td class="tweet">بدون الجهد لانستطيع تحقيق التقدم ولكن بدون الراحة والتفكير ستكون حياتنا غير متوازنة. </td>
+        <td class="tweet"><img src="data:image/png;base64, ${tweet4}
+"></td>
         <td><select class="form-control" name="sentiment">
         		<option selected="selected" value="select one">اختر واحداً</option>
                 <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
@@ -300,8 +292,21 @@ td.tweet {
             </select>
          </td>
 	</tr>
-</table>    
-	
+    <tr>
+        <td class="tweet"><img src="data:image/png;base64, ${tweet5}
+"></td>
+        <td><select class="form-control" name="sentiment">
+        		<option selected="selected" value="select one">اختر واحداً</option>
+                <option value="neutralSentiment">احساس عام موضوعي او محايد</option>
+                <option value="positiveSentiment">احساس عام إيجابي</option>
+                <option value="negativeSentiment">احساس عام سلبي</option>
+                <option value="mixedSentiment">احساس عام مزدوج</option>
+                <option value="unclearSentiment">احساس عام غير واضح</option>
+            </select>
+         </td>
+	</tr>
+</table>
+
 </fieldset>
 
 </section>

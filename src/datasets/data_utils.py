@@ -6,7 +6,7 @@ import numpy as np
 import logging
 logging.basicConfig()
 logger=logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 
 class DataException(Exception):
     pass
@@ -16,7 +16,8 @@ class TextTooShortException(DataException):
 
 def normalize(txt, vocab=None, replace_char=' ',
                 min_length=100, max_length=1014, pad_out=True, 
-                to_lower=True, reverse = True, encoding="latin1"):
+                to_lower=True, reverse = True, 
+                truncate_left=False, encoding="latin1"):
     ''' Takes a single string object and truncates it to max_length,
     raises an exception if its length does not exceed min_length, and
     performs case normalization if to_lower is True. Optionally
@@ -54,7 +55,10 @@ def normalize(txt, vocab=None, replace_char=' ',
     if len(txt) < min_length:
         raise TextTooShortException("Too short: {}".format(len(txt)))
     # truncate if too long
-    txt = txt[0:max_length]
+    if truncate_left:
+        txt = txt[-max_length:]
+    else:    
+        txt = txt[0:max_length]
     # change case
     if to_lower==True:
         txt = txt.lower()

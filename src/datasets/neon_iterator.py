@@ -65,7 +65,7 @@ class DiskDataIterator(NervanaObject):
         self.Xbuf_flat = self.be.iobuf((self.nvocab, self.nsteps))
         self.Xbuf = self.Xbuf_flat.reshape((self.nvocab * self.nsteps, self.be.bsz))
 
-        self.ylabels = self.be.iobuf(1, dtype=np.int32)
+        self.ylabels = self.be.iobuf(1, dtype=np.int16)
         self.ybuf = self.be.iobuf(self.nlabels)
 
         # This makes upstream layers interpret each example as a 1d image
@@ -115,6 +115,7 @@ class DiskDataIterator(NervanaObject):
             # which we convert to one-hot encoding here
             self.ylabels[:] = y.T.copy()
             self.Xbuf[:] = X.T.copy()
+            logger.debug(self.Xbuf.shape)
             self.ybuf[:] = self.be.onehot(self.ylabels, axis=0)
             logger.debug(y.shape)
             #logger.debug(np.concatenate((y, ylabels.T, self.ybuf.get().T), axis=1))

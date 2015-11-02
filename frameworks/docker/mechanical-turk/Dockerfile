@@ -11,18 +11,25 @@ RUN wget http://packages.sil.org/sil.gpg -O /tmp/sil.gpg && \
     apt-get update
 
 
-# add scheherazade font
+# add font and text->png utility
 RUN apt-get install --assume-yes  ttf-sil-scheherazade \
-                                  fonts-sil-scheherazade
+                                  fonts-sil-scheherazade \
+                                  libpango1.0-dev
 
 
-# install python modules
-RUN pip install boto
+# python modules: mechanical turk; image processing
+RUN pip install boto pillow
 
 
-# install pango text->png
-RUN apt-get update && \
-    apt-get install --assume-yes libpango1.0-dev
+# add MTurk command line tools
+RUN cd / && \
+    wget https://mturk.s3.amazonaws.com/CLTSource/aws-mturk-clt.tar.gz && \
+    tar zxvf aws-mturk-clt.tar.gz && \
+    rm aws-mturk-clt.tar.gz
+
+
+# set java
+ENV JAVA_HOME /opt/jdk/jdk1.7.0_67
 
 
 # start in the /data directory
