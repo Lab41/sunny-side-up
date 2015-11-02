@@ -6,6 +6,11 @@ import tarfile
 from os.path import join,exists
 import re
 import random
+from zipfile import ZipFile
+import shutil
+
+from datasets.data_utils import get_file, latin_csv_reader
+from datasets import sentiment140
 
 # Adds ability to import loader, preprocess
 currentPath = os.path.dirname(os.path.abspath(__file__))
@@ -24,15 +29,15 @@ def blockGen(files, size=65536):
         b = files.read(size)
         if not b: break
         yield b
-        
+
 def nlines(ofFile):
     if ofFile not in sizes:
 
         with open(ofFile) as f:
             sizes[ofFile] = sum(bl.count("\n") for bl in blockGen(f))
-    
+
     return sizes[ofFile]
-    
+
 def ensureCache():
     if not exists(cacheDir):
         os.mkdir(cacheDir)
@@ -41,7 +46,7 @@ def cacheMaker(cachePath):
     with open(cachePath) as f:
         for l in f:
             yield json.loads(l)
-            
+
 def read_sentiment140(sentiment140Path = "/data/sentiment140/sentiment140.csv"):
     """
         Get a generator for the sentiment140 dataset
