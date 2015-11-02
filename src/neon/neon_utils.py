@@ -168,7 +168,7 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
         conf_matrix = {'tp':0, 'fp':0, 'tn':0, 'fn':0}
         running_sums = [0,0]
         for x,t in data:
-            y = model.fprop(x, t, inference=True)
+            y = model.fprop(x, inference=True)
             new_conf_matrix = self(y, t)
             conf_matrix = { a: conf_matrix[a] + new_conf_matrix[a] for a in conf_matrix.keys() }
             running_sums[0] += np.sum([1 for a in np.nditer(t.get()) if a == 1.])
