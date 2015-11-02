@@ -236,14 +236,14 @@ def do_model(get_data, base_dir, data_filename, hdf5_name):
     logger.info("Testing accuracy: {}".format(mlp.eval(test_iter, metric=neon.transforms.Accuracy())))
 
 def main():
-    do_model(get_amazon, 
-        base_dir="/root/data/pcallier/amazon/", 
-        data_filename="reviews_Health_and_Personal_Care.json.gz",
-        hdf5_name="home_kitch_split.hd5")
-    #do_model(get_imdb,
-    #    base_dir="/root/data/pcallier/imdb",
-    #    data_filename="",
-    #    hdf5_name="imdb_split.hd5")
+    #do_model(get_amazon, 
+    #    base_dir="/root/data/pcallier/amazon/", 
+    #    data_filename="reviews_Health_and_Personal_Care.json.gz",
+    #    hdf5_name="home_kitch_split.hd5")
+    do_model(get_imdb,
+        base_dir="/root/data/pcallier/imdb",
+        data_filename="",
+        hdf5_name="imdb_split.hd5")
 
 if __name__=="__main__":
     main()
