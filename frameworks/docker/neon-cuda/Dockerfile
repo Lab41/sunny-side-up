@@ -82,11 +82,20 @@ RUN mkdir /ipython && \
     ipython profile create nbserver
 
 # install/configure CUDA
-RUN cd  /tmp && \
-    wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1404/x86_64/cuda-repo-ubuntu1404_7.0-28_amd64.deb && \
-    dpkg -i cuda-repo-ubuntu1404_7.0-28_amd64.deb && \
-    apt-get update && \
-    apt-get install --assume-yes cuda
+# Uses .run file; .deb files install CUDA 7.5 for some reason
+# Change to the /tmp directory
+RUN cd /tmp && \
+# Download run file
+  wget http://developer.download.nvidia.com/compute/cuda/7_0/Prod/local_installers/cuda_7.0.28_linux.run && \
+# Make the run file executable and extract
+  chmod +x cuda_*_linux.run && ./cuda_*_linux.run -extract=`pwd` && \
+# Install CUDA drivers (silent, no kernel)
+  ./NVIDIA-Linux-x86_64-*.run -s --no-kernel-module && \
+# Install toolkit (silent)  
+  ./cuda-linux64-rel-*.run -noprompt && \
+# Clean up
+  rm -rf *
+
 ENV PATH /usr/local/cuda/bin:$PATH
 ENV LD_LIBRARY_PATH /usr/local/cuda/lib64:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH /usr/local/lib:/usr/local/cuda/lib:$LD_LIBRARY_PATH
