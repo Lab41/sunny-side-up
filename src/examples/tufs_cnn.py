@@ -105,12 +105,12 @@ if __name__=="__main__":
     
     #Generator that outputs Amazon training data in batches with specificed parameters
     am_train_batch = batch_data.batch_data(amtr,normalizer_fun=lambda x: x,
-        transformer_fun=lambda x: data_utils.to_one_hot(x[0]),
+        transformer_fun=lambda x: data_utils.to_one_hot(x),
         flatten=False, batch_size=batch_size)
 
     #Generator that outputs Amazon testing data in batches with specificed parameters
     am_test_batch = batch_data.batch_data(amte,normalizer_fun=lambda x: x,
-        transformer_fun=lambda x: data_utils.to_one_hot(x[0]),
+        transformer_fun=lambda x: data_utils.to_one_hot(x),
         flatten=False, batch_size=batch_size)
 
     #Begin runs of training and testing    
