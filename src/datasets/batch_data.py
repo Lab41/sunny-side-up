@@ -351,7 +351,7 @@ def split_and_batch(data_loader,
     data_batches = batch_data(data_loader, batch_size,
         normalizer_fun=normalizer_fun,
         transformer_fun=None)
-    (_, _), (train_size, test_size) = split_data(imdb_batches, 
+    (_, _), (train_size, test_size) = split_data(data_batches, 
             h5_path, overwrite_previous=False, rng_seed=rng_seed)
     def train_batcher():
         (a,b),(a_size,b_size)=split_data(None, h5_path=h5_path, overwrite_previous=False, shuffle=True)
