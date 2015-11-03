@@ -4,7 +4,7 @@ import os
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 
 import numpy as np
 import h5py
@@ -54,8 +54,6 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
     docs = []
     labels = []
 
-    logger.debug(data_loader)
-
     # set (near) identity functions for transformation functions when None
     if transformer_fun is None:
         transformer_fun = lambda x: np.array(x)
@@ -71,12 +69,6 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
         try:
             #logger.debug("Normalization........")
             doc_text = normalizer_fun(doc_text)
-            try:
-                logger.debug(doc_text.shape)
-            except:
-                #logger.debug("Not a numpy array: {}".format(type(doc_text)))
-                #logger.debug(len(doc_text))
-                pass
             # transform document into a numpy array
             transformed_doc = transformer_fun(doc_text)
             docs.append(transformed_doc)
@@ -384,11 +376,15 @@ if __name__=="__main__":
         # get a record
         next_text, next_label = next(iter(amtr))
 
-        print "Next record shape: {}".format(next_text.shape)
+        try:
+            print "Next record shape: {}".format(next_text.shape)
+        except AttributeError as e:
+            print "(No shape) Text: '{}'".format(next_text)
+
 
         # batch training, testing sets
         am_train_batch = batch_data(amtr,
-            normalizer_fun=lambda x: data_utils.normalize(x[0], 
+            normalizer_fun=lambda x: data_utils.normalize(x, 
                 max_length=300, 
                 truncate_left=True),
             transformer_fun=None)
@@ -400,25 +396,24 @@ if __name__=="__main__":
         data, label = next_batch
         np.set_printoptions(threshold=np.nan)
         print "Batch properties:"
-        print "Shape: {}".format(data.shape)
+        print "Shape (data): {}".format(data.shape)
+        print "Shape (label): {}".format(label.shape)
         print "Type: {}".format(type(data))
         print
         print "First record of first batch:"
         print "Type (1 level in): {}".format(type(data[0]))
         print "Type of record (2 levels in): {}".format(type(data[0,0]))
         print data[0,0]
-        print "Sentiment label: {}".format(label[0])
-        print "In numpy format:"
+        print "Sentiment label: {}".format(label[0,0])
+        print "Data in numpy format:"
         oh = data_utils.to_one_hot(data[0,0])
         print np.array_str(np.argmax(oh,axis=0))
         print "Translated back into characters:\n"
-        print data_utils.from_one_hot(oh)
+        print ''.join(data_utils.from_one_hot(oh))
         
-        sys.exit(0)
+
         # dimension checks
         second_batch_data, second_batch_label = second_batch = am_train_batch.next()
-        second_batch = list(second_batch)
-        print len(second_batch)
         print "Data object type: ", type(second_batch_data)
         print second_batch_data.shape
 
