@@ -12,8 +12,8 @@ import h5py
 import data_utils
 
 
-def batch_data(data_loader, batch_size=128, normalizer_fun=data_utils.normalize, 
-               transformer_fun=data_utils.to_one_hot, flatten=True):
+def batch_data(data_loader, batch_size=128, normalizer_fun=None, 
+               transformer_fun=None, flatten=True):
     '''
     Batches data, doing all necessary preprocessing and
     normalization.
@@ -54,8 +54,6 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=data_utils.normalize,
     docs = []
     labels = []
 
-    logger.debug(data_loader)
-
     # set (near) identity functions for transformation functions when None
     if transformer_fun is None:
         transformer_fun = lambda x: np.array(x)
@@ -69,14 +67,15 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=data_utils.normalize,
     for doc_text, label in data_loader:
         # transformation and normalization
         try:
-            logger.debug("Normalization........")
+            #logger.debug("Normalization........")
             doc_text = normalizer_fun(doc_text)
             # transform document into a numpy array
             transformed_doc = transformer_fun(doc_text)
             docs.append(transformed_doc)
             labels.append(label)
         except data_utils.DataException as e:
-            logger.info(e)
+            logger.debug("Type of input: {}".format(type(doc_text)))
+            logger.info("{}: {}".format(type(e), e))
 
         # dispatch once batch is of appropriate size 
         if len(docs) >= batch_size:
@@ -91,25 +90,42 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=data_utils.normalize,
 
             yield docs_np, labels_np
 
-def pick_splits(splits):
-    ''' Pick a bin from a list of n-1 probabilities (0-1)
-    for landing in n bins. Used for splitting data.'''
-    # avoid changing splits argument in place
-    splits = splits[:]
-    assert np.sum(splits) < 1.0
-    splits.append(1 - np.sum(splits))
-    # generate the strictly increasing cutoffs for each split from >0 to 1 
-    cum_cutoffs = np.cumsum(splits)
-    logger.debug(cum_cutoffs)
-    # roll the die
-    pick_num = np.random.random()
-    logger.debug(pick_num)
-    bin_num = 0
-    for cutoff in cum_cutoffs:
-        if pick_num < cutoff:
-            return bin_num
-        bin_num += 1
-    
+
+class BatchIterator:
+    """Iterator class to wrap around batching functionality.
+    Allows batched data to be iterated over multiple times.
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Args and kwargs should be arguments to batch_data.
+        data_loader should be an iterator (i.e., able to be reused)
+        """
+        self.reset_args = args
+        self.reset_kwargs = kwargs
+
+    def __iter__(self):
+        return batch_data(*self.reset_args, **self.reset_kwargs)
+
+class DataIterator:
+    """Utility class to wrap a data loading generator function,
+    providing a reusable data container if needed.
+    """
+    def __init__(self, load_fun, *args, **kwargs):
+        """
+        @Arguments:
+            load_fun -- function object which returns
+            a generator over tuples of individual records (data, label)
+
+            args, kwargs are passed on to load_fun on every fresh iteration
+        """
+        self.load_fun = load_fun
+        self.reset_args = args
+        self.reset_kwargs = kwargs
+
+    def __iter__(self):
+        return self.load_fun(*self.reset_args, **self.reset_kwargs)
+
+
 class H5Iterator:
     """Small utility class for iterating over an HDF5 file.
     Iterating over it yields tuples of (data, label) from datasets in the
@@ -134,10 +150,45 @@ class H5Iterator:
             indices = self.indices
 
         for which_index in indices:
-            yield (self.data[which_index], self.labels[which_index])
+            # Singletons should be taken out of containers by default,
+            # to match the behavior of the nnn.load_data class of functions
+            # this presumes the data in the container is a string
+            next_data = self.data[which_index]
+            if next_data.shape == (1,):
+                next_data = bytes(next_data[0])
+                logger.debug("Going from singleton to string: '{}...'".format(next_data[::-1][:50]))
+            else:
+                logger.debug("H5 record shape: {}".format(next_data.shape))
+            yield (next_data, self.labels[which_index])
+            # take label out of container--assuming it is an integer
+            next_label = self.labels[which_index]
+            if next_label.shape == (1,):
+                next_label = next_label[0]
+                logger.debug("Going from singleton to numeric type: {}".format(type(next_label)))
+                #logger.debug("Shape: {}".format(next_label.shape))
+            else:
+                logger.debug("H5 record shape: {}".format(next_label.shape))
+            yield (next_data, next_label)
 
-    #def next(self):
-    #    return (self.data.next(), self.labels.next())
+def pick_splits(splits):
+    ''' Pick a bin from a list of n-1 probabilities (0-1)
+    for landing in n bins. Used for splitting data.'''
+    # avoid changing splits argument in place
+    splits = splits[:]
+    assert np.sum(splits) < 1.0
+    splits.append(1 - np.sum(splits))
+    # generate the strictly increasing cutoffs for each split from >0 to 1 
+    cum_cutoffs = np.cumsum(splits)
+    logger.debug(cum_cutoffs)
+    # roll the die
+    pick_num = np.random.random()
+    logger.debug(pick_num)
+    bin_num = 0
+    for cutoff in cum_cutoffs:
+        if pick_num < cutoff:
+            return bin_num
+        bin_num += 1
+    
         
 def write_batch_to_h5(splits, h5_file, data_sizes, new_data, new_labels):
     """ Takes some information about a minibatch of data and 
@@ -182,7 +233,7 @@ def split_data(batch_iterator,
                overwrite_previous=False,
                shuffle=False):
     ''' Splits data into slices and returns a list of
-        iterators over each slice. Slice size is configurable.
+        H5Iterators over each slice. Slice size is configurable.
         Probabilistic, so may not produce exactly the expected bin sizes, 
         especially for small data.
     
@@ -190,7 +241,7 @@ def split_data(batch_iterator,
             batch_iterator --
                 generator of tuples (data, label) where each of data, label
                 is a numpy array with the first dimension representing batch size.
-                This can be none if in_memory is False, h5_path is valid, and
+                This can be none if h5_path is valid and
                 overwrite_previous=False (uses existing data, does not re-shuffle 
                 or rearrange).
             h5_path -- path to HDF5 file
@@ -262,64 +313,132 @@ def split_data(batch_iterator,
             shuffle=shuffle)))
     return data_iterators, bin_sizes
         
-               
+
+
+def split_and_batch(data_loader, 
+                    batch_size, 
+                    doclength,
+                    h5_path,
+                    rng_seed=888,
+                    normalizer_fun=lambda x: data_utils.normalize(x, max_length=doclength),
+                    transformer_fun=lambda x: data_utils.to_one_hot(x[0])):
+    """
+    Convenience wrapper for most common splitting and batching
+    workflow in neon. Splits data to an HDF5 path, if it does not already exist,
+    and then returns functions
+    """
+    data_batches = batch_data(data_loader, batch_size,
+        normalizer_fun=normalizer_fun,
+        transformer_fun=None)
+    (_, _), (train_size, test_size) = batch_data.split_data(imdb_batches, 
+            h5_path, overwrite_previous=False, rng_seed=rng_seed)
+    def train_batcher():
+        (a,b),(a_size,b_size)=split_data(None, h5_path=h5_path, overwrite_previous=False, shuffle=True)
+        return batch_data(a,
+            normalizer_fun=lambda x: x,
+            transformer_fun=transformer_fun,
+            flatten=True,
+            batch_size=batch_size)
+    def test_batcher():
+        (a,b),(a_size,b_size)=split_data(None, h5_path, overwrite_previous=False,shuffle=False)
+        return batch_data(b,
+            normalizer_fun=lambda x: x,
+            transformer_fun=transformer_fun,
+            flatten=True,
+            batch_size=batch_size)
+
+    return (train_batcher, test_batcher), (train_size, test_size)               
                 
 if __name__=="__main__":
     # some demo code
     import imdb
     import amazon_reviews
-    import batch_data
     import data_utils
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('h5_path', help="Path to pre-split HDF5 file", 
-                        default="/data/pcallier/amazon/amazon_split.hd5",
+    parser.add_argument('--h5_path', help="Path to pre-split HDF5 file",
+                        nargs='?')
+    parser.add_argument('--amazon_path', help='Path to amazon json.gz file',
                         nargs='?')
     args = parser.parse_args()
 
-    # get training and testing sets, and their sizes for amazon.
-    # this HDF5 file uses an 80/20 train/test split and lives at /data/pcallier/amazon
-    (amtr, amte), (amntr, amnte) = datasets, sizes = batch_data.split_data(
-        None, 
-        h5_path=args.h5_path, 
-        overwrite_previous=False,
-        in_memory=False,
-        shuffle=True)
-    import sys
+    # Demo batching on pre-split data
+    if args.h5_path:  
+        # get training and testing sets, and their sizes for amazon
+        (amtr, amte), (amntr, amnte) = datasets, sizes = split_data(
+            None, 
+            h5_path=args.h5_path, 
+            overwrite_previous=False,
+            shuffle=True)
+        import sys
 
-    # batch training, testing sets
-    am_train_batch = batch_data.batch_data(amtr,
-        normalizer_fun=lambda x: data_utils.normalize(x[0], 
-            max_length=300, 
-            truncate_left=True),
-        transformer_fun=None)
-    am_test_batch = batch_data.batch_data(amte,
-        normalizer_fun=None,transformer_fun=None)
+        # get a record
+        next_text, next_label = next(iter(amtr))
+
+        try:
+            print "Next record shape: {}".format(next_text.shape)
+        except AttributeError as e:
+            print "(No shape) Text: '{}'".format(next_text)
+
+
+        # batch training, testing sets
+        am_train_batch = batch_data(amtr,
+            normalizer_fun=lambda x: data_utils.normalize(x, 
+                max_length=300, 
+                truncate_left=True),
+            transformer_fun=None)
+        am_test_batch = batch_data(amte,
+            normalizer_fun=None,transformer_fun=None)
+
+        # Spit out some sample data
+        next_batch = am_train_batch.next()
+        data, label = next_batch
+        np.set_printoptions(threshold=np.nan)
+        print "Batch properties:"
+        print "Shape (data): {}".format(data.shape)
+        print "Shape (label): {}".format(label.shape)
+        print "Type: {}".format(type(data))
+        print
+        print "First record of first batch:"
+        print "Type (1 level in): {}".format(type(data[0]))
+        print "Type of record (2 levels in): {}".format(type(data[0,0]))
+        print data[0,0]
+        print "Sentiment label: {}".format(label[0,0])
+        print "Data in numpy format:"
+        oh = data_utils.to_one_hot(data[0,0])
+        print np.array_str(np.argmax(oh,axis=0))
+        print "Translated back into characters:\n"
+        print ''.join(data_utils.from_one_hot(oh))
+        
+
+        # dimension checks
+        second_batch_data, second_batch_label = second_batch = am_train_batch.next()
+        print "Data object type: ", type(second_batch_data)
+        print second_batch_data.shape
+
+    # Demo iterator utility classes
+    # iterate multiple times over same data 
+    if args.amazon_path:
+        amz_iterator = DataIterator(amazon_reviews.load_data, args.amazon_path)
+        print "First run:"
+        for i, (data, label) in enumerate(amz_iterator):
+            print "{}: {}...".format(i, data[:50])
+            if i >= 3: break
     
-    # Spit out some sample data
-    next_batch = am_train_batch.next()
-    data, label = next_batch
-    np.set_printoptions(threshold=np.nan)
-    print "Batch properties:"
-    print "Length: {}".format(len(data))
-    print "Type: {}".format(type(data))
-    print
-    print "First record of first batch:"
-    print "Type (1 level in): {}".format(type(data[0]))
-    print "Type of record (2 levels in): {}".format(type(data[0,0]))
-    print data[0,0]
-    print "Sentiment label: {}".format(label[0])
-    print "In numpy format:"
-    oh = data_utils.to_one_hot(data[0,0])
-    print np.array_str(np.argmax(oh,axis=0))
-    print "Translated back into characters:\n"
-    print data_utils.from_one_hot(oh)
-    
-    # dimension checks
-    second_batch_data, second_batch_label = second_batch = am_train_batch.next()
-    second_batch = list(second_batch)
-    print len(second_batch)
-    print "Data object type: ", type(second_batch_data)
-    print second_batch_data.shape
-    
+        print "Second run:"
+        for i, (data, label) in enumerate(amz_iterator):
+            print "{}: {}...".format(i, data[:50])
+            if i >= 3: break
+
+        # Demo batch iterator utility class
+        amz_batches = BatchIterator(
+            DataIterator(amazon_reviews.load_data, args.amazon_path),
+            batch_size=5, normalizer_fun=data_utils.normalize, 
+            transformer_fun=lambda x: data_utils.to_one_hot(x), flatten=True)
+        for i, (batch_data, batch_labell) in enumerate(amz_batches):
+            print "Batch {}".format(i)
+            print batch_data.shape
+            print ''.join(data_utils.from_one_hot(batch_data[0].reshape(67, -1)))[::-1][:50], "..."
+            if i >= 3: break
+
