@@ -91,6 +91,8 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
             yield docs_np, labels_np
 
 
+# Not fully tested -- still recommended to use
+# batch_data
 class BatchIterator:
     """Iterator class to wrap around batching functionality.
     Allows batched data to be iterated over multiple times.
@@ -106,6 +108,8 @@ class BatchIterator:
     def __iter__(self):
         return batch_data(*self.reset_args, **self.reset_kwargs)
 
+# not fully tested -- still recommended to use 
+# xyz.load_data
 class DataIterator:
     """Utility class to wrap a data loading generator function,
     providing a reusable data container if needed.
@@ -130,9 +134,25 @@ class H5Iterator:
     """Small utility class for iterating over an HDF5 file.
     Iterating over it yields tuples of (data, label) from datasets in the
     file with the names given in data_name and labels_name.
-    By default, will randomly access records in any given iteration
+    By default, will randomly access records in any given iteration.
     """    
     def __init__(self, h5_path, data_name, labels_name, shuffle=True):
+        """
+        Arguments:
+            h5_path -- path to HDF5 file to be accessed. This file should have the structure:
+                / ...   [data_name]
+                        [labels_name]
+                        (...)
+                where data_name and labels_name are datasets at the root level
+
+            data_name -- name of features-bearing dataset
+
+            labels_name -- name of dataset with labels. these may have a different type from 
+                data_name, which is why they are stored separately
+
+            shuffle -- should numpy randomly shuffle the indices each time an iterator is 
+                made from this container?
+        """
         self.h5file = h5py.File(h5_path, "r")
         self.shuffle = shuffle
         self.data = self.h5file[data_name]
@@ -159,8 +179,8 @@ class H5Iterator:
                 logger.debug("Going from singleton to string: '{}...'".format(next_data[::-1][:50]))
             else:
                 logger.debug("H5 record shape: {}".format(next_data.shape))
-            yield (next_data, self.labels[which_index])
-            # take label out of container--assuming it is an integer
+
+            # take label out of container if singleton
             next_label = self.labels[which_index]
             if next_label.shape == (1,):
                 next_label = next_label[0]
@@ -321,11 +341,12 @@ def split_and_batch(data_loader,
                     h5_path,
                     rng_seed=888,
                     normalizer_fun=lambda x: data_utils.normalize(x, max_length=doclength),
-                    transformer_fun=lambda x: data_utils.to_one_hot(x[0])):
+                    transformer_fun=lambda x: data_utils.to_one_hot(x)):
     """
     Convenience wrapper for most common splitting and batching
     workflow in neon. Splits data to an HDF5 path, if it does not already exist,
-    and then returns functions
+    and then returns functions for getting geerators over the datasets
+    (gets around limitations of input to neon_utils.DiskDataIterator)
     """
     data_batches = batch_data(data_loader, batch_size,
         normalizer_fun=normalizer_fun,
@@ -357,18 +378,23 @@ if __name__=="__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--h5_path', help="Path to pre-split HDF5 file",
+    parser.add_argument('--batch_hdf5_demo', 
+                        help="Demo basic batching. Requires a path to pre-split HDF5 file",
+                        metavar="HDF5_PATH",
                         nargs='?')
-    parser.add_argument('--amazon_path', help='Path to amazon json.gz file',
+    parser.add_argument('--iterator_demo',
+                        metavar="AMAZON_JSON_GZ",
+                        help='Demo iterator classes, requires a path to an Amazon json.gz file',
                         nargs='?')
     args = parser.parse_args()
 
     # Demo batching on pre-split data
-    if args.h5_path:  
+    if args.batch_hdf5_demo:  
+        print args.batch_hdf5_demo
         # get training and testing sets, and their sizes for amazon
         (amtr, amte), (amntr, amnte) = datasets, sizes = split_data(
             None, 
-            h5_path=args.h5_path, 
+            h5_path=args.batch_hdf5_demo, 
             overwrite_previous=False,
             shuffle=True)
         import sys
@@ -410,17 +436,13 @@ if __name__=="__main__":
         print np.array_str(np.argmax(oh,axis=0))
         print "Translated back into characters:\n"
         print ''.join(data_utils.from_one_hot(oh))
-        
 
-        # dimension checks
-        second_batch_data, second_batch_label = second_batch = am_train_batch.next()
-        print "Data object type: ", type(second_batch_data)
-        print second_batch_data.shape
 
     # Demo iterator utility classes
     # iterate multiple times over same data 
-    if args.amazon_path:
-        amz_iterator = DataIterator(amazon_reviews.load_data, args.amazon_path)
+    if args.iterator_demo:
+        # Demo dataIterator class
+        amz_iterator = DataIterator(amazon_reviews.load_data, args.iterator_demo)
         print "First run:"
         for i, (data, label) in enumerate(amz_iterator):
             print "{}: {}...".format(i, data[:50])
@@ -430,10 +452,9 @@ if __name__=="__main__":
         for i, (data, label) in enumerate(amz_iterator):
             print "{}: {}...".format(i, data[:50])
             if i >= 3: break
-
         # Demo batch iterator utility class
         amz_batches = BatchIterator(
-            DataIterator(amazon_reviews.load_data, args.amazon_path),
+            DataIterator(amazon_reviews.load_data, args.iterator_demo),
             batch_size=5, normalizer_fun=data_utils.normalize, 
             transformer_fun=lambda x: data_utils.to_one_hot(x), flatten=True)
         for i, (batch_data, batch_labell) in enumerate(amz_batches):
