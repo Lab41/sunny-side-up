@@ -146,7 +146,7 @@ if __name__=="__main__":
             #Reshape input from a 3D Input to a 4D input for training
             X_batch = X_batch[:,np.newaxis]
 
-            loss,acc = model.train_on_batch(X_batch, Y_batch, accuracy=True)
+            loss,acc = model.test_on_batch(X_batch, Y_batch, accuracy=True)
             progbar.add(batch_size, values=[("test loss", loss),("test acc",acc)])
              
         print("\n")
