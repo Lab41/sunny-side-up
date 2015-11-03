@@ -19,3 +19,4 @@ build/
 **/data/output/*
 **/docker.env
 **/mturk.properties
+*.hd5
