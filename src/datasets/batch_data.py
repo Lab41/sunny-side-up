@@ -158,13 +158,25 @@ class H5Iterator:
             indices = self.indices
 
         for which_index in indices:
+            # Singletons should be taken out of containers by default,
+            # to match the behavior of the nnn.load_data class of functions
+            # this presumes the data in the container is a string
             next_data = self.data[which_index]
             if next_data.shape == (1,):
-                next_data = next_data[0].asdtype
-                logger.debug("Going from singleton to string: {}".format(next_data)[::-1][:50])
+                next_data = bytes(next_data[0])
+                logger.debug("Going from singleton to string: '{}...'".format(next_data[::-1][:50]))
             else:
                 logger.debug("H5 record shape: {}".format(next_data.shape))
             yield (next_data, self.labels[which_index])
+            # take label out of container--assuming it is an integer
+            next_label = self.labels[which_index]
+            if next_label.shape == (1,):
+                next_label = next_label[0]
+                logger.debug("Going from singleton to numeric type: {}".format(type(next_label)))
+                #logger.debug("Shape: {}".format(next_label.shape))
+            else:
+                logger.debug("H5 record shape: {}".format(next_label.shape))
+            yield (next_data, next_label)
 
 def pick_splits(splits):
     ''' Pick a bin from a list of n-1 probabilities (0-1)
