@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 import numpy as np
-import pandas as pd
+#import pandas as pd
 
-from data_utils import get_file
+from data_utils import get_file, to_one_hot
 
 
 vocabulary=ur"""abcdefghijklmnopqrstuvwxyz0123456789-,;.!?:'"/\|_@#$%^&*~`+-=<>()[]{}""" + "\n"
@@ -57,21 +57,23 @@ def enforce_length(txt, min_length=None, max_length=None, pad_out=False):
         txt = txt +  ' ' * (max_length - len(txt))
     return txt
 
-def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, rng_seed=None, min_length=None, max_length=None, pad_out=False):
+def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_records=None, rng_seed=None, min_length=None, max_length=None, pad_out=False):
     """
     Load data from Open Weiboscope corpus of Sina Weibo posts. Options are available for encoding
     of returned text data. 
 
     @Arguments:
         file_path -- path to downloaded, unzipped Open Weiboscope
-            data. If this path does not exist or is not given, load_data
+            data (a directory). If this path does not exist or is not given, load_data
             will create the path and download the data (string)
         which_set -- whether to iterate over train or testing set. You should
             also set train_pct and rng_seed to non-default values if you specify this
             (string)
-        form -- return results in hanzi, pinyin romanization, or one-hot encodings of romanization?
-            can take values of 'hanzi', 'pinyin', or 'onehot' (string)
+        form -- return results in hanzi, pinyin romanization?
+            can take values of 'hanzi', 'pinyin' (string)
         train_pct -- what percent of dataset should go to training (remainder goes to test)?  (float)
+        nr_records -- if not None, gives the maximum number of records this generator should yield.
+            will yield fewer records if the corpus exhausted before nr_records records are yielded
         rng_seed -- value for seeding random number generator
         min_length -- enforce a minimum length, in characters, for the 
             dataset? Counted in hanzi for form='hanzi' and in roman characters 
@@ -111,6 +113,7 @@ def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, r
     logger.debug("Shuffle order: {}, split on {}".format(ow_files, split_on))
     data_sets['train'], data_sets['test'] = ow_files[:split_on], ow_files[split_on:]
     logger.debug(data_sets)
+    nr_yielded = 0
     for table_path in data_sets[which_set]:
         with codecs.open(table_path, "r", encoding="utf-8") as f:
             logging.debug("In file {}".format(table_path))
@@ -142,40 +145,35 @@ def load_data(file_path=None, which_set='train', form='onehot', train_pct=1.0, r
                                 romanize_tweet(post_text), min_length, 
                                 max_length, pad_out), post_deleted
                             yield record_txt, sentiment
-                        elif form=='onehot':
-                            record_txt, sentiment = enforce_length(
-                                romanize_tweet(post_text), min_length, 
-                                max_length, pad_out), post_deleted 
-                            yield text_to_one_hot(record_txt, vocabulary), sentiment
                         else:
-                            raise Exception("Unknown form '{}' (should be 'hanzi', "
-                                            "'pinyin', or 'onehot')".format(form))
-
+                            raise Exception("Unknown form '{}' (should be 'hanzi' "
+                                            "or 'pinyin')".format(form))
+                        # limit number of records retrieved?
+                        nr_yielded += 1
+                        if nr_records is not None and nr_yielded >= nr_records:
+                            raise StopIteration()
+                # log various exception cases from loop body
                 except TextTooShortException:
                     logger.info("Record {} thrown out (too short)".format(post_id))
-                    continue
                 except BadRecordException as e:
                     logger.info(e)
-                    continue
                 except IndexError as e:
                     logger.info(e)
-                    continue
                 except UnicodeEncodeError as e:
                     logger.info(e)
-                    continue
 
                 except GeneratorExit:
                     return
 
-def text_to_one_hot(txt, vocabulary=vocabulary):
-    # setup the vocabulary for one-hot encoding
-    vocab_chars = set(list(vocabulary))
-
-    # create the output list
-    chars = list(txt)
-    categorical_chars = pd.Categorical(chars, categories=vocab_chars)
-    vectorized_chars = np.array(pd.get_dummies(categorical_chars))
-    return vectorized_chars
+#def text_to_one_hot(txt, vocabulary=vocabulary):
+#    # setup the vocabulary for one-hot encoding
+#    vocab_chars = set(list(vocabulary))
+#
+#    # create the output list
+#    chars = list(txt)
+#    categorical_chars = pd.Categorical(chars, categories=vocab_chars)
+#    vectorized_chars = np.array(pd.get_dummies(categorical_chars))
+#    return vectorized_chars
 
 def romanize_tweet(txt):
     """
