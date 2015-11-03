@@ -144,7 +144,7 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
         conf_matrix = dict()
         predictions = self.preds.get().astype(bool)
         truth = self.hyps.get().astype(bool)
-        matches = self.outputs.get().astype(bool)
+        matches = self.matches.get().astype(bool)
         
         # true positives
         conf_matrix['tp'] = np.sum(matches & truth)
