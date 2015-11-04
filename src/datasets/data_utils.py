@@ -102,11 +102,20 @@ def from_one_hot(oh, vocab=zhang_lecun_vocab):
             txt.append(" ")
     return txt
 
+def index_as_one_hot(indices, axis=0, dtype=np.int32):
+    encoding_size = np.max(indices)
+    encoding_length = len(indices)
+    encoded_indices = []
+    for index in indices:
+        encoded_index = np.zeros(encoding_length, dtype)
+        encoded_index[index] = 1
+        encoded_indices.append(encoded_index)
+    onehot_encoding = np.concatenate(encoded_indices, axis=axis)
+    return onehot_encoding
 
 def to_embedded_word(txt):
     embedder = WordVectorEmbedder('glove')
     return embedder.embed_words_into_vectors(text)
-
 
 def latin_csv_reader(csv_data, dialect=csv.excel, **kwargs):
     ''' Function that takes an opened CSV file with
