@@ -1,9 +1,12 @@
 import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 from data_utils import latin_csv_reader, get_file
 from zipfile import ZipFile
 
-# Dictionary that defines the Sentiment features
-Sentiment = {0: 'neg', 2: 'neutral', 4: 'pos'}
+# Dictionaries that define the Sentiment features
+sentiment_text = {0: 'neg', 2: 'neutral', 4: 'pos'}
+sentiment_binary = {0: 0, 4: 1}
 
 
 def load_data(file_path=None, feat_extractor=None, verbose=False):
@@ -53,7 +56,11 @@ def load_data(file_path=None, feat_extractor=None, verbose=False):
         # Gets tweets string from line in csv
         tweet_string = tweet[5]
         # Gets feature from Sentiment dictionary
-        sent = Sentiment[int(tweet[0])]
+        try:
+            sent = sentiment_binary[int(tweet[0])]
+        except KeyError:
+            logger.debug("Sentiment score of {} skipped.".format(tweet[0]))
+
         # If a feat_extractor function was provided, apply it to tweet
         if feat_extractor:
             features = feat_extractor(tweet_string)
