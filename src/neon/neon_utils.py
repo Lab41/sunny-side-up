@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 import numpy as np
 import neon
+import neon.transforms.cost
 #import matplotlib
 #import sklearn.metrics
 
@@ -175,3 +176,30 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
             running_sums[1] += np.sum([1 for a in np.nditer(t.get()) if a == 0.])
         return conf_matrix
 
+class Accuracy(neon.transforms.cost.Metric):
+    """
+    Compute the accuracy error metric
+    """
+    def __init__(self):
+        self.preds = self.be.iobuf(1)
+        self.hyps = self.be.iobuf(1)
+        self.outputs = self.preds  # Contains per record metric
+        self.metric_names = ['Accuracy']
+
+    def __call__(self, y, t):
+        """
+        Compute the accuracy error metric
+
+        Args:
+            y (Tensor or OpTree): Output of previous layer or model
+            t (Tensor or OpTree): True targets corresponding to y
+
+        Returns:
+            float: Returns the metric
+        """
+        # convert back from onehot and compare
+        self.preds[:] = self.be.argmax(y, axis=0)
+        self.hyps[:] = self.be.argmax(t, axis=0)
+        self.outputs[:] = self.be.equal(self.preds, self.hyps)
+
+        return self.outputs.get().mean()
