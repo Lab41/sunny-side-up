@@ -4,6 +4,7 @@ import random
 from urllib2 import urlopen, HTTPError, URLError
 import numpy as np
 import logging
+from word_vector_embedder import WordVectorEmbedder
 logging.basicConfig()
 logger=logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -100,6 +101,12 @@ def from_one_hot(oh, vocab=zhang_lecun_vocab):
         else:
             txt.append(" ")
     return txt
+
+
+def to_embedded_word(txt):
+    embedder = WordVectorEmbedder('glove')
+    return embedder.embed_words_into_vectors(text)
+
 
 def latin_csv_reader(csv_data, dialect=csv.excel, **kwargs):
     ''' Function that takes an opened CSV file with
