@@ -284,7 +284,6 @@ if __name__=="__main__":
         None, 
         h5_path=args.h5_path, 
         overwrite_previous=False,
-        in_memory=False,
         shuffle=True)
     import sys
 
