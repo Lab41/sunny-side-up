@@ -6,7 +6,8 @@ Demo character-level CNN on Neon
 import sys
 import os
 current_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.dirname(current_path))
+two_up = os.path.dirname(os.path.dirname(current_path))
+sys.path.append(two_up)
 import datetime
 
 import logging
@@ -29,10 +30,10 @@ from neon.backends import gen_backend
 import src.datasets.imdb as imdb
 import src.datasets.amazon_reviews as amazon
 import src.datasets.data_utils as data_utils
-from src.datasets.batch_data import batch_data, split_data
+from src.datasets.batch_data import batch_data, split_data, split_and_batch
 from src.datasets.data_utils import from_one_hot
 from src.datasets.neon_iterator import DiskDataIterator
-from src.neon.neon_utils import ConfusionMatrixBinary, NeonCallbacks, NeonCallback
+from src.neon.neon_utils import ConfusionMatrixBinary, NeonCallbacks, NeonCallback, Accuracy
 
 def get_imdb(batch_size, doclength, 
              data_path,
@@ -46,14 +47,14 @@ def get_imdb(batch_size, doclength,
         (a,b),(a_size,b_size)=split_data(None, h5_path=h5_path, overwrite_previous=False, shuffle=True)
         return batch_data(a,
             normalizer_fun=lambda x: x,
-            transformer_fun=lambda x: data_utils.to_one_hot(x[0]),
+            transformer_fun=lambda x: data_utils.to_one_hot(x),
             flatten=True,
             batch_size=batch_size)
     def test_batcher():
         (a,b),(a_size,b_size)=split_data(None, h5_path, overwrite_previous=False,shuffle=False)
         return batch_data(b,
             normalizer_fun=lambda x: x,
-            transformer_fun=lambda x: data_utils.to_one_hot(x[0]),
+            transformer_fun=lambda x: data_utils.to_one_hot(x),
             flatten=True,
             batch_size=batch_size)
 
@@ -83,14 +84,14 @@ def get_amazon(batch_size, doclength, data_path, h5_path):
             shuffle=True)
         return batch_data(a, 
             normalizer_fun=lambda x: x,
-            transformer_fun=lambda x: data_utils.to_one_hot(x[0]), 
+            transformer_fun=lambda x: data_utils.to_one_hot(x), 
             flatten=True,
             batch_size=batch_size)
     def b_batcher():
         (a,b),(a_size,b_size)=split_data(None, h5_path=h5_path, overwrite_previous=False)
         return batch_data(b, 
             normalizer_fun=lambda x: x, 
-            transformer_fun=lambda x: data_utils.to_one_hot(x[0]), 
+            transformer_fun=lambda x: data_utils.to_one_hot(x), 
             flatten=True,
             batch_size=batch_size)
 
@@ -133,7 +134,7 @@ def simple_model(nvocab=67,
     ]
     return layers
 
-def crepe_model(nvocab=67, nframes=256, batch_norm=True):
+def crepe_model(nvocab=67, nframes=256, batch_norm=False):
     init_gaussian = neon.initializers.Gaussian(0, 0.05)
     layers = [
         neon.layers.Conv((nvocab, 7, nframes), 
@@ -188,12 +189,14 @@ def crepe_model(nvocab=67, nframes=256, batch_norm=True):
     ]
     return layers
 
-def do_model(get_data, base_dir, data_filename, hdf5_name):
-    batch_size=64
+def do_model(dataset_name, base_dir, data_filename, hdf5_name):
+    batch_size=128
     doc_length=1014
     vocab_size=67
     gpu_id=1
     nframes=256
+    dataset_loaders = { 'amazon'    : amazon.load_data,
+                        'imdb'      : imdb.load_data }
 
     present_time = datetime.datetime.strftime(datetime.datetime.now(),"%m%d_%I%p")
     model_state_path=os.path.join(base_dir, "neon_crepe_model_{}.pkl".format(present_time))
@@ -204,8 +207,14 @@ def do_model(get_data, base_dir, data_filename, hdf5_name):
 
     data_path = os.path.join(base_dir, data_filename)
     hdf5_path = os.path.join(base_dir, hdf5_name)
-    (train_get, test_get), (train_size, test_size) = get_data(batch_size, doc_length,
-        data_path, hdf5_path)
+    data_loader = dataset_loaders[dataset_name](data_path)
+    (train_get, test_get), (train_size, test_size) = split_and_batch(
+        data_loader,
+        batch_size, 
+        doc_length,
+        hdf5_path,
+        rng_seed=888,
+        normalizer_fun=lambda x: data_utils.normalize(x, max_length=doc_length))
     train_batch_beta = test_get()
     logger.debug("First record shape: {}".format(train_batch_beta.next()[0].shape))
 
@@ -233,18 +242,30 @@ def do_model(get_data, base_dir, data_filename, hdf5_name):
     logger.info("Doing training...")
     mlp.fit(train_iter, optimizer=optimizer, 
               num_epochs=10, cost=cost, callbacks=callbacks)
-    logger.info("Testing accuracy: {}".format(mlp.eval(test_iter, metric=neon.transforms.Accuracy())))
+    logger.info("Testing accuracy: {}".format(mlp.eval(test_iter, metric=Accuracy())))
 
 def main():
     #do_model(get_amazon, 
     #    base_dir="/root/data/pcallier/amazon/", 
     #    data_filename="reviews_Health_and_Personal_Care.json.gz",
     #    hdf5_name="home_kitch_split.hd5")
-    do_model(get_imdb,
-        base_dir="/root/data/pcallier/imdb",
-        data_filename="",
-        hdf5_name="imdb_split.hd5")
+    # do_model(get_imdb,
+    #     base_dir="/root/data/pcallier/imdb",
+    #     data_filename="",
+    #     hdf5_name="imdb_split.hd5")
+    model_args = { "imdb": {
+            'base_dir'      : "/root/data/pcallier/imdb",
+            'data_filename' : "",
+            'hdf5_name'     : "imdb_split.hd5"},
+        'amazon': {
+            'base_dir'      : "/root/data/pcallier/amazon",
+            'data_filename' : "reviews_Health_and_Personal_Care.json.gz",
+            'hdf5_name'     : "home_kitch_split.hd5"            
+            }
+        }
 
+    dataset_name = "amazon"
+    do_model(dataset_name, **model_args[dataset_name])
 if __name__=="__main__":
     main()
 
