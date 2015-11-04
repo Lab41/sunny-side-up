@@ -13,14 +13,12 @@
 # limitations under the License.
 # ----------------------------------------------------------------------------
 """
-This file defines a DataIterator class, compatible for use with Nervana Systems'
-neon, that accepts an iterator over minibatches of arbitrary size
+This file defines a DataIterator subclass, compatible for use with Nervana Systems'
+neon, that accepts a generator function whose value yields minibatches of arbitrary size
 and copies them to the neon backend as necessary for use in 
 training neon models.
 """
 import numpy as np
-#import h5py
-#import simplejson as json
 import gzip
 
 import logging
@@ -33,12 +31,6 @@ from neon import NervanaObject
 from amazon_reviews import load_data
 from batch_data import batch_data as batcher
 from data_utils import from_one_hot
-
-# parameters: data modeling
-# path_to_amazon = '/mnt/data/AmazonReviews/aggressive_dedup.json.gz'
-# total_records = 82836502
-# path_to_amazon = '/mnt/data/AmazonReviews/reviews_Health_and_Personal_Care.json.gz'
-# total_records =  2982356
 
 class DiskDataIterator(NervanaObject):
 
@@ -56,21 +48,16 @@ class DiskDataIterator(NervanaObject):
             nvocab  (int, optional): The number of letter tokens
                 (not necessary if not providing labels)
         """
-        # Treat singletons like list so that iteration follows same syntax
-        #self.ofile = h5py.File(fname, "r")
-        #self.dbuf = self.ofile['reviews']
         
         # set function for loading data and intialize batch generator
+        # this would have been better implemented as an iterator
         self.batch_gen_fun = batch_gen_fun
         self.ndata = ndata
         self.reset()
-        
-        #might not work, beware
-        #self.be.bsz=batch_size
 
         self.nlabels = nlabels
         self.nvocab = nvocab
-        self.nsteps = doclength  # removing 1 for the label at the front
+        self.nsteps = doclength
 
         # on device tensor for review chars and one hot
         self.xlabels_flat = self.be.iobuf((1, self.nsteps), dtype=np.int16)
@@ -91,12 +78,9 @@ class DiskDataIterator(NervanaObject):
 
     def reset(self):
         """
-        For resetting the starting index of this dataset back to zero.
-        Relevant for when one wants to call repeated evaluations on the dataset
-        but don't want to wrap around for the last uneven minibatch
-        Not necessary when ndata is divisible by batch size
+        For resetting the starting index of this dataset back to zero. Used on 
+        initialization and every call to __iter__()
         """
-        #self.start = 0
         self.datagen = self.batch_gen_fun()
 
     def __iter__(self):
@@ -111,12 +95,9 @@ class DiskDataIterator(NervanaObject):
         for i1 in range(0, self.ndata, self.be.bsz):
             i2 = min(i1 + self.be.bsz, self.ndata)
             bsz = i2 - i1
-            # anticipate wraparound
-            #if i2 == self.ndata:
-            #self.start = self.be.bsz - bsz
-            # copy labels from HDF5 file/generator
+            # TODO: implement wraparound. as of now, partial batches are discarded
             X, y = next(self.datagen)
-            logger.info("Dest shape: {}, Src shape: {}, Xbuf flat shape: {}, Xbuf shape: {}"
+            logger.debug("Dest shape: {}, Src shape: {}, Xbuf flat shape: {}, Xbuf shape: {}"
                         "\nY labels shape: {}, Y buffer shape: {}, Y input shape: {}".format(
                     self.xlabels.shape,
                     X.T.shape,
@@ -125,17 +106,19 @@ class DiskDataIterator(NervanaObject):
                     self.ylabels.shape,
                     self.ybuf.shape,
                     y.shape))
-            #self.xlabels[:] = X.T.copy()
+            # This is where data is copied from host memory
+            # to the backend. For some reason, it is
+            # best to transpose it. X is expected to 
+            # already be in the form we want (one-hot
+            # or embedded, probably)
+            # y is expected to come as a count-from-zero integer,
+            # which we convert to one-hot encoding here
             self.ylabels[:] = y.T.copy()
-            # wraparound condition
-            #if self.be.bsz > bsz:
-            #    self.xlabels[:, bsz:] = self.dbuf[:self.start, 1:].T.copy()
-            #    self.ylabels[:, bsz:] = self.dbuf[:self.start, 0:1].T.copy()
-
-            #self.Xbuf_flat[:] = self.be.onehot(self.xlabels_flat, axis=0)
             self.Xbuf[:] = X.T.copy()
             logger.debug(self.Xbuf.shape)
             self.ybuf[:] = self.be.onehot(self.ylabels, axis=0)
+            logger.debug(y.shape)
+            #logger.debug(np.concatenate((y, ylabels.T, self.ybuf.get().T), axis=1))
             yield (self.Xbuf, self.ybuf)
 
 

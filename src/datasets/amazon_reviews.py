@@ -35,11 +35,11 @@ def load_data(file_path='/data/amazon/reviews_Home_and_Kitchen.json.gz',
                            "productGraph/categoryFiles/"
                            "reviews_Home_and_Kitchen.json.gz"):
     ''' Function that takes in a path to the Stanford SNAP Amazon review
-        data, opens it, and yields a dictoray of information for each
+        data, opens it, and yields a tuple of information for each
         review
 
         @Arguments:
-            file_path -- (optional) personal system file path to the
+            file_path -- personal system file path to the
                 SNAP Stanford data set (or others of a similar structure)
             
             amazon_url -- (optional) URI of data set, in case it needs to be 
