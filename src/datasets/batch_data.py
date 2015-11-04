@@ -340,8 +340,8 @@ def split_and_batch(data_loader,
                     doclength,
                     h5_path,
                     rng_seed=888,
-                    normalizer_fun=lambda x: data_utils.normalize(x, max_length=doclength),
-                    transformer_fun=lambda x: data_utils.to_one_hot(x)):
+                    normalizer_fun=data_utils.normalize,
+                    transformer_fun=data_utils.to_one_hot):
     """
     Convenience wrapper for most common splitting and batching
     workflow in neon. Splits data to an HDF5 path, if it does not already exist,
