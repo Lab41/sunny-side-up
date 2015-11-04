@@ -102,8 +102,12 @@ ENV LIBRARY_PATH /usr/local/lib:/usr/local/cuda/lib:$LD_LIBRARY_PATH
 RUN echo "/usr/local/cuda/lib64" > /etc/ld.so.conf.d/cuda.conf && \
     ldconfig
 
-# download/configure/install neon
-RUN cd /opt/ && git clone https://github.com/NervanaSystems/neon.git
+# download/configure/install neon 1.0.0
+RUN pip install virtualenv
+RUN cd /opt/ && \
+    wget -nv https://github.com/NervanaSystems/neon/archive/v1.0.0.tar.gz
+RUN cd /opt && tar -xzvf v1.0.0.tar.gz && \
+    mv neon-1.0.0 neon
 RUN cd /opt/neon && \
     make sysinstall
 
