@@ -23,8 +23,9 @@ class WordVectorEmbedder:
                 model_subset    = 'GoogleNews-vectors-negative300.bin'
                 model_args      = { 'binary': True }
 
-            # setup importer
+            # setup importer and converter
             self.model_import_method = Doc2Vec.load_word2vec_format
+            self.word_vector = self.word_vector_word2vec
 
         elif model_type == 'glove':
 
@@ -35,8 +36,9 @@ class WordVectorEmbedder:
                 model_subset    = 'glove.twitter.27B.25d'
                 model_args      = {}
 
-            # setup importer
+            # setup importer and converter
             self.model_import_method = Glove.load_obj
+            self.word_vector = self.word_vector_glove
 
         else:
             raise NameError("Error! You must specify a model type from: <word2vec|glove>")
@@ -53,9 +55,24 @@ class WordVectorEmbedder:
         self.model = self.model_import_method(model_fullpath, **model_args)
 
 
+    def word_vector_glove(self, word):
+        '''
+            get glove vector for given word
+        '''
+        word_idx = self.model.dictionary[word]
+        return self.model.word_vectors[word_idx]
+
+
+    def word_vector_word2vec(self, word):
+        '''
+            get glove vector for given word
+        '''
+        return self.model[word]
+
+
     def embed_words_into_vectors(self, text):
         '''
-            embed text into model's vector space
+            embed text into glove's vector space
         '''
 
         # store vectors as list
@@ -65,12 +82,8 @@ class WordVectorEmbedder:
         for word in text.split():
             try:
 
-                # embed word into vector
-                self.model.word_idx = self.model.dictionary[word]
-                vector = self.model.word_vectors[self.model.word_idx]
-
                 # add vector
-                vectors.append(vector)
+                vectors.append(self.word_vector(word))
 
             # ignore words not in dictionary
             except KeyError as e:
