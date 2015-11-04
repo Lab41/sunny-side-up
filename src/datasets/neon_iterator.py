@@ -24,7 +24,7 @@ import gzip
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 
 from neon import NervanaObject
 
