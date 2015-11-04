@@ -9,6 +9,7 @@ current_path = os.path.dirname(os.path.abspath(__file__))
 two_up = os.path.dirname(os.path.dirname(current_path))
 sys.path.append(two_up)
 import datetime
+import argparse
 
 import logging
 logging.basicConfig()
@@ -29,6 +30,7 @@ from neon.backends import gen_backend
 
 import src.datasets.imdb as imdb
 import src.datasets.amazon_reviews as amazon
+import src.datasets.sentiment140 as sentiment140
 import src.datasets.data_utils as data_utils
 from src.datasets.batch_data import batch_data, split_data, split_and_batch
 from src.datasets.data_utils import from_one_hot
@@ -196,7 +198,8 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name):
     gpu_id=1
     nframes=256
     dataset_loaders = { 'amazon'    : amazon.load_data,
-                        'imdb'      : imdb.load_data }
+                        'imdb'      : imdb.load_data,
+                        'sentiment140'  : sentiment140.load_data }
 
     present_time = datetime.datetime.strftime(datetime.datetime.now(),"%m%d_%I%p")
     model_state_path=os.path.join(base_dir, "neon_crepe_model_{}.pkl".format(present_time))
@@ -245,6 +248,9 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name):
     logger.info("Testing accuracy: {}".format(mlp.eval(test_iter, metric=Accuracy())))
 
 def main():
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("dataset", help="Name of dataset (one of amazon, imdb, sentiment140)")
+    args = arg_parser.parse_args()
     #do_model(get_amazon, 
     #    base_dir="/root/data/pcallier/amazon/", 
     #    data_filename="reviews_Health_and_Personal_Care.json.gz",
@@ -261,10 +267,15 @@ def main():
             'base_dir'      : "/root/data/pcallier/amazon",
             'data_filename' : "reviews_Health_and_Personal_Care.json.gz",
             'hdf5_name'     : "home_kitch_split.hd5"            
+            },
+        'sentiment140': {
+            'base_dir'      : "/root/data/pcallier/sentiment140",
+            'data_filename' : "sentiment140.csv",
+            'hdf5_name'     : "sentiment140_split.hd5"
             }
         }
 
-    dataset_name = "amazon"
+    dataset_name = args.dataset
     do_model(dataset_name, **model_args[dataset_name])
 if __name__=="__main__":
     main()
