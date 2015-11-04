@@ -5,6 +5,8 @@ evaluation of neon models"""
 
 import os
 import json
+import time
+import datetime
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -17,12 +19,13 @@ import neon
 
 class NeonCallback(neon.callbacks.callbacks.Callback):
     """ This Callback object:
-        -- saves performance metrics after every N minibatches
+        -- saves performance metrics after every minibatch
             - cost
-            - training accuracy
+        -- after every epoch
+            - train time
             - testing accuracy
-            - precision/recall
-            - confusion matrix
+            - testing confusion matrix
+
     """
     def __init__(self, model, train_data, test_data, save_path):
         self.conf_matrix_binary = ConfusionMatrixBinary()
@@ -32,11 +35,12 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         self.test_data = test_data
         self.old_cost = self.be.zeros((1,1))
         self.save_path = save_path
-        #self.minibatch_freq = minibatch_freq
         self.costs = []
         self.train_accuracies = []
         self.test_accuracies = []
         self.test_confusions = []
+        self.train_times = {}
+        self.epoch_times = []
     
     @staticmethod
     def write_to_json(obj, path_base, path_decorator):
@@ -51,9 +55,21 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         full_path = "{}{}{}".format(path_part, path_decorator, ext)
         with open(full_path, "w") as f:
             json.dump(obj, f)
+
+    def on_train_begin(self, epochs):
+        # get start time for training
+        self.train_times['start'] = time.time()
+
+    def on_train_end(self):
+        # write out start and end times for training
+        self.train_times['end'] = time.time()
+        self.write_to_json(self.train_times, self.save_path, "_traintimes")        
         
     def on_minibatch_end(self, epoch, minibatch):
-        """Check if it's time to do our metrics!"""
+        """Get costs per minibatch and
+        write them to disk in JSON format every number
+        of minibatches
+        """
         # get cost
         new_cost = self.model.total_cost - self.old_cost
         # fiddle with neon's MOP abstractions to get the metric out
@@ -72,10 +88,17 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         if len(self.costs[epoch]) % 500 == 0:
             self.write_to_json(self.costs, self.save_path, "_costs")
 
+    def on_epoch_begin(self, epoch):
+        # get start time for epoch
+        self.epoch_times.append({})
+        self.epoch_times[epoch]['start'] = time.time()
+
 
     def on_epoch_end(self, epoch):
         """Get train/test accuracy, produce
         epoch-wide charts of loss per minibatch"""
+        # Get end time for training
+        self.epoch_times[epoch]['end'] = time.time()
         # get accuracy scores
         logger.info("Computing training accuracy")
         train_accuracy = self.model.eval(self.train_data, neon.transforms.Accuracy())
@@ -93,11 +116,7 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         self.write_to_json(self.test_confusions, self.save_path, "_confusions")
         # finish writing costs to disk
         self.write_to_json(self.costs, self.save_path, "_costs")
-        # TODO:  plot loss over the epoch
-        
-
-            
-            
+        self.write_to_json(self.epoch_times, self.save_path, "_epochtimes")
 
 class NeonCallbacks(neon.callbacks.callbacks.Callbacks):
     def add_neon_callback(self, metrics_path, **kwargs):
