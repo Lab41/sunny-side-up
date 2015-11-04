@@ -63,7 +63,7 @@ def load_data(file_path='/data/amazon/reviews_Home_and_Kitchen.json.gz',
                 continue
 
 if __name__=="__main__":
-    data = amazon_reviews.load_data()
+    data = load_data()
     print data.next()
                 
 
