@@ -250,6 +250,9 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name):
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("dataset", help="Name of dataset (one of amazon, imdb, sentiment140)")
+    arg_parser.add_argument("--working_dir", default=".",
+	help="Directory where data should be put, default PWD")
+
     args = arg_parser.parse_args()
     #do_model(get_amazon, 
     #    base_dir="/root/data/pcallier/amazon/", 
@@ -260,16 +263,16 @@ def main():
     #     data_filename="",
     #     hdf5_name="imdb_split.hd5")
     model_args = { "imdb": {
-            'base_dir'      : "/root/data/pcallier/imdb",
+            'base_dir'      : os.path.join(args.working_dir, "imdb"),
             'data_filename' : "",
             'hdf5_name'     : "imdb_split.hd5"},
         'amazon': {
-            'base_dir'      : "/root/data/pcallier/amazon",
+            'base_dir'      : os.path.join(args.working_dir, "amazon"),
             'data_filename' : "reviews_Health_and_Personal_Care.json.gz",
             'hdf5_name'     : "home_kitch_split.hd5"            
             },
         'sentiment140': {
-            'base_dir'      : "/root/data/pcallier/sentiment140",
+            'base_dir'      : os.path.join(args.working_dir, "sentiment140"),
             'data_filename' : "sentiment140.csv",
             'hdf5_name'     : "sentiment140_split.hd5"
             }
