@@ -1,5 +1,5 @@
-# build from ubuntu 15.04, matching host
-FROM ubuntu:15.04
+# build from ubuntu 14.04, matching host
+FROM ubuntu:14.04
 MAINTAINER Kyle F <kylef@lab41.org>
 
 # configure headless install
