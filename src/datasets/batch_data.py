@@ -54,6 +54,8 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
     docs = []
     labels = []
 
+    logger.debug(data_loader)
+
     # set (near) identity functions for transformation functions when None
     if transformer_fun is None:
         transformer_fun = lambda x: np.array(x)
@@ -374,6 +376,7 @@ if __name__=="__main__":
     # some demo code
     import imdb
     import amazon_reviews
+    import batch_data
     import data_utils
     import argparse
 
