@@ -106,17 +106,20 @@ RUN echo "/usr/local/cuda/lib64" > /etc/ld.so.conf.d/cuda.conf && \
 RUN pip install virtualenv
 RUN cd /opt/ && \
     wget -nv https://github.com/NervanaSystems/neon/archive/v1.0.0.tar.gz
+# untar to a standard location
 RUN cd /opt && tar -xzvf v1.0.0.tar.gz && \
     mv neon-1.0.0 neon
+RUN cd /opt/neon && \
+# Make kludgey edit to neon asserts
+    cd /usr/local/lib/python2.7/dist-packages/neon && \
+        sed -i 's/(CRST, KRST)/(CRST ,)/g' layer_gpu.py
+# install
 RUN cd /opt/neon && \
     make sysinstall
 
 # make some updates
 RUN pip install -U six
 
-# Make kludgey edit to neon asserts
-cd /opt/neon/neon/layers/backends && \
-    sed -i 'g/(CRST, KRST)/(CRST ,)/g' layer_gpu.py
 
 # default to shell in root dir
 WORKDIR /root
