@@ -70,16 +70,16 @@ class WordVectorEmbedder:
         return self.model[word]
 
 
-    def embed_words_into_vectors(self, text):
+    def embed_words_into_vectors(self, words, num_features=None):
         '''
-            embed text into glove's vector space
+            embed words into model's vector space
         '''
 
         # store vectors as list
         vectors = []
 
         # process tokens
-        for word in text.split():
+        for word in words.split():
             try:
 
                 # add vector
@@ -89,5 +89,22 @@ class WordVectorEmbedder:
             except KeyError as e:
                 pass
 
-        # return list of embedded words
-        return np.array(vectors)
+
+        # build fixed-length set if necessary
+        if num_features:
+
+            # truncate if longer
+            if (len(vectors) >= num_features):
+                vectors = vectors[:num_features]
+
+            # pad if necessary by appending right-sized 0 vectors
+            else:
+                padding_length = num_features - len(vectors)
+                for i in xrange(padding_length):
+                    vectors.append[np.zeros_like(vectors[0])]
+
+        # convert into ndarray
+        vectors = np.array(vectors)
+
+        # return ndarray of embedded words
+        return vectors
