@@ -115,8 +115,8 @@ RUN cd /opt/neon && \
 RUN pip install -U six
 
 # Make kludgey edit to neon asserts
-cd /opt/neon/neon/layers/backends && \
-    sed -i 'g/(CRST, KRST)/(CRST ,)/g' layer_gpu.py
+RUN cd /usr/local/lib/python2.7/dist-packages/neon/backends && \
+    sed -i 's/(CRST, KRST)/(CRST ,)/g' layer_gpu.py
 
 # default to shell in root dir
 WORKDIR /root
