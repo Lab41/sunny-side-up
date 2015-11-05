@@ -120,7 +120,6 @@ RUN cd /opt/neon && \
 # make some updates
 RUN pip install -U six
 
-
 # default to shell in root dir
 WORKDIR /root
 CMD ["/bin/bash"]
