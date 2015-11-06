@@ -106,6 +106,7 @@ RUN echo "/usr/local/cuda/lib64" > /etc/ld.so.conf.d/cuda.conf && \
 RUN pip install virtualenv
 RUN cd /opt/ && \
     wget -nv https://github.com/NervanaSystems/neon/archive/v1.0.0.tar.gz
+# untar to a standard location
 RUN cd /opt && tar -xzvf v1.0.0.tar.gz && \
     mv neon-1.0.0 neon
 RUN cd /opt/neon && \
