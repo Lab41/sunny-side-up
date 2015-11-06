@@ -109,21 +109,21 @@ RUN cd /opt && tar -xzvf v1.0.0.tar.gz && \
     mv neon-1.0.0 neon
 RUN cd /opt/neon && \
     # Make kludgey edit to neon asserts
-    sed -i 's/(CRST, KRST)/(CRST ,)/g' backends/layer_gpu.py && \
+    sed -i 's/(CRST, KRST)/(CRST ,)/g' neon/backends/layer_gpu.py && \
     make sysinstall
 
 # make some updates
 RUN pip install -U six
 
-# add gensim and glove
-RUN pip install gensim glove
+# add gensim
+RUN pip install gensim
 
 # add glove-python
-RUN cd /tmp && \
-    git clone https://github.com/maciejkula/glove-python.git && \
-    cd glove-python && \
-    python setup.py install && \
-    rm -rf *
+#RUN cd /tmp && \
+#    git clone https://github.com/maciejkula/glove-python.git && \
+#    cd glove-python && \
+#    python setup.py install && \
+#    rm -rf *
 
 # install custom glove code
 RUN cd /tmp && \
