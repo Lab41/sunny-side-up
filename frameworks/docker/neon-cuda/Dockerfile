@@ -109,14 +109,29 @@ RUN cd /opt/ && \
 RUN cd /opt && tar -xzvf v1.0.0.tar.gz && \
     mv neon-1.0.0 neon
 RUN cd /opt/neon && \
+    # Make kludgey edit to neon asserts
+    sed -i 's/(CRST, KRST)/(CRST ,)/g' backends/layer_gpu.py && \
     make sysinstall
 
 # make some updates
 RUN pip install -U six
 
-# Make kludgey edit to neon asserts
-RUN cd /usr/local/lib/python2.7/dist-packages/neon/backends && \
-    sed -i 's/(CRST, KRST)/(CRST ,)/g' layer_gpu.py
+# add gensim and glove
+RUN pip install gensim glove
+
+# add glove-python
+RUN cd /tmp && \
+    git clone https://github.com/maciejkula/glove-python.git && \
+    cd glove-python && \
+    python setup.py install && \
+    rm -rf *
+
+# install custom glove code
+RUN cd /tmp && \
+    git clone https://github.com/Lab41/sunny-side-up.git && \
+    cd sunny-side-up/src/glove && \
+    python setup.py install && \
+    rm -rf *
 
 # default to shell in root dir
 WORKDIR /root
