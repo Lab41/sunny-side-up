@@ -56,6 +56,13 @@ class WordVectorEmbedder:
         self.model = self.model_import_method(model_fullpath, **model_args)
 
 
+    def num_features(self):
+        if self.model_type == 'word2vec':
+            return self.model.vector_size
+        else:
+            return self.model.no_components
+
+
     def word_vector_glove(self, word):
         '''
             get glove vector for given word
