@@ -17,7 +17,14 @@ from src.datasets.word_vector_embedder import WordVectorEmbedder
 data_fraction_test = 0.20
 data_fraction_train = 0.80
 dir_data = "/data"
-dir_results = os.path.join(dir_data, os.path.dirname(os.path.realpath(__file__)), 'results')
+
+# set output directory
+try:
+    dir_results = os.path.join(dir_data, os.path.dirname(os.path.realpath(__file__)), 'results')
+except NameError:
+    dir_results = os.path.join(dir_data, 'results')
+
+
 
 def getClassifiers():
     """
