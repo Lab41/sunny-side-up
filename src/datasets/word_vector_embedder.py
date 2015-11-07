@@ -127,28 +127,27 @@ class WordVectorEmbedder:
         # paragraph
 
         # setup dictionary
-        if self.model_type == 'word2vec':
-            dictionary = self.model.index2word
-            num_features = self.model.syn0.shape[1]
+        if self.model_type == 'glove':
+            vector = self.model.transform_paragraph(words.split(), ignore_missing=True)
+            return np.nan_to_num(vector)
         else:
-            dictionary = self.model.dictionary
-            num_features = self.model.word_vectors.shape[1]
 
-        # Pre-initialize an empty numpy array (for speed)
-        featureVec = np.zeros((num_features,),dtype="float32")
+            # Pre-initialize an empty numpy array (for speed)
+            featureVec = np.zeros((self.num_features(),),dtype="float32")
 
-        nwords = 0.
+            nwords = 0.
 
-        # names of the words in model's vocabulary converted to a set for speed
-        word_set = set(dictionary)
+            # names of the words in model's vocabulary converted to a set for speed
+            dictionary = self.model.index2word
+            word_set = set(dictionary)
 
-        # Loop over each word in the review and, if it is in the model's
-        # vocabulary, add its feature vector to the total
-        for word in words:
-            if word in word_set:
-                nwords = nwords + 1.
-                featureVec = np.add(featureVec, self.word_vector(word))
+            # Loop over each word in the review and, if it is in the model's
+            # vocabulary, add its feature vector to the total
+            for word in words:
+                if word in word_set:
+                    nwords = nwords + 1.
+                    featureVec = np.add(featureVec, self.word_vector(word))
 
-        # Divide the result by the number of words to get the average
-        featureVec = np.divide(featureVec, nwords)
-        return featureVec
+            # Divide the result by the number of words to get the average
+            featureVec = np.divide(featureVec, nwords)
+            return np.nan_to_num(featureVec)
