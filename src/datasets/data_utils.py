@@ -1,4 +1,4 @@
-import os, re, csv
+import os, re, csv, errno
 import logging
 import random
 from urllib2 import urlopen, HTTPError, URLError
@@ -14,6 +14,16 @@ class DataException(Exception):
 
 class TextTooShortException(DataException):
     pass
+
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc: # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else: raise
+
 
 def normalize(txt, vocab=None, replace_char=' ',
                 min_length=100, max_length=1014, pad_out=True, 
