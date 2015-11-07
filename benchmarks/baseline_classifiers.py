@@ -6,6 +6,7 @@ from collections import defaultdict, Counter
 import cProfile, pstats
 
 from sklearn import metrics
+from sklearn import svm
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -38,12 +39,13 @@ def getClassifiers():
                                                       intercept_scaling=1,
                                                       penalty='l2',
                                                       random_state=None,
-                                                      tol=0.0001),),
+                                                      tol=0.0001)),
 
            ("RandomForests", RandomForestClassifier(n_jobs=-1,
                                                     n_estimators = 15,
                                                     max_features = 'sqrt')),
-           ("Gaussian NaiveBayes", GaussianNB(),)]
+           ("Gaussian NaiveBayes", GaussianNB()),
+           ("SVM", svm.SVC())]
 
 
 # prepare to embed words into vector space
