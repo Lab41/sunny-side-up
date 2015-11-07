@@ -22,7 +22,7 @@ RUN pip install six==1.9.0
 
 # install custom glove code
 RUN cd /tmp && \
-    git clone https://github.com/danforth36phd/sunny-side-up.git && \
+    git clone https://github.com/Lab41/sunny-side-up.git && \
     cd sunny-side-up/src/glove && \
     python setup.py install
 
