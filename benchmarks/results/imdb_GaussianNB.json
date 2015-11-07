@@ -1,0 +1,1 @@
+{"metrics": {"FP": "1258", "TN": "3735", "time_in_seconds_training": "0.010492", "FN": "3239", "f1": "0.440044826298", "recall": "0.352976428286", "time_in_seconds_testing": "0.007311", "precision": "0.584132231405", "TP": "1767", "accuracy": "0.550255025503"}, "data": {"source": "imdb", "negative": "4993.0", "positive": "5006.0", "testsize": "9999"}, "classifier": "GaussianNB"}
