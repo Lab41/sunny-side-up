@@ -12,11 +12,14 @@ import datetime
 import argparse
 
 import logging
-logging.basicConfig()
+logging.basicConfig(level=logging.DEBUG)
 logger=logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
+
+
 
 import numpy as np
+
 
 import neon
 import neon.layers
@@ -37,67 +40,6 @@ from src.datasets.data_utils import from_one_hot
 from src.datasets.neon_iterator import DiskDataIterator
 from src.neon.neon_utils import ConfusionMatrixBinary, NeonCallbacks, NeonCallback, Accuracy
 
-def get_imdb(batch_size, doclength, 
-             data_path,
-             h5_path):
-    imdb_data = imdb.load_data(data_path, None)
-    imdb_batches = batch_data(imdb_data, batch_size,
-        normalizer_fun=lambda x: data_utils.normalize(x, max_length=doclength),
-        transformer_fun=None)
-    (_, _), (train_size, test_size) = split_data(imdb_batches, h5_path, overwrite_previous=False)
-    def train_batcher():
-        (a,b),(a_size,b_size)=split_data(None, h5_path=h5_path, overwrite_previous=False, shuffle=True)
-        return batch_data(a,
-            normalizer_fun=lambda x: x,
-            transformer_fun=lambda x: data_utils.to_one_hot(x),
-            flatten=True,
-            batch_size=batch_size)
-    def test_batcher():
-        (a,b),(a_size,b_size)=split_data(None, h5_path, overwrite_previous=False,shuffle=False)
-        return batch_data(b,
-            normalizer_fun=lambda x: x,
-            transformer_fun=lambda x: data_utils.to_one_hot(x),
-            flatten=True,
-            batch_size=batch_size)
-
-    return (train_batcher, test_batcher), (train_size, test_size)
-
-def get_amazon(batch_size, doclength, data_path, h5_path):
-    # batch data and split it to HDF5
-    # the generators obtained here are not 
-    # used except for debugging
-    amz_data = batch_data(amazon.load_data(data_path),
-        batch_size=batch_size,
-        normalizer_fun=lambda x: data_utils.normalize(x, max_length=doclength),
-        transformer_fun=None)
-    (a, b), (a_size, b_size) = split_data(amz_data, 
-                      h5_path=h5_path,
-                      overwrite_previous=False)
-    logger.debug("Test iteration (shape of one record): {}".format(iter(a).next()[0].shape))
-    logger.debug("Test iteration (one record): {}".format(iter(a).next()[0]))
-
-    # define functions for use with neon_iterator
-    # TODO: create proper iterator classes and use those
-    # these functions are returned, alongside the batch sizes
-    def a_batcher():
-        (a,b),(a_size,b_size)=split_data(None, 
-            h5_path=h5_path, 
-            overwrite_previous=False, 
-            shuffle=True)
-        return batch_data(a, 
-            normalizer_fun=lambda x: x,
-            transformer_fun=lambda x: data_utils.to_one_hot(x), 
-            flatten=True,
-            batch_size=batch_size)
-    def b_batcher():
-        (a,b),(a_size,b_size)=split_data(None, h5_path=h5_path, overwrite_previous=False)
-        return batch_data(b, 
-            normalizer_fun=lambda x: x, 
-            transformer_fun=lambda x: data_utils.to_one_hot(x), 
-            flatten=True,
-            batch_size=batch_size)
-
-    return (a_batcher, b_batcher), (a_size, b_size)
 
 def lstm_model(nvocab=67, hidden_size=20, embedding_dim=60):
     init_emb = neon.initializers.Uniform(low=-0.1/embedding_dim, high=0.1/embedding_dim)
@@ -191,10 +133,11 @@ def crepe_model(nvocab=67, nframes=256, batch_norm=False):
     ]
     return layers
 
-def do_model(dataset_name, base_dir, data_filename, hdf5_name):
+def do_model(dataset_name, base_dir, data_filename, hdf5_name, **normalize_args):
     batch_size=128
-    doc_length=1014
     vocab_size=67
+    doc_length=normalize_args.get('max_length', 1014)
+    logger.debug("Doc length: {}".format(doc_length))
     gpu_id=1
     nframes=256
     dataset_loaders = { 'amazon'    : amazon.load_data,
@@ -216,13 +159,14 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name):
     data_path = os.path.join(base_dir, data_filename)
     hdf5_path = os.path.join(base_dir, hdf5_name)
     data_loader = dataset_loaders[dataset_name](data_path)
+    logger.debug("Keyowrd args: {}".format(normalize_args))
     (train_get, test_get), (train_size, test_size) = split_and_batch(
         data_loader,
         batch_size, 
         doc_length,
         hdf5_path,
         rng_seed=888,
-        normalizer_fun=lambda x: data_utils.normalize(x, max_length=doc_length))
+        normalizer_fun=lambda x: data_utils.normalize(x, **normalize_args))
     train_batch_beta = test_get()
     logger.debug("First record shape: {}".format(train_batch_beta.next()[0].shape))
 
@@ -284,7 +228,7 @@ def main():
         }
 
     dataset_name = args.dataset
-    do_model(dataset_name, **model_args[dataset_name])
+    do_model(dataset_name, max_length=140, min_length=80, **model_args[dataset_name])
 if __name__=="__main__":
     main()
 
