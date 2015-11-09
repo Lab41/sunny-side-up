@@ -152,4 +152,5 @@ for classifier_name,classifier in classifiers():
     # save json file
     filename_results = "{}_{}_{}.json".format(data_source, embedder_model, classifier.__class__.__name__)
     with open(os.path.join(dir_results,filename_results), 'a') as outfile:
-        json.dump(results, outfile)
+        json.dump(results, outfile, sort_keys=True, indent=4, separators=(',', ': '))
+        outfile.write('\n')
