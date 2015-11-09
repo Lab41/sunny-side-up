@@ -1,5 +1,6 @@
 import os
 import logging
+import shutil
 logger = logging.getLogger(__name__)
 from data_utils import latin_csv_reader, get_file
 from zipfile import ZipFile
@@ -42,10 +43,14 @@ def load_data(file_path=None, feat_extractor=None, verbose=False, return_iter=Tr
     except IOError as e:
         logger.exception("File I/O error, will try downloading...")
         logger.info("Downloading...")
-        # Dowloads and saves locally the zip file from internet (does not unzip permanently)
-        file_path = get_file("http://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip")
-        with ZipFile(file_path, 'r') as zp:
-            twitter_csv = zp.open('training.1600000.processed.noemoticon.csv')
+
+        # download and save file from internet
+        file_downloaded = get_file("http://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip")
+        twitter_csv_filename = 'training.1600000.processed.noemoticon.csv'
+        with ZipFile(file_downloaded, 'r') as zp:
+            zp.extract(twitter_csv_filename, path=os.path.dirname(file_path))
+            shutil.move(os.path.join(os.path.dirname(file_path), twitter_csv_filename), file_path)
+            twitter_csv = open(file_path, 'r')
 
     # Perform parsing of CSV file
     reader = latin_csv_reader(twitter_csv, delimiter=',')
