@@ -1,4 +1,4 @@
-import os, re, csv, errno
+import os, re, csv, errno, sys
 import logging
 import random
 from urllib2 import urlopen, HTTPError, URLError
