@@ -12,7 +12,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
 from src.datasets import data_utils
-from src.datasets.data_utils import timed
+from src.datasets.data_utils import timed, TextTooShortException
 from src.datasets.imdb import IMDB
 from src.datasets.sentiment140 import Sentiment140
 from src.datasets.word_vector_embedder import WordVectorEmbedder
