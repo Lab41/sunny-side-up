@@ -134,6 +134,14 @@ RUN cd /tmp && \
     python setup.py install && \
     rm -rf *
 
+
+# six version conflict (1.5.2 vs 1.9+)
+RUN echo "\ndeb http://archive.ubuntu.com/ubuntu/ vivid main" >> /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install python-six
+
+#RUN dpkg -r --force-depends python-six && apt-mark hold python-six
+
 # default to shell in root dir
 WORKDIR /root
 CMD ["/bin/bash"]
