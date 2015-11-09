@@ -300,3 +300,34 @@ def preprocess_tweet(text):
     text = re_sub(ur"([A-Z]){2,}", allcaps)
 
     return text.lower()
+
+
+# simple structure to hold results of profiled methods
+class ProfileResults():
+    def __init__(self):
+        self.results = None
+        self.timer = None
+
+# decorator to profile execution time
+def timed(func):
+    import cProfile, pstats
+    def func_wrapper(*args, **kwargs):
+        # return object
+        profile_results = ProfileResults() #{ 'results': None, 'timer': None }
+
+        # initialize profiler
+        pr = cProfile.Profile()
+        pr.enable()
+
+        # execute method
+        profile_results.results = func(*args, **kwargs)
+
+        # profile results
+        pr.disable()
+        ps = pstats.Stats(pr)
+        profile_results.timer = ps
+
+        # return object with results and timer
+        return profile_results
+
+    return func_wrapper

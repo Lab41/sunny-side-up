@@ -12,6 +12,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
 from src.datasets import data_utils
+from src.datasets.data_utils import timed
 from src.datasets.imdb import IMDB
 from src.datasets.word_vector_embedder import WordVectorEmbedder
 
@@ -26,8 +27,17 @@ except NameError:
     dir_results = os.path.join(dir_data, 'results')
 
 
+# profiled methods
+@timed
+def timed_training(classifier, values, labels):
+    return classifier.fit(values, labels)
+
+@timed
+def timed_testing(classifier, values):
+    return classifier.predict(values)
 
 def getClassifiers():
+def classifiers():
     """
         Returns a list of classifier tuples (name, model)
         for use in training
@@ -79,28 +89,17 @@ dist.update(labels_test)
 
 
 # setup classifier
-for classifier_name,classifier in getClassifiers():
+for classifier_name,classifier in classifiers():
 
-    # profile training
+    # profiled training
     logging.info("Building %s classifier..." % classifier.__class__.__name__)
-    pr = cProfile.Profile()
-    pr.enable()
-    classifier.fit(values_train, labels_train)
-    pr.disable()
+    profile_results = timed_training(classifier, values_train, labels_train)
+    seconds_training = profile_results.timer.total_tt
 
-    # store total training time
-    ps = pstats.Stats(pr)
-    seconds_training = ps.total_tt
-
-    # profile testing
-    pr = cProfile.Profile()
-    pr.enable()
-    predictions = classifier.predict(values_test)
-    pr.disable()
-
-    # store total testing time
-    ps = pstats.Stats(pr)
-    seconds_testing = ps.total_tt
+    # profiled testing
+    profile_results = timed_testing(classifier, values_test)
+    predictions = profile_results.results
+    seconds_testing = profile_results.timer.total_tt
 
     # calculate metrics
     data_size           = len(labels_test)
