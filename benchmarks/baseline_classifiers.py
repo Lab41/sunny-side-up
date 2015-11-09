@@ -36,7 +36,18 @@ def timed_training(classifier, values, labels):
 def timed_testing(classifier, values):
     return classifier.predict(values)
 
-def getClassifiers():
+@timed
+def timed_dataload(data, values, labels):
+    for i, (text, sentiment) in enumerate(data):
+
+        if (i % int(len(values)/20) == 0):
+            print("Embedding {}...".format(i))
+
+        values[i] = embedder.embed_words_into_vectors_averaged(text)
+        labels[i] = sentiment
+
+
+
 def classifiers():
     """
         Returns a list of classifier tuples (name, model)
@@ -66,16 +77,12 @@ data_source = "imdb"
 loader = IMDB(os.path.join(dir_data, data_source))
 data = loader.load_data()
 
-# create output array
+
+# load dataset
 values = np.zeros((loader.num_samples(), embedder.num_features()), dtype="float32")
 labels = np.zeros(loader.num_samples(), dtype='float32')
-for i, (text, sentiment) in enumerate(data):
-
-    if (i % int(loader.num_samples()/20) == 0):
-        print("Embedding {}...".format(i))
-
-    values[i] = embedder.embed_words_into_vectors_averaged(text)
-    labels[i] = sentiment
+profile_results = timed_dataload(data, values, labels)
+seconds_loading = profile_results.timer.total_tt
 
 
 # split into training and test data
@@ -120,7 +127,8 @@ for classifier_name,classifier in classifiers():
                 'data':    {    'source': str(data_source),
                                 'testsize': str(data_size),
                                 'positive': str(data_positive),
-                                'negative': str(data_negative)
+                                'negative': str(data_negative),
+                                'time_in_seconds_loading': str(seconds_loading)
                            },
                 'metrics': {    'TP': str(TP),
                                 'FP': str(FP),
