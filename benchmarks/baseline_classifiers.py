@@ -79,17 +79,26 @@ def timed_testing(classifier, values):
     return classifier.predict(values)
 
 @timed
-def timed_dataload(data, values, labels):
+def timed_dataload(loader, data, values, labels):
     for i, (text, sentiment) in enumerate(data):
 
         if (i % int(len(values)/20) == 0):
             logger.info("Embedding {}...".format(i))
 
-        # input data in the form of paragraph vectors from normalized text
-        values[i] = embedder.embed_words_into_vectors_averaged(data_utils.normalize(text))
+        try:
+            # input data in the form of paragraph vectors from normalized text
+            text_normalized = data_utils.normalize(text)
+            values[i] = embedder.embed_words_into_vectors_averaged(text_normalized)
 
-        # data labeled by sentiment score
-        labels[i] = sentiment
+            # data labeled by sentiment score
+            labels[i] = sentiment
+
+        except TextTooShortException as e:
+
+            # adjust number of valid samples
+            loader.samples -= 1
+            pass
+
 
 
 
@@ -112,7 +121,7 @@ for embedder_model in embedders():
         logger.info("loading dataset {}...".format(data_params['path']))
         values = np.zeros((loader.num_samples(), embedder.num_features()), dtype="float32")
         labels = np.zeros(loader.num_samples(), dtype='float32')
-        profile_results = timed_dataload(data, values, labels)
+        profile_results = timed_dataload(loader, data, values, labels)
         seconds_loading = profile_results.timer.total_tt
 
 

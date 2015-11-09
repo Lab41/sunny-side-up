@@ -32,9 +32,12 @@ class IMDB:
         self.data = self.load_datafiles(imdb_root)
         random.shuffle(self.data)
 
+        # setup the number of samples
+        self.samples = len(self.data)
+
 
     def num_samples(self):
-        return len(self.data)
+        return self.samples
 
 
     def download_data(self, file_dir, download_dir):
