@@ -208,6 +208,11 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name):
     be = gen_backend(backend='gpu', batch_size=batch_size, device_id=gpu_id)
     logger.info("Getting data...")
 
+    base_dir = os.path.abspath(base_dir)
+    try:
+        os.mkdir(base_dir)
+    except OSError:
+        logger.exception("Was trying to create directory, but it may already exist")
     data_path = os.path.join(base_dir, data_filename)
     hdf5_path = os.path.join(base_dir, hdf5_name)
     data_loader = dataset_loaders[dataset_name](data_path)
