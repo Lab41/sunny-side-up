@@ -1,3 +1,4 @@
+import os
 import logging
 logger = logging.getLogger(__name__)
 from data_utils import latin_csv_reader, get_file
@@ -33,15 +34,13 @@ def load_data(file_path=None, feat_extractor=None, verbose=False):
     tweet_to_sentiment = list()
 
     # Open file path
-    if file_path:
-        try:
-            twitter_csv = open(file_path, 'r')
-        except IOError, e:
-            print "IO Error:", e.code, file_path
-    else:
-        # Dowloads and saves locally the zip file from internet
+    try:
+        twitter_csv = open(file_path, 'r')
+    except IOError as e:
+        logger.exception("File I/O error, will try downloading...")
+        logger.info("Downloading...")
+        # Dowloads and saves locally the zip file from internet (does not unzip permanently)
         file_path = get_file("http://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip")
-
         with ZipFile(file_path, 'r') as zp:
             twitter_csv = zp.open('training.1600000.processed.noemoticon.csv')
 
