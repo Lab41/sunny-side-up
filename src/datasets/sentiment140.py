@@ -1,12 +1,15 @@
+import os
 import logging
+logger = logging.getLogger(__name__)
 from data_utils import latin_csv_reader, get_file
 from zipfile import ZipFile
 
-# Dictionary that defines the Sentiment features
-Sentiment = {0: 'neg', 2: 'neutral', 4: 'pos'}
+# Dictionaries that define the Sentiment features
+sentiment_text = {0: 'neg', 2: 'neutral', 4: 'pos'}
+sentiment_binary = {0: 0, 4: 1}
 
 
-def load_data(file_path=None, feat_extractor=None, verbose=False):
+def load_data(file_path=None, feat_extractor=None, verbose=False, return_iter=True):
     ''' Function that takes in a path to the StanfordTweetData CSV
         file, opens it, and adds tweet strings and their respective
         sentiments to a list
@@ -24,6 +27,9 @@ def load_data(file_path=None, feat_extractor=None, verbose=False):
 
             verbose -- if True, this funciton shows logging data as it progresses
 
+            return_iter -- if True, return an iterator over tuples of (record, sentiment);
+               if False, return a list of such tuples
+
         @Return:
             A list of tuples of the following format:
                 (tweets/features, sentiment label)
@@ -31,15 +37,13 @@ def load_data(file_path=None, feat_extractor=None, verbose=False):
     tweet_to_sentiment = list()
 
     # Open file path
-    if file_path:
-        try:
-            twitter_csv = open(file_path, 'r')
-        except IOError, e:
-            print "IO Error:", e.code, file_path
-    else:
-        # Dowloads and saves locally the zip file from internet
+    try:
+        twitter_csv = open(file_path, 'r')
+    except IOError as e:
+        logger.exception("File I/O error, will try downloading...")
+        logger.info("Downloading...")
+        # Dowloads and saves locally the zip file from internet (does not unzip permanently)
         file_path = get_file("http://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip")
-
         with ZipFile(file_path, 'r') as zp:
             twitter_csv = zp.open('training.1600000.processed.noemoticon.csv')
 
@@ -53,7 +57,11 @@ def load_data(file_path=None, feat_extractor=None, verbose=False):
         # Gets tweets string from line in csv
         tweet_string = tweet[5]
         # Gets feature from Sentiment dictionary
-        sent = Sentiment[int(tweet[0])]
+        try:
+            sent = sentiment_binary[int(tweet[0])]
+        except KeyError:
+            logger.debug("Sentiment score of {} skipped.".format(tweet[0]))
+
         # If a feat_extractor function was provided, apply it to tweet
         if feat_extractor:
             features = feat_extractor(tweet_string)
@@ -61,7 +69,10 @@ def load_data(file_path=None, feat_extractor=None, verbose=False):
         else:
             tweet_to_sentiment.append((tweet_string, sent))
     twitter_csv.close()
-    return tweet_to_sentiment
+    if return_iter:
+        return iter(tweet_to_sentiment)
+    else:
+        return tweet_to_sentiment
 
 
 def to_txt(write_path, read_path=None, verbose=False):
@@ -75,3 +86,10 @@ def to_txt(write_path, read_path=None, verbose=False):
         # For each line in CSV, write each tweet with a new line to the output
         for line in reader:
             output.write(line[5].encode('UTF-8') + '\n')
+            
+def main():
+    # Download data (will save in ./.downloads)
+    data = load_data()
+
+if __name__=="__main__":
+    main()
