@@ -70,7 +70,9 @@ def classifiers():
 
 
 # prepare to embed words into vector space
-embedder = WordVectorEmbedder('glove')
+embedder_model = 'glove'
+embedder = WordVectorEmbedder(embedder_model)
+
 
 # load datasets
 data_source = "imdb"
@@ -148,6 +150,6 @@ for classifier_name,classifier in classifiers():
         data_utils.mkdir_p(dir_results)
 
     # save json file
-    filename_results = "{}_{}.json".format(data_source, classifier.__class__.__name__)
+    filename_results = "{}_{}_{}.json".format(data_source, embedder_model, classifier.__class__.__name__)
     with open(os.path.join(dir_results,filename_results), 'a') as outfile:
         json.dump(results, outfile)
