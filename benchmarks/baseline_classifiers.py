@@ -85,7 +85,10 @@ def timed_dataload(data, values, labels):
         if (i % int(len(values)/20) == 0):
             logger.info("Embedding {}...".format(i))
 
-        values[i] = embedder.embed_words_into_vectors_averaged(text)
+        # input data in the form of paragraph vectors from normalized text
+        values[i] = embedder.embed_words_into_vectors_averaged(data_utils.normalize(text))
+
+        # data labeled by sentiment score
         labels[i] = sentiment
 
 
