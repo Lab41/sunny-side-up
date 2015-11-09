@@ -1,1 +1,0 @@
-{"metrics": {"FP": "1901", "TN": "3099", "time_in_seconds_training": "145.985274", "FN": "2025", "f1": "0.602390115455", "recall": "0.594918983797", "time_in_seconds_testing": "22.300877", "precision": "0.610051282051", "TP": "2974", "accuracy": "0.607360736074"}, "data": {"source": "imdb", "negative": "5000.0", "positive": "4999.0", "testsize": "9999"}, "classifier": "SVC"}

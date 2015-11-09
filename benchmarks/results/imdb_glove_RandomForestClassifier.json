@@ -1,0 +1,22 @@
+{
+    "classifier": "RandomForestClassifier",
+    "data": {
+        "negative": "4955.0",
+        "positive": "5044.0",
+        "source": "imdb",
+        "testsize": "9999",
+        "time_in_seconds_loading": "145.532101"
+    },
+    "metrics": {
+        "FN": "2173",
+        "FP": "2149",
+        "TN": "2806",
+        "TP": "2871",
+        "accuracy": "0.567756775678",
+        "f1": "0.570548489666",
+        "precision": "0.571912350598",
+        "recall": "0.56919111816",
+        "time_in_seconds_testing": "0.148757",
+        "time_in_seconds_training": "1.921186"
+    }
+}

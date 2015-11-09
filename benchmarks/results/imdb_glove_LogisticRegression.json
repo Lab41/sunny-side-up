@@ -1,0 +1,22 @@
+{
+    "classifier": "LogisticRegression",
+    "data": {
+        "negative": "4955.0",
+        "positive": "5044.0",
+        "source": "imdb",
+        "testsize": "9999",
+        "time_in_seconds_loading": "145.532101"
+    },
+    "metrics": {
+        "FN": "2178",
+        "FP": "1977",
+        "TN": "2978",
+        "TP": "2866",
+        "accuracy": "0.584458445845",
+        "f1": "0.579751188429",
+        "precision": "0.591781953335",
+        "recall": "0.568199841396",
+        "time_in_seconds_testing": "0.001218",
+        "time_in_seconds_training": "0.186804"
+    }
+}
