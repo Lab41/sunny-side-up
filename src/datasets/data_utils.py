@@ -331,3 +331,21 @@ def timed(func):
         return profile_results
 
     return func_wrapper
+
+
+def syslogger(name="logger"):
+
+    # setup stdout logger
+    log = logging.getLogger(name)
+    out_hdlr = logging.StreamHandler(sys.stdout)
+
+    # set formatting
+    out_hdlr.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
+
+    # set default level to info
+    out_hdlr.setLevel(logging.INFO)
+    log.addHandler(out_hdlr)
+    log.setLevel(logging.INFO)
+
+    # return logger
+    return log
