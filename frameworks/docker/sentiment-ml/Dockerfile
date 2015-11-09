@@ -26,6 +26,10 @@ RUN cd /tmp && \
     cd sunny-side-up/src/glove && \
     python setup.py install
 
+# add hdf5
+RUN apt-get install --assume-yes libhdf5-dev
+RUN pip install h5py
+
 # setup data volume
 VOLUME ["/data"]
 WORKDIR /data

@@ -19,22 +19,29 @@ class GitCommitHandler(RequestHandler):
 
     def put(self):
 
-        # git parameters
-        notebook_path_relative = '/ipython-notebooks'
-        git_branch = git_remote = 'gitbot-jupyter-updates'
-        git_url = '<FIXME>'
-        git_user = '<FIXME>'
-        git_repo_upstream = '<FIXME>'
+        # git parameters from environment variables
+        # expand variables since Docker's will pass VAR=$VAL as $VAL without expansion
+        git_dir = "{}/{}".format(os.path.expandvars(os.environ.get('GIT_PARENT_DIR')), os.path.expandvars(os.environ.get('GIT_REPO_NAME')))
+        git_url = os.path.expandvars(os.environ.get('GIT_REMOTE_URL'))
+        git_user = os.path.expandvars(os.environ.get('GIT_USER'))
+        git_repo_upstream = os.path.expandvars(os.environ.get('GIT_REMOTE_UPSTREAM'))
+        git_branch = git_remote = os.path.expandvars(os.environ.get('GIT_BRANCH_NAME'))
+        git_access_token = os.path.expandvars(os.environ.get('GITHUB_ACCESS_TOKEN'))
+
+        # get the parent directory for git operations
+        git_dir_parent = os.path.dirname(git_dir)
 
         # obtain filename and msg for commit
         data = json.loads(self.request.body.decode('utf-8'))
         filename = urllib.unquote(data['filename']).decode('utf8')
         msg = data['msg']
 
+        # get current directory (to return later)
+        cwd = os.getcwd()
+
         # select branch within repo
         try:
-            cwd = os.getcwd()
-            os.chdir(cwd + notebook_path_relative)
+            os.chdir(git_dir)
             dir_repo = check_output(['git','rev-parse','--show-toplevel']).strip()
             repo = Repo(dir_repo)
         except GitCommandError as e:
@@ -48,11 +55,12 @@ class GitCommitHandler(RequestHandler):
             print("Switching to {}".format(repo.heads[git_branch].checkout()))
 
         # commit current notebook
+        # client will sent pathname containing git directory; append to git directory's parent
         try:
-            print(repo.git.add(cwd + notebook_path_relative + filename))
+            print(repo.git.add(git_dir_parent + filename))
             print(repo.git.commit( a=True, m="{}\n\nUpdated {}".format(msg, filename) ))
         except GitCommandError as e:
-            self.error_and_return(cwd, "Could not commit changes to notebook: {}".format(cwd + notebook_path_relative + filename))
+            self.error_and_return(cwd, "Could not commit changes to notebook: {}".format(git_dir_parent + filename))
             return
 
         # create or switch to remote
@@ -83,7 +91,7 @@ class GitCommitHandler(RequestHandler):
               "head":"{}:{}".format(git_user, git_remote),
               "base":"master"
           }
-          github_headers = {"Authorization": "token {}".format(os.environ.get('GITHUB_ACCESS_TOKEN'))}
+          github_headers = {"Authorization": "token {}".format(git_access_token)}
           r = requests.post(github_url, data=json.dumps(github_pr), headers=github_headers)
           if r.status_code != 201:
             print("Error submitting Pull Request to {}".format(git_repo_upstream))

@@ -73,7 +73,8 @@ RUN pip install ipython \
                 jinja2 \
                 tornado \
                 jsonschema \
-                terminado
+                terminado \
+                simplejson
 
 # setup ipython
 ENV IPYTHONDIR /ipython
@@ -81,49 +82,38 @@ RUN mkdir /ipython && \
     ipython profile create nbserver
 
 # install/configure CUDA
-RUN cd  /tmp && \
-    wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1404/x86_64/cuda-repo-ubuntu1404_7.0-28_amd64.deb && \
-    dpkg -i cuda-repo-ubuntu1404_7.0-28_amd64.deb && \
-    apt-get update && \
-    apt-get install --assume-yes cuda
+# Uses .run file; .deb files install CUDA 7.5 for some reason
+# Change to the /tmp directory
+RUN cd /tmp && \
+# Download run file
+  wget -nv http://developer.download.nvidia.com/compute/cuda/7_0/Prod/local_installers/cuda_7.0.28_linux.run && \
+# Make the run file executable and extract
+  chmod +x cuda_*_linux.run && ./cuda_*_linux.run -extract=`pwd` && \
+# Install CUDA drivers (silent, no kernel)
+  ./NVIDIA-Linux-x86_64-*.run -s --no-kernel-module && \
+# Install toolkit (silent)  
+  ./cuda-linux64-rel-*.run -noprompt && \
+# Clean up
+  rm -rf *
+
 ENV PATH /usr/local/cuda/bin:$PATH
 ENV LD_LIBRARY_PATH /usr/local/cuda/lib64:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH /usr/local/lib:/usr/local/cuda/lib:$LD_LIBRARY_PATH
 RUN echo "/usr/local/cuda/lib64" > /etc/ld.so.conf.d/cuda.conf && \
     ldconfig
 
-# download and install nervana fork of cuda-convnet2
-RUN cd /opt && git clone https://github.com/NervanaSystems/cuda-convnet2.git
-RUN cd /opt/cuda-convnet2 && \
-    mkdir build && \
-    cd build && \
-    cmake .. && \
-    make install
-ENV LD_LIBRARY_PATH /opt/cuda-convnet2/build/cudanet:$LD_LIBRARY_PATH
-ENV LIBRARY_PATH /opt/cuda-convnet2/build/cudanet:$LIBRARY_PATH
-
-# download/install nervana imgworker
-RUN cd /opt && git clone https://github.com/NervanaSystems/imgworker.git
-RUN cd /opt/imgworker && \
-    pip install .
-
-# download/configure/install neon
+# download/configure/install neon 1.0.0
 RUN pip install virtualenv
-RUN cd /opt/ && git clone https://github.com/NervanaSystems/neon.git
-ENV NEON_CONFIG_CPU 1
-ENV NEON_CONFIG_GPU 1
-ENV NEON_CONFIG_MPI 0
-ENV NEON_CONFIG_DEV 0
+RUN cd /opt/ && \
+    wget -nv https://github.com/NervanaSystems/neon/archive/v1.0.0.tar.gz
+RUN cd /opt && tar -xzvf v1.0.0.tar.gz && \
+    mv neon-1.0.0 neon
 RUN cd /opt/neon && \
-    sed -i "s/^CPU = .*/CPU = $NEON_CONFIG_CPU/g" setup.cfg && \
-    sed -i "s/^GPU = .*/GPU = $NEON_CONFIG_GPU/g" setup.cfg && \
-    sed -i "s/^DIST = .*/DIST = $NEON_CONFIG_MPI/g" setup.cfg && \
-    sed -i "s/^DEV = .*/DEV = $NEON_CONFIG_DEV/g" setup.cfg && \
     make sysinstall
 
 # make some updates
 RUN pip install -U six
 
-# default to shell in neon dir
-WORKDIR /opt/neon
+# default to shell in root dir
+WORKDIR /root
 CMD ["/bin/bash"]

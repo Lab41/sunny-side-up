@@ -27,6 +27,9 @@ glove-evaluate-similarities:
 glove-save-and-load:
 	python examples/save_and_load.py
 
+all-tests:
+	for t in $$(ls glove/tests/*.py); do python -m nose $$t; done
+
 all-analogies: glove-get-analogies glove-build-stanford glove-evaluate-analogies
 
 all-similarities: glove-evaluate-similarities glove-save-and-load
