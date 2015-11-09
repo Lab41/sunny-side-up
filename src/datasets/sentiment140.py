@@ -9,7 +9,7 @@ sentiment_text = {0: 'neg', 2: 'neutral', 4: 'pos'}
 sentiment_binary = {0: 0, 4: 1}
 
 
-def load_data(file_path=None, feat_extractor=None, verbose=False):
+def load_data(file_path=None, feat_extractor=None, verbose=False, return_iter=True):
     ''' Function that takes in a path to the StanfordTweetData CSV
         file, opens it, and adds tweet strings and their respective
         sentiments to a list
@@ -26,6 +26,9 @@ def load_data(file_path=None, feat_extractor=None, verbose=False):
                 and outputs a dictionary of features
 
             verbose -- if True, this funciton shows logging data as it progresses
+
+            return_iter -- if True, return an iterator over tuples of (record, sentiment);
+               if False, return a list of such tuples
 
         @Return:
             A list of tuples of the following format:
@@ -66,7 +69,10 @@ def load_data(file_path=None, feat_extractor=None, verbose=False):
         else:
             tweet_to_sentiment.append((tweet_string, sent))
     twitter_csv.close()
-    return tweet_to_sentiment
+    if return_iter:
+        return iter(tweet_to_sentiment)
+    else:
+        return tweet_to_sentiment
 
 
 def to_txt(write_path, read_path=None, verbose=False):
