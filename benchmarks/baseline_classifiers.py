@@ -56,7 +56,7 @@ datasets =  {
 
 # word embeddings
 def embedders():
-    return ['glove']
+    return ['glove','word2vec']
 
 def classifiers():
     """
