@@ -105,7 +105,8 @@ def timed_dataload(loader, data, args, values, labels):
         try:
             # input data in the form of paragraph vectors from normalized text
             text_normalized = data_utils.normalize(text, **args['normalize'])
-            values[i] = embedder.embed_words_into_vectors_averaged(text_normalized)
+            tokens = data_utils.tokenize(text_normalized)
+            values[counter] = embedder.embed_words_into_vectors_averaged(tokens)
 
             # data labeled by sentiment score
             labels[counter] = sentiment
