@@ -140,6 +140,7 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name, **normalize_args)
     logger.debug("Doc length: {}".format(doc_length))
     gpu_id=1
     nframes=256
+    nr_epochs=30
     dataset_loaders = { 'amazon'    : amazon.load_data,
                         'imdb'      : imdb.load_data,
                         'sentiment140'  : sentiment140.load_data }
@@ -193,24 +194,16 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name, **normalize_args)
 
     logger.info("Doing training...")
     mlp.fit(train_iter, optimizer=optimizer, 
-              num_epochs=10, cost=cost, callbacks=callbacks)
+              num_epochs=nr_epochs, cost=cost, callbacks=callbacks)
     logger.info("Testing accuracy: {}".format(mlp.eval(test_iter, metric=Accuracy())))
 
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("dataset", help="Name of dataset (one of amazon, imdb, sentiment140)")
-    arg_parser.add_argument("--working_dir", default=".",
+    arg_parser.add_argument(("--working_dir", "-w", default=".",
 	help="Directory where data should be put, default PWD")
 
     args = arg_parser.parse_args()
-    #do_model(get_amazon, 
-    #    base_dir="/root/data/pcallier/amazon/", 
-    #    data_filename="reviews_Health_and_Personal_Care.json.gz",
-    #    hdf5_name="home_kitch_split.hd5")
-    # do_model(get_imdb,
-    #     base_dir="/root/data/pcallier/imdb",
-    #     data_filename="",
-    #     hdf5_name="imdb_split.hd5")
     model_args = { "imdb": {
             'base_dir'      : os.path.join(args.working_dir, "imdb"),
             'data_filename' : "",
@@ -223,12 +216,14 @@ def main():
         'sentiment140': {
             'base_dir'      : os.path.join(args.working_dir, "sentiment140"),
             'data_filename' : "sentiment140.csv",
-            'hdf5_name'     : "sentiment140_split.hd5"
+            'hdf5_name'     : "sentiment140_split.hd5",
+            'max_length'    : 150,
+            'min_length'    : 70
             }
         }
 
     dataset_name = args.dataset
-    do_model(dataset_name, max_length=140, min_length=80, **model_args[dataset_name])
+    do_model(dataset_name, **model_args[dataset_name])
 if __name__=="__main__":
     main()
 
