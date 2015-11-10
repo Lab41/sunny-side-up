@@ -5,7 +5,6 @@ from urllib2 import urlopen, HTTPError, URLError
 from nltk.tokenize import wordpunct_tokenize
 import numpy as np
 import logging
-from word_vector_embedder import WordVectorEmbedder
 logging.basicConfig()
 logger=logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -128,6 +127,7 @@ def index_as_one_hot(indices, axis=0, dtype=np.int32):
     return onehot_encoding
 
 def to_embedded_word(txt):
+    from word_vector_embedder import WordVectorEmbedder
     embedder = WordVectorEmbedder('glove')
     return embedder.embed_words_into_vectors(text)
 
