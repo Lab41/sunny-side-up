@@ -74,7 +74,7 @@ def classifiers():
                                                     max_features = 'sqrt')),
            ("Gaussian NaiveBayes", GaussianNB()),
            ("LinearSVM", svm.LinearSVC()),
-           ("SVM", svn.SVC())]
+           ("SVM", svm.SVC())]
 
 
 
