@@ -133,14 +133,20 @@ def crepe_model(nvocab=67, nframes=256, batch_norm=False):
     ]
     return layers
 
-def do_model(dataset_name, base_dir, data_filename, hdf5_name, **normalize_args):
-    batch_size=128
-    vocab_size=67
-    doc_length=normalize_args.get('max_length', 1014)
+def do_model(dataset_name, base_dir, data_filename, hdf5_name, **kwargs):
+    valid_freq=kwargs.get('valid_freq', 3)
+    batch_size=kwargs.get('batch_size', 128)
+    vocab_size=kwargs.get('vocab_size', 67)
+    learning_rate=kwargs.get('learning_rate', 0.01)
+    doc_length=kwargs.get('max_length', 1014)
+    normalizer_fun = kwargs.get('normalizer_fun', data_utils.normalize)
+    rng_seed = kwargs.get('rng_seed', 888)
     logger.debug("Doc length: {}".format(doc_length))
-    gpu_id=1
-    nframes=256
-    nr_epochs=30
+    gpu_id=kwargs.get('gpu_id', 1)
+    nframes=kwargs.get('nframes', 256)
+    nr_epochs=kwargs.get('nr_epochs', 30)
+    nr_to_save=kwargs.get('nr_to_save', 5)
+    save_freq=kwargs.get('save_freq', 2)
     dataset_loaders = { 'amazon'    : amazon.load_data,
                         'imdb'      : imdb.load_data,
                         'sentiment140'  : sentiment140.load_data }
@@ -149,7 +155,7 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name, **normalize_args)
     model_state_path=os.path.join(base_dir, "neon_crepe_model_{}.pkl".format(present_time))
     model_weights_history_path=os.path.join(base_dir, "neon_crepe_weights_{}.pkl".format(present_time))
     logger.info("Getting backend...")
-    be = gen_backend(backend='gpu', batch_size=batch_size, device_id=gpu_id)
+    be = gen_backend(backend='gpu', batch_size=batch_size, device_id=gpu_id, rng_seed=rng_seed)
     logger.info("Getting data...")
 
     base_dir = os.path.abspath(base_dir)
@@ -160,14 +166,14 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name, **normalize_args)
     data_path = os.path.join(base_dir, data_filename)
     hdf5_path = os.path.join(base_dir, hdf5_name)
     data_loader = dataset_loaders[dataset_name](data_path)
-    logger.debug("Keyowrd args: {}".format(normalize_args))
+    logger.debug("Keyword args: {}".format(kwargs))
     (train_get, test_get), (train_size, test_size) = split_and_batch(
         data_loader,
         batch_size, 
         doc_length,
         hdf5_path,
-        rng_seed=888,
-        normalizer_fun=lambda x: data_utils.normalize(x, **normalize_args))
+        rng_seed=rng_seed,
+        normalizer_fun=normalizer_fun,)
     train_batch_beta = test_get()
     logger.debug("First record shape: {}".format(train_batch_beta.next()[0].shape))
 
@@ -182,13 +188,13 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name, **normalize_args)
     mlp = neon.models.Model(model_layers)
 
     cost = neon.layers.GeneralizedCost(neon.transforms.CrossEntropyBinary())
-    callbacks = NeonCallbacks(mlp,train_iter,valid_set=test_iter,valid_freq=3,progress_bar=True)
+    callbacks = NeonCallbacks(mlp,train_iter,valid_set=test_iter,valid_freq=valid_freq,progress_bar=True)
     callbacks.add_neon_callback(metrics_path=os.path.join(base_dir, "metrics.json"), insert_pos=0)
     callbacks.add_save_best_state_callback(model_state_path)
-    callbacks.add_serialize_callback(1, model_weights_history_path,history=5)
+    callbacks.add_serialize_callback(save_freq, model_weights_history_path,history=nr_to_save)
 
     optimizer = neon.optimizers.GradientDescentMomentum(
-        learning_rate=0.01,
+        learning_rate=learning_rate,
         momentum_coef=0.9,
         schedule=neon.optimizers.Schedule([2,5,8], 0.5))
 
@@ -200,7 +206,7 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name, **normalize_args)
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("dataset", help="Name of dataset (one of amazon, imdb, sentiment140)")
-    arg_parser.add_argument(("--working_dir", "-w", default=".",
+    arg_parser.add_argument("--working_dir", "-w", default=".",
 	help="Directory where data should be put, default PWD")
 
     args = arg_parser.parse_args()
@@ -218,7 +224,8 @@ def main():
             'data_filename' : "sentiment140.csv",
             'hdf5_name'     : "sentiment140_split.hd5",
             'max_length'    : 150,
-            'min_length'    : 70
+            'min_length'    : 70,
+            'learning_rate' : 1e-6,
             }
         }
 
