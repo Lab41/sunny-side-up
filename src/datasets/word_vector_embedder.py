@@ -3,6 +3,7 @@ import numpy as np
 from glove.glove import Glove
 from gensim.models import Doc2Vec
 from model_downloader import ModelDownloader
+from data_utils import TextTooShortException
 
 class WordVectorEmbedder:
     '''
@@ -54,6 +55,12 @@ class WordVectorEmbedder:
         # load the model
         print("Loading model from {}...".format(model_fullpath))
         self.model = self.model_import_method(model_fullpath, **model_args)
+
+        # setup the word lookup
+        if self.model_type == 'word2vec':
+            self.word_set = set(self.model.index2word)
+        else:
+            self.word_set = set(self.model.dictionary)
 
 
     def num_features(self):
