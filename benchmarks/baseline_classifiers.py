@@ -92,10 +92,15 @@ def timed_testing(classifier, values):
 
 @timed
 def timed_dataload(loader, data, args, values, labels):
-    for i, (text, sentiment) in enumerate(data):
 
-        if (i % int(len(values)/20) == 0):
-            logger.info("Embedding {}...".format(i))
+    # use separate counter to account for invalid input along the way
+    counter = 0
+
+    # process data
+    for text, sentiment in data:
+
+        if (counter % int(len(values)/20) == 0):
+            logger.info("Embedding {}...".format(counter))
 
         try:
             # input data in the form of paragraph vectors from normalized text
@@ -103,7 +108,10 @@ def timed_dataload(loader, data, args, values, labels):
             values[i] = embedder.embed_words_into_vectors_averaged(text_normalized)
 
             # data labeled by sentiment score
-            labels[i] = sentiment
+            labels[counter] = sentiment
+
+            # increment counter
+            counter += 1
 
         except TextTooShortException as e:
 
