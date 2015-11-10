@@ -2,6 +2,7 @@ import os, re, csv, errno, sys
 import logging
 import random
 from urllib2 import urlopen, HTTPError, URLError
+from nltk.tokenize import wordpunct_tokenize
 import numpy as np
 import logging
 from word_vector_embedder import WordVectorEmbedder
@@ -23,6 +24,9 @@ def mkdir_p(path):
         if exc.errno == errno.EEXIST and os.path.isdir(path):
             pass
         else: raise
+
+def tokenize(txt):
+    return wordpunct_tokenize(txt)
 
 
 def normalize(txt, vocab=None, replace_char=' ',
