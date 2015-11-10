@@ -99,6 +99,10 @@ def timed_dataload(loader, data, values, labels):
             loader.samples -= 1
             pass
 
+    # adjust array size
+    values = values[:loader.num_samples()]
+    labels = labels[:loader.num_samples()]
+
 
 
 
