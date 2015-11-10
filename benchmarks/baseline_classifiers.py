@@ -76,8 +76,7 @@ def classifiers():
                                                     n_estimators = 15,
                                                     max_features = 'sqrt')),
            ("Gaussian NaiveBayes", GaussianNB()),
-           ("LinearSVM", svm.LinearSVC()),
-           ("SVM", svm.SVC())]
+           ("LinearSVM", svm.LinearSVC())]
 
 
 
