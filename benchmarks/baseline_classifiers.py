@@ -34,13 +34,22 @@ except NameError:
 datasets =  {
                 'imdb':         {
                                     'class':    IMDB,
-                                    'path':     os.path.join(dir_data, 'imdb')
+                                    'path':     os.path.join(dir_data, 'imdb'),
+                                    'args':     { 'normalize': {    'encoding': None }
+
+                                                }
                                 },
                 'sentiment140': {
                                     'class':    Sentiment140,
-                                    'path':     os.path.join(dir_data, 'sentiment140.csv')
+                                    'path':     os.path.join(dir_data, 'sentiment140.csv'),
+                                    'args':     { 'normalize': {    'min_length': 70,
+                                                                    'max_length': 150
+                                                                }
+                                                }
                                 }
             }
+
+
 
 # word embeddings
 def embedders():
@@ -79,7 +88,7 @@ def timed_testing(classifier, values):
     return classifier.predict(values)
 
 @timed
-def timed_dataload(loader, data, values, labels):
+def timed_dataload(loader, data, args, values, labels):
     for i, (text, sentiment) in enumerate(data):
 
         if (i % int(len(values)/20) == 0):
@@ -87,7 +96,7 @@ def timed_dataload(loader, data, values, labels):
 
         try:
             # input data in the form of paragraph vectors from normalized text
-            text_normalized = data_utils.normalize(text)
+            text_normalized = data_utils.normalize(text, **args['normalize'])
             values[i] = embedder.embed_words_into_vectors_averaged(text_normalized)
 
             # data labeled by sentiment score
@@ -118,6 +127,7 @@ for embedder_model in embedders():
         # prepare data loader
         klass = data_params['class']
         loader = klass(data_params['path'])
+        data_args = data_params['args']
         data = loader.load_data()
 
 
@@ -125,7 +135,7 @@ for embedder_model in embedders():
         logger.info("loading dataset {}...".format(data_params['path']))
         values = np.zeros((loader.num_samples(), embedder.num_features()), dtype="float32")
         labels = np.zeros(loader.num_samples(), dtype='float32')
-        profile_results = timed_dataload(loader, data, values, labels)
+        profile_results = timed_dataload(loader, data, data_args, values, labels)
         seconds_loading = profile_results.timer.total_tt
 
 
