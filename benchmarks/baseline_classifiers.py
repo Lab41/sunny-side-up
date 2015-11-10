@@ -100,7 +100,7 @@ def timed_dataload(loader, data, args, values, labels):
     for text, sentiment in data:
 
         if (counter % int(len(values)/20) == 0):
-            logger.info("Embedding {}...".format(counter))
+            logger.info("Embedding {} ({})...".format(counter, sentiment))
 
         try:
             # input data in the form of paragraph vectors from normalized text
@@ -120,10 +120,6 @@ def timed_dataload(loader, data, args, values, labels):
             loader.samples -= 1
             pass
 
-    # adjust array size
-    values = values[:loader.num_samples()]
-    labels = labels[:loader.num_samples()]
-
 
 
 
@@ -142,14 +138,18 @@ for embedder_model in embedders():
         data_args = data_params['args']
         data = loader.load_data()
 
-
-        # load dataset
-        logger.info("loading dataset {}...".format(data_params['path']))
+        # initialize numpy arrays (will be truncated later based on actual data size)
         values = np.zeros((loader.num_samples(), embedder.num_features()), dtype="float32")
         labels = np.zeros(loader.num_samples(), dtype='float32')
-        profile_results = timed_dataload(loader, data, data_args, values, labels)
-        seconds_loading = profile_results.timer.total_tt
 
+        # load dataset and downscale size of arrays
+        logger.info("loading dataset {}...".format(data_params['path']))
+        profile_results = timed_dataload(loader, data, data_args, values, labels)
+        values = values[:loader.num_samples()]
+        labels = labels[:loader.num_samples()]
+
+        # store loading time
+        seconds_loading = profile_results.timer.total_tt
 
         # split into training and test data
         logger.info("splitting dataset into training and testing sets...")
