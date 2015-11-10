@@ -133,28 +133,21 @@ class WordVectorEmbedder:
         # Function to average all of the word vectors in a given
         # paragraph
 
-        # setup dictionary
+        # choose model
         if self.model_type == 'glove':
             vector = self.model.transform_paragraph(words.split(), ignore_missing=True)
             return np.nan_to_num(vector)
         else:
 
-            # Pre-initialize an empty numpy array (for speed)
-            featureVec = np.zeros((self.num_features(),),dtype="float32")
+            # process valid words
+            valid_words = [word for word in words if word in self.word_set]
+            if len(valid_words):
 
-            nwords = 0.
+                # get vectors for valid words
+                vectors = self.word_vector(valid_words)
 
-            # names of the words in model's vocabulary converted to a set for speed
-            dictionary = self.model.index2word
-            word_set = set(dictionary)
+                # find the average/paragraph vector
+                return np.mean(vectors, axis=0)
 
-            # Loop over each word in the review and, if it is in the model's
-            # vocabulary, add its feature vector to the total
-            for word in words:
-                if word in word_set:
-                    nwords = nwords + 1.
-                    featureVec = np.add(featureVec, self.word_vector(word))
-
-            # Divide the result by the number of words to get the average
-            featureVec = np.divide(featureVec, nwords)
-            return np.nan_to_num(featureVec)
+            else:
+                raise TextTooShortException()
