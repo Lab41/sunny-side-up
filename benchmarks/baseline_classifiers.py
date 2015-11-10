@@ -35,7 +35,9 @@ datasets =  {
                 'imdb':         {
                                     'class':    IMDB,
                                     'path':     os.path.join(dir_data, 'imdb'),
-                                    'args':     { 'normalize': {    'encoding': None }
+                                    'args':     { 'normalize': {    'encoding': None,
+                                                                    'reverse': False
+                                                                }
 
                                                 }
                                 },
@@ -43,7 +45,8 @@ datasets =  {
                                     'class':    Sentiment140,
                                     'path':     os.path.join(dir_data, 'sentiment140.csv'),
                                     'args':     { 'normalize': {    'min_length': 70,
-                                                                    'max_length': 150
+                                                                    'max_length': 150,
+                                                                    'reverse': False
                                                                 }
                                                 }
                                 }
