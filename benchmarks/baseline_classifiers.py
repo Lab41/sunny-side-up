@@ -187,6 +187,7 @@ for embedder_model in embedders():
                                         'negative': str(data_negative),
                                         'time_in_seconds_loading': str(seconds_loading)
                                    },
+                        'data_args': data_args,
                         'metrics': {    'TP': str(TP),
                                         'FP': str(FP),
                                         'TN': str(TN),
