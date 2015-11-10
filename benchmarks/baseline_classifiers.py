@@ -60,8 +60,7 @@ def classifiers():
         Returns a list of classifier tuples (name, model)
         for use in training
     """
-    return [("LogisticRegression", LogisticRegression(n_jobs=-1,
-                                                      C=1.0,
+    return [("LogisticRegression", LogisticRegression(C=1.0,
                                                       class_weight=None,
                                                       dual=False,
                                                       fit_intercept=True,
