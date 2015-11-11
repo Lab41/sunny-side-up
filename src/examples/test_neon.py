@@ -10,11 +10,10 @@ two_up = os.path.dirname(os.path.dirname(current_path))
 sys.path.append(two_up)
 import datetime
 import argparse
-
+import pprint
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger=logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 
@@ -78,7 +77,7 @@ def simple_model(nvocab=67,
     ]
     return layers
 
-def crepe_model(nvocab=67, nframes=256, batch_norm=False):
+def crepe_model(nvocab=67, nframes=256, batch_norm=False, variant=None):
     init_gaussian = neon.initializers.Gaussian(0, 0.05)
     layers = [
         neon.layers.Conv((nvocab, 7, nframes), 
@@ -131,25 +130,43 @@ def crepe_model(nvocab=67, nframes=256, batch_norm=False):
             activation=neon.transforms.Logistic())
         
     ]
+    # remove certain layers if we are asked for a variant
+    if variant == 'embedding' or variant == 'tweet_character':
+        del layers[8]
+        del layers[3]
+    elif variant != None:
+        raise Exception("variant must be one of embedding|tweet_character")
+
+    if variant == 'embedding':
+        del layers[1] 
+
+    logger.debug(variant)
+    logger.debug(layers)
     return layers
 
-def do_model(dataset_name, base_dir, data_filename, hdf5_name, **kwargs):
-    valid_freq=kwargs.get('valid_freq', 3)
-    batch_size=kwargs.get('batch_size', 128)
-    vocab_size=kwargs.get('vocab_size', 67)
-    learning_rate=kwargs.get('learning_rate', 0.01)
-    doc_length=kwargs.get('max_length', 1014)
-    normalizer_fun = kwargs.get('normalizer_fun', data_utils.normalize)
-    rng_seed = kwargs.get('rng_seed', 888)
-    logger.debug("Doc length: {}".format(doc_length))
-    gpu_id=kwargs.get('gpu_id', 1)
-    nframes=kwargs.get('nframes', 256)
-    nr_epochs=kwargs.get('nr_epochs', 30)
-    nr_to_save=kwargs.get('nr_to_save', 5)
-    save_freq=kwargs.get('save_freq', 2)
+def do_model(dataset_name, base_dir, data_filename, hdf5_name, 
+        valid_freq=2,
+        batch_size=128,
+        vocab_size=67,
+        learning_rate=0.01,
+        min_length=100,
+        max_length=1014,
+        sequence_length=None,
+        rng_seed=888,
+        normalizer_fun=data_utils.normalize,
+        transformer_fun=data_utils.to_one_hot,
+        gpu_id=1,
+        nframes=256,
+        nr_epochs=30,
+        nr_to_save=5,
+        save_freq=2,
+        crepe_variant=None,
+        **kwargs):
     dataset_loaders = { 'amazon'    : amazon.load_data,
                         'imdb'      : imdb.load_data,
                         'sentiment140'  : sentiment140.load_data }
+    if sequence_length==None:
+        sequence_length = max_length
 
     present_time = datetime.datetime.strftime(datetime.datetime.now(),"%m%d_%I%p")
     model_state_path=os.path.join(base_dir, "neon_crepe_model_{}.pkl".format(present_time))
@@ -170,23 +187,26 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name, **kwargs):
     (train_get, test_get), (train_size, test_size) = split_and_batch(
         data_loader,
         batch_size, 
-        doc_length,
+        max_length,
         hdf5_path,
         rng_seed=rng_seed,
-        normalizer_fun=normalizer_fun,)
+        normalizer_fun=normalizer_fun,
+        transformer_fun=transformer_fun)
     train_batch_beta = test_get()
     logger.debug("First record shape: {}".format(train_batch_beta.next()[0].shape))
 
     train_iter = DiskDataIterator(train_get, ndata=train_size, 
-                                  doclength=doc_length, 
+                                  doclength=sequence_length, 
                                   nvocab=vocab_size)
     test_iter = DiskDataIterator(test_get, ndata=test_size, 
-                                  doclength=doc_length, 
+                                  doclength=sequence_length, 
                                   nvocab=vocab_size)
     logger.info("Building model...")
-    model_layers = crepe_model(nframes=nframes)
+    model_layers = crepe_model(nvocab=vocab_size,nframes=nframes,variant=crepe_variant)
     mlp = neon.models.Model(model_layers)
 
+    layers_description = [l.get_description() for l in mlp.layers]
+    logger.info(pprint.pformat(layers_description))
     cost = neon.layers.GeneralizedCost(neon.transforms.CrossEntropyBinary())
     callbacks = NeonCallbacks(mlp,train_iter,valid_set=test_iter,valid_freq=valid_freq,progress_bar=True)
     callbacks.add_neon_callback(metrics_path=os.path.join(base_dir, "metrics.json"), insert_pos=0)
@@ -207,9 +227,11 @@ def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("dataset", help="Name of dataset (one of amazon, imdb, sentiment140)")
     arg_parser.add_argument("--working_dir", "-w", default=".",
-	help="Directory where data should be put, default PWD")
+	    help="Directory where data should be put, default PWD")
+    arg_parser.add_argument("--glove", "-g", action="store_true")
 
     args = arg_parser.parse_args()
+    dataset_name = args.dataset
     model_args = { "imdb": {
             'base_dir'      : os.path.join(args.working_dir, "imdb"),
             'data_filename' : "",
@@ -225,11 +247,21 @@ def main():
             'hdf5_name'     : "sentiment140_split.hd5",
             'max_length'    : 150,
             'min_length'    : 70,
-            'learning_rate' : 1e-6,
+            'learning_rate' : 1e-4,
+            'normalizer_fun': lambda x: data_utils.normalize(x, min_length=70, max_length=150),
+            'transformer_fun': data_utils.to_one_hot,
+            'variant'       : 'tweet_character',
             }
         }
+    if args.glove:
+        glove_embedder = WordVectorEmbedder("glove", os.path.join(args.working_dir, "glove.twitter.27B.zip"))
+        model_args[dataset_name]['normalizer_fun'] = lambda x: x.encode('ascii', 'ignore').lower()
+        model_args[dataset_name]['transformer_fun'] = lambda x: glove_embedder.embed_words_into_vectors(x, 50)
+        model_args[dataset_name]['vocab_size'] = 25
+        model_args[dataset_name]['sequence_length'] = 50
+        model_args[dataset_name]['crepe_variant'] = 'embedding'
 
-    dataset_name = args.dataset
+    logger.debug(model_args[dataset_name]['normalizer_fun'])
     do_model(dataset_name, **model_args[dataset_name])
 if __name__=="__main__":
     main()
