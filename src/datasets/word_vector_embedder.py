@@ -119,7 +119,7 @@ class WordVectorEmbedder:
             else:
                 padding_length = num_features - len(vectors)
                 for i in xrange(padding_length):
-                    vectors.append(np.zeros_like(vectors[0]))
+                    vectors.append(np.zeros(num_features*self.num_features()))
 
         # return ndarray of embedded words
         return np.array(vectors)
