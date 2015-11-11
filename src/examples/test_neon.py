@@ -38,6 +38,7 @@ from src.datasets.batch_data import batch_data, split_data, split_and_batch
 from src.datasets.data_utils import from_one_hot
 from src.datasets.neon_iterator import DiskDataIterator
 from src.neon.neon_utils import ConfusionMatrixBinary, NeonCallbacks, NeonCallback, Accuracy
+from src.datasets.word_vector_embedder import WordVectorEmbedder
 
 
 def lstm_model(nvocab=67, hidden_size=20, embedding_dim=60):
