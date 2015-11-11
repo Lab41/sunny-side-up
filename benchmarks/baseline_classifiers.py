@@ -190,24 +190,26 @@ for embedder_model in embedders():
 
             # build results object
             results = { 'classifier':   str(classifier.__class__.__name__),
-                        'data':    {    'source': str(data_source),
-                                        'subset': str(embedder.model_subset),
-                                        'testsize': str(data_size),
-                                        'positive': str(data_positive),
-                                        'negative': str(data_negative),
-                                        'time_in_seconds_loading': str(seconds_loading)
+                        'data':    {    'source':                   str(data_source),
+                                        'testsize':                 str(data_size),
+                                        'positive':                 str(data_positive),
+                                        'negative':                 str(data_negative),
+                                        'time_in_seconds_loading':  str(seconds_loading)
                                    },
-                        'data_args': data_args,
-                        'metrics': {    'TP': str(TP),
-                                        'FP': str(FP),
-                                        'TN': str(TN),
-                                        'FN': str(FN),
-                                        'accuracy': str(accuracy),
-                                        'precision': str(precision),
-                                        'recall': str(recall),
-                                        'f1': str(f1),
+                        'embedding': {  'model':                    str(embedder_model),
+                                        'subset':                   str(embedder.model_subset)
+                                    },
+                        'data_args':    data_args,
+                        'metrics': {    'TP':                       str(TP),
+                                        'FP':                       str(FP),
+                                        'TN':                       str(TN),
+                                        'FN':                       str(FN),
+                                        'accuracy':                 str(accuracy),
+                                        'precision':                str(precision),
+                                        'recall':                   str(recall),
+                                        'f1':                       str(f1),
                                         'time_in_seconds_training': str(seconds_training),
-                                        'time_in_seconds_testing': str(seconds_testing)
+                                        'time_in_seconds_testing':  str(seconds_testing)
                                     }
                        }
 
