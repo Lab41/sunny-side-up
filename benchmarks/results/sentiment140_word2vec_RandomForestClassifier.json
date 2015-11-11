@@ -1,0 +1,33 @@
+{
+    "classifier": "RandomForestClassifier",
+    "data": {
+        "negative": "80229.0",
+        "positive": "78957.0",
+        "source": "sentiment140",
+        "testsize": "159186",
+        "time_in_seconds_loading": "135.505742"
+    },
+    "embedding": {
+        "model": "word2vec",
+        "subset": "GoogleNews-vectors-negative300.bin"
+    },
+    "data_args": {
+        "normalize": {
+            "max_length": 150,
+            "min_length": 70,
+            "reverse": false
+        }
+    },
+    "metrics": {
+        "FN": "27895",
+        "FP": "26388",
+        "TN": "53841",
+        "TP": "51062",
+        "accuracy": "0.658996394155",
+        "f1": "0.652937528371",
+        "precision": "0.659289864429",
+        "recall": "0.646706435148",
+        "time_in_seconds_testing": "0.389573",
+        "time_in_seconds_training": "31.748532"
+    }
+}

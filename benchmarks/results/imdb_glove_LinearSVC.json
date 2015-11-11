@@ -1,5 +1,5 @@
 {
-    "classifier": "LogisticRegression",
+    "classifier": "LinearSVC",
     "data": {
         "negative": "5028.0",
         "positive": "4967.0",
@@ -18,15 +18,15 @@
         }
     },
     "metrics": {
-        "FN": "948",
-        "FP": "979",
-        "TN": "4049",
-        "TP": "4019",
-        "accuracy": "0.807203601801",
-        "f1": "0.806623181134",
-        "precision": "0.804121648659",
-        "recall": "0.809140326153",
-        "time_in_seconds_testing": "0.005895",
-        "time_in_seconds_training": "2.835082"
+        "FN": "936",
+        "FP": "977",
+        "TN": "4051",
+        "TP": "4031",
+        "accuracy": "0.808604302151",
+        "f1": "0.808220551378",
+        "precision": "0.804912140575",
+        "recall": "0.811556271391",
+        "time_in_seconds_testing": "0.005891",
+        "time_in_seconds_training": "23.394612"
     }
 }

@@ -1,22 +1,32 @@
 {
     "classifier": "GaussianNB",
     "data": {
-        "negative": "4955.0",
-        "positive": "5044.0",
+        "negative": "5028.0",
+        "positive": "4967.0",
         "source": "imdb",
-        "testsize": "9999",
-        "time_in_seconds_loading": "145.532101"
+        "testsize": "9995",
+        "time_in_seconds_loading": "24.758371"
+    },
+    "embedding": {
+        "model": "glove",
+        "subset": "glove.twitter.27B.200d"
+    },
+    "data_args": {
+        "normalize": {
+            "encoding": null,
+            "reverse": false
+        }
     },
     "metrics": {
-        "FN": "3298",
-        "FP": "1217",
-        "TN": "3738",
-        "TP": "1746",
-        "accuracy": "0.548454845485",
-        "f1": "0.436118396403",
-        "precision": "0.589267634155",
-        "recall": "0.346153846154",
-        "time_in_seconds_testing": "0.00529",
-        "time_in_seconds_training": "0.01076"
+        "FN": "1556",
+        "FP": "1177",
+        "TN": "3851",
+        "TP": "3411",
+        "accuracy": "0.726563281641",
+        "f1": "0.713971742543",
+        "precision": "0.743461203139",
+        "recall": "0.686732434065",
+        "time_in_seconds_testing": "0.079064",
+        "time_in_seconds_training": "0.089354"
     }
 }
