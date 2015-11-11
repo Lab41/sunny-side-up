@@ -22,9 +22,7 @@ import numpy as np
 import gzip
 
 import logging
-logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
 
 from neon import NervanaObject
 
