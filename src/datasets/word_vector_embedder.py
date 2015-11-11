@@ -97,7 +97,7 @@ class WordVectorEmbedder:
         vectors = []
 
         # process tokens
-        for word in words.split():
+        for word in words:
             try:
 
                 # add vector
