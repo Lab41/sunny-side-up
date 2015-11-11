@@ -35,16 +35,17 @@ datasets =  {
                 'imdb':         {
                                     'class':    IMDB,
                                     'path':     os.path.join(dir_data, 'imdb'),
-                                    'args':     { 'normalize': {    'encoding': None,
+                                    'args':     { 'embed':      {   'num_features': 50 },
+                                                  'normalize':  {   'encoding': None,
                                                                     'reverse': False
                                                                 }
-
                                                 }
                                 },
                 'sentiment140': {
                                     'class':    Sentiment140,
                                     'path':     os.path.join(dir_data, 'sentiment140.csv'),
-                                    'args':     { 'normalize': {    'min_length': 70,
+                                    'args':     { 'embed':      {   'num_features': 50 },
+                                                  'normalize':  {   'min_length': 70,
                                                                     'max_length': 150,
                                                                     'reverse': False
                                                                 }
@@ -52,7 +53,8 @@ datasets =  {
                                 }
             }
 
-
+def embedding_type():
+    return 'concatenated' #averaged
 
 # word embeddings
 def embedders():
@@ -106,7 +108,14 @@ def timed_dataload(loader, data, args, values, labels):
             # input data in the form of paragraph vectors from normalized text
             text_normalized = data_utils.normalize(text, **args['normalize'])
             tokens = data_utils.tokenize(text_normalized)
-            values[counter] = embedder.embed_words_into_vectors_averaged(tokens)
+
+            # choose embedding type
+            if embedding_type() == 'concatenated':
+                values[counter] = embedder.embed_words_into_vectors_concatenated(tokens, **args['embed'])
+            elif embedding_type() == 'averaged':
+                values[counter] = embedder.embed_words_into_vectors_averaged(tokens)
+            else:
+                pass
 
             # data labeled by sentiment score
             labels[counter] = sentiment
