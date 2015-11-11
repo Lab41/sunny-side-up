@@ -138,7 +138,7 @@ class WordVectorEmbedder:
 
         # choose model
         if self.model_type == 'glove':
-            vector = self.model.transform_paragraph(words, ignore_missing=True)
+            vector = self.model.transform_paragraph(words, ignore_missing=True, epochs=0)
             return np.nan_to_num(vector)
         else:
 
