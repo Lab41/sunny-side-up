@@ -1,8 +1,10 @@
 import os
+import logging
 import numpy as np
 from glove.glove import Glove
 from gensim.models import Doc2Vec
 from model_downloader import ModelDownloader
+from data_utils import DataException
 
 class WordVectorEmbedder:
     '''
@@ -36,6 +38,11 @@ class WordVectorEmbedder:
                 model_group     = 'twitter-2b'
                 model_subset    = 'glove.twitter.27B.25d'
                 model_args      = {}
+            else:
+                model_dir       = os.path.dirname(model_fullpath)
+                model_group     = 'twitter-2b'
+                model_subset    = 'glove.twitter.27B.25d'
+                model_args      = {}
 
             # setup importer and converter
             self.model_import_method = Glove.load_obj
@@ -43,6 +50,8 @@ class WordVectorEmbedder:
 
         else:
             raise NameError("Error! You must specify a model type from: <word2vec|glove>")
+        
+        
 
         # download and save the model (ModelDownloader will skip if exists)
         downloader = ModelDownloader(self.model_type)
@@ -75,7 +84,8 @@ class WordVectorEmbedder:
         '''
             embed words into model's vector space
         '''
-
+        logger = logging.getLogger(__name__)
+        logger.debug(words)
         # store vectors as list
         vectors = []
 
@@ -97,6 +107,8 @@ class WordVectorEmbedder:
             # truncate if longer
             if (len(vectors) >= num_features):
                 vectors = vectors[:num_features]
+            elif len(vectors) == 0:
+                raise DataException("No words could be embedded")
 
             # pad if necessary by appending right-sized 0 vectors
             else:
