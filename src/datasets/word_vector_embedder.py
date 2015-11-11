@@ -35,7 +35,7 @@ class WordVectorEmbedder:
             if model_fullpath is None:
                 model_dir       = '/data'
                 model_group     = 'twitter-2b'
-                model_subset    = 'glove.twitter.27B.200d.txt'
+                model_subset    = 'glove.twitter.27B.200d'
                 model_args      = {}
 
             # setup importer and converter
