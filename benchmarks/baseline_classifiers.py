@@ -121,8 +121,6 @@ def timed_dataload(loader, data, args, values, labels):
             pass
 
 
-
-
 # test all vector models
 for embedder_model in embedders():
 
@@ -193,6 +191,7 @@ for embedder_model in embedders():
             # build results object
             results = { 'classifier':   str(classifier.__class__.__name__),
                         'data':    {    'source': str(data_source),
+                                        'subset': str(embedder.model_subset),
                                         'testsize': str(data_size),
                                         'positive': str(data_positive),
                                         'negative': str(data_negative),

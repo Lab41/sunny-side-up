@@ -45,6 +45,9 @@ class WordVectorEmbedder:
         else:
             raise NameError("Error! You must specify a model type from: <word2vec|glove>")
 
+        # save subset for documentation
+        self.model_subset = model_subset
+
         # download and save the model (ModelDownloader will skip if exists)
         downloader = ModelDownloader(self.model_type)
         downloader.download_and_save(outdir=model_dir, datafile=model_subset, dataset=model_group)
