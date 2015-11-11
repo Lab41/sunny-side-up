@@ -101,7 +101,7 @@ def timed_dataload(loader, data, args, values, labels):
     # process data
     for text, sentiment in data:
 
-        if (counter % int(len(values)/20) == 0):
+        if (counter % int(loader.num_samples()/20) == 0):
             logger.info("Embedding {} ({})...".format(counter, sentiment))
 
         try:
@@ -111,14 +111,14 @@ def timed_dataload(loader, data, args, values, labels):
 
             # choose embedding type
             if embedding_type() == 'concatenated':
-                values[counter] = embedder.embed_words_into_vectors_concatenated(tokens, **args['embed'])
+                values.append(embedder.embed_words_into_vectors_concatenated(tokens, **args['embed']))
             elif embedding_type() == 'averaged':
-                values[counter] = embedder.embed_words_into_vectors_averaged(tokens)
+                values.append(embedder.embed_words_into_vectors_averaged(tokens) )
             else:
                 pass
 
             # data labeled by sentiment score
-            labels[counter] = sentiment
+            labels.append(sentiment)
 
             # increment counter
             counter += 1
@@ -145,15 +145,15 @@ for embedder_model in embedders():
         data_args = data_params['args']
         data = loader.load_data()
 
-        # initialize numpy arrays (will be truncated later based on actual data size)
-        values = np.zeros((loader.num_samples(), embedder.num_features()), dtype="float32")
-        labels = np.zeros(loader.num_samples(), dtype='float32')
+        # initialize lists (will be converted later into numpy arrays)
+        values = []
+        labels = []
 
         # load dataset and downscale size of arrays
         logger.info("loading dataset {}...".format(data_params['path']))
         profile_results = timed_dataload(loader, data, data_args, values, labels)
-        values = values[:loader.num_samples()]
-        labels = labels[:loader.num_samples()]
+        values = np.array(values, dtype="float32")
+        labels = np.array(labels, dtype="float32")
 
         # store loading time
         seconds_loading = profile_results.timer.total_tt
