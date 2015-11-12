@@ -140,8 +140,6 @@ RUN echo "\ndeb http://archive.ubuntu.com/ubuntu/ vivid main" >> /etc/apt/source
     apt-get update && \
     apt-get install python-six
 
-#RUN dpkg -r --force-depends python-six && apt-mark hold python-six
-
 # default to shell in root dir
 WORKDIR /root
 CMD ["/bin/bash"]
