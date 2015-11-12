@@ -1,6 +1,7 @@
 import os, sys, logging
 import json
 import numpy as np
+import random
 from collections import defaultdict, Counter
 
 import cProfile, pstats
@@ -38,7 +39,8 @@ datasets =  {
                                     'class':    AmazonReviews,
                                     'path':     os.path.join(dir_data, 'amazonreviews.gz'),
                                     'args':     { 'embed':      {   'type': 'averaged' },
-                                                  'normalize':  {   'reverse': False }
+                                                  'normalize':  {   'reverse': False },
+                                                  'shuffle_after_load': True
                                                 }
                                 },
                 'imdb':         {
@@ -47,7 +49,8 @@ datasets =  {
                                     'args':     { 'embed':      {   'type': 'averaged' },
                                                   'normalize':  {   'encoding': None,
                                                                     'reverse': False
-                                                                }
+                                                                },
+                                                  'shuffle_after_load': False
                                                 }
                                 },
                 'sentiment140': {
@@ -57,13 +60,16 @@ datasets =  {
                                                   'normalize':  {   'min_length': 70,
                                                                     'max_length': 150,
                                                                     'reverse': False
-                                                                }
+                                                                },
+                                                  'shuffle_after_load': False
                                                 }
                                 },
                 'openweibo':    {
                                     'class':    OpenWeibo,
                                     'path':     os.path.join(dir_data, 'openweibo'),
-                                    'args':     { 'embed':      {   'type': 'averaged' } }
+                                    'args':     { 'embed':      {   'type': 'averaged' },
+                                                  'shuffle_after_load': True
+                                                }
                                 }
             }
 
@@ -165,19 +171,30 @@ for embedder_model in embedders():
         values = []
         labels = []
 
-        # load dataset and downscale size of arrays
+        # load dataset
         logger.info("loading dataset {}...".format(data_params['path']))
         profile_results = timed_dataload(loader, data, data_args, values, labels)
-        values = np.array(values, dtype="float32")
-        labels = np.array(labels, dtype="float32")
 
         # store loading time
         seconds_loading = profile_results.timer.total_tt
+
+        # shuffle if necessary
+        if data_args['shuffle_after_load']:
+            indices = np.arange(len(labels))
+            np.random.shuffle(indices)
+            values = [values[i] for i in indices]
+            labels = [labels[i] for i in indices]
+
+        # convert into nparray for sklearn
+        values = np.array(values, dtype="float32")
+        labels = np.array(labels, dtype="float32")
+        logger.info("Loaded {} samples...".format(len(values)))
 
         # split into training and test data
         logger.info("splitting dataset into training and testing sets...")
         labels_train, labels_dev, labels_test = data_utils.split_data(labels, train=data_fraction_train, dev=0, test=data_fraction_test)
         values_train, values_dev, values_test = data_utils.split_data(values, train=data_fraction_train, dev=0, test=data_fraction_test)
+        logger.info("Training on {}, Testing on {}...".format(len(values_train), len(values_test)))
 
 
         # calculate distribution
