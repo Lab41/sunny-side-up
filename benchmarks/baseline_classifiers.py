@@ -15,6 +15,7 @@ from src.datasets import data_utils
 from src.datasets.data_utils import timed, TextTooShortException
 from src.datasets.imdb import IMDB
 from src.datasets.sentiment140 import Sentiment140
+from src.datasets.amazon_reviews import AmazonReviews
 from src.datasets.word_vector_embedder import WordVectorEmbedder
 
 data_fraction_test = 0.20
@@ -32,6 +33,13 @@ except NameError:
 
 # data inputs
 datasets =  {
+                'amazon':       {
+                                    'class':    AmazonReviews,
+                                    'path':     os.path.join(dir_data, 'amazonreviews.gz'),
+                                    'args':     { 'embed':      {   'type': 'averaged' },
+                                                  'normalize':  {   'reverse': False }
+                                                }
+                                },
                 'imdb':         {
                                     'class':    IMDB,
                                     'path':     os.path.join(dir_data, 'imdb'),
