@@ -16,6 +16,7 @@ from src.datasets.data_utils import timed, TextTooShortException
 from src.datasets.imdb import IMDB
 from src.datasets.sentiment140 import Sentiment140
 from src.datasets.amazon_reviews import AmazonReviews
+from src.datasets.open_weiboscope import OpenWeibo
 from src.datasets.word_vector_embedder import WordVectorEmbedder
 
 data_fraction_test = 0.20
@@ -58,8 +59,14 @@ datasets =  {
                                                                     'reverse': False
                                                                 }
                                                 }
+                                },
+                'openweibo':    {
+                                    'class':    OpenWeibo,
+                                    'path':     os.path.join(dir_data, 'openweibo'),
+                                    'args':     { 'embed':      {   'type': 'averaged' } }
                                 }
             }
+
 
 
 # word embeddings

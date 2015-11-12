@@ -57,6 +57,19 @@ def enforce_length(txt, min_length=None, max_length=None, pad_out=False):
         txt = txt +  ' ' * (max_length - len(txt))
     return txt
 
+def download_data(file_path):
+
+    url_weibo = "http://weiboscope.jmsc.hku.hk/datazip/week{}.zip"
+
+    if not os.path.exists(file_path):
+        # download repository files and unzip them
+        os.makedirs(file_path)
+        for remote_path in [ url_weibo.format(a) for a in [ str(b) for b in range(1, 52) ] ]:
+            local_zip = get_file(remote_path, file_path)
+            with ZipFile(local_zip) as zf:
+                zf.extractall(file_path)
+
+
 def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_records=None, rng_seed=None, min_length=None, max_length=None, pad_out=False):
     """
     Load data from Open Weiboscope corpus of Sina Weibo posts. Options are available for encoding
@@ -90,13 +103,7 @@ def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_rec
 
     """
 
-    if not os.path.exists(file_path):
-        # download repository files and unzip them
-        os.makedirs(file_path)
-        for remote_path in [ "http://weiboscope.jmsc.hku.hk/datazip/week{}.zip".format(a) for a in [ str(b) for b in range(1, 52) ] ]:
-            local_zip = get_file(remote_path, file_path)
-            with ZipFile(local_zip) as zf:
-                zf.extractall(file_path)
+    download_data(file_path)
 
     # get list of weekNN.csv files at file_path
     ow_files = [ os.path.join(file_path, f) for f in os.listdir(file_path) if re.match(r"week[0-9]{,2}\.csv", f) is not None ]
@@ -224,3 +231,14 @@ def romanize_tweet(txt):
     hanzi_wds = segment_hanzi(txt)
     pinyin_wds = [ hanzi_to_pinyin(word_chars) for word_chars in hanzi_wds ]
     return u' '.join(pinyin_wds)
+
+
+
+class OpenWeibo:
+
+    def __init__(self, file_path):
+        self.file_path = file_path
+        download_data(file_path)
+
+    def load_data(self):
+        return load_data(self.file_path)
