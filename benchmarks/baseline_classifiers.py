@@ -114,7 +114,7 @@ def timed_dataload(loader, data, args, values, labels):
     # process data
     for text, sentiment in data:
 
-        if (counter % int(loader.num_samples()/20) == 0):
+        if (counter % 10000 == 0):
             logger.info("Embedding {} ({})...".format(counter, sentiment))
 
         try:
