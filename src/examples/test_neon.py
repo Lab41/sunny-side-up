@@ -12,7 +12,7 @@ import datetime
 import argparse
 import pprint
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger=logging.getLogger(__name__)
 
 
@@ -145,7 +145,7 @@ def crepe_model(nvocab=67, nframes=256, batch_norm=False, variant=None):
     logger.debug(layers)
     return layers
 
-def do_model(dataset_name, base_dir, data_filename, hdf5_name, 
+def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path, 
         valid_freq=2,
         batch_size=128,
         vocab_size=67,
@@ -162,6 +162,7 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name,
         nr_to_save=5,
         save_freq=2,
         crepe_variant=None,
+        warm_start_path=None,
         **kwargs):
     dataset_loaders = { 'amazon'    : amazon.load_data,
                         'imdb'      : imdb.load_data,
@@ -169,20 +170,31 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name,
     if sequence_length==None:
         sequence_length = max_length
 
+    # set up result paths
     present_time = datetime.datetime.strftime(datetime.datetime.now(),"%m%d_%I%p")
-    model_state_path=os.path.join(base_dir, "neon_crepe_model_{}.pkl".format(present_time))
-    model_weights_history_path=os.path.join(base_dir, "neon_crepe_weights_{}.pkl".format(present_time))
+    model_state_path=os.path.join(results_path, "neon_crepe_model_{}.pkl".format(present_time))
+    model_weights_history_path=os.path.join(results_path, "neon_crepe_weights_{}.pkl".format(present_time))
+    metrics_path_template=os.path.join(results_path, "metrics.json")
+    logger.debug("\n"
+        "Working directory: {}\n"
+        "Results path: {}\n"
+        "Metrics path: {}\n".format(working_dir, results_path, metrics_path_template))
+
     logger.info("Getting backend...")
     be = gen_backend(backend='gpu', batch_size=batch_size, device_id=gpu_id, rng_seed=rng_seed)
     logger.info("Getting data...")
 
-    base_dir = os.path.abspath(base_dir)
     try:
-        os.mkdir(base_dir)
+        os.mkdir(working_dir)
     except OSError:
-        logger.exception("Was trying to create directory, but it may already exist")
-    data_path = os.path.join(base_dir, data_filename)
-    hdf5_path = os.path.join(base_dir, hdf5_name)
+        logger.debug("Was trying to create working directory, but it may already exist",
+            exc_info=True)
+    try:
+        os.mkdir(results_path)
+    except OSError:
+        logger.debug("Was trying to create results directory, but it may already exist",
+            exc_info=True)
+
     data_loader = dataset_loaders[dataset_name](data_path)
     logger.debug("Keyword args: {}".format(kwargs))
     (train_get, test_get), (train_size, test_size) = split_and_batch(
@@ -206,11 +218,14 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name,
     model_layers = crepe_model(nvocab=vocab_size,nframes=nframes,variant=crepe_variant)
     mlp = neon.models.Model(model_layers)
 
+    if warm_start_path:
+        mlp.load_weights(warm_start_path)
+
     layers_description = [l.get_description() for l in mlp.layers]
     logger.info(pprint.pformat(layers_description))
     cost = neon.layers.GeneralizedCost(neon.transforms.CrossEntropyBinary())
     callbacks = NeonCallbacks(mlp,train_iter,valid_set=test_iter,valid_freq=valid_freq,progress_bar=True)
-    callbacks.add_neon_callback(metrics_path=os.path.join(base_dir, "metrics.json"), insert_pos=0)
+    callbacks.add_neon_callback(metrics_path=metrics_path_template, insert_pos=0)
     callbacks.add_save_best_state_callback(model_state_path)
     callbacks.add_serialize_callback(save_freq, model_weights_history_path,history=nr_to_save)
 
@@ -225,34 +240,51 @@ def do_model(dataset_name, base_dir, data_filename, hdf5_name,
     logger.info("Testing accuracy: {}".format(mlp.eval(test_iter, metric=Accuracy())))
 
 def main():
+    model_defaults = {
+        'imdb': {
+            'data_filename' : "",
+            'hdf5_name'     : "imdb_split.hd5"},
+        'amazon': {
+            'data_filename' : "reviews_Health_and_Personal_Care.json.gz",
+            'hdf5_name'     : "health_personal_split.hd5"            
+            },
+        'sentiment140': {
+            'data_filename' : "sentiment140.csv",
+            'hdf5_name'     : "sentiment140_split.hd5" 
+            }
+        }
+
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("dataset", help="Name of dataset (one of amazon, imdb, sentiment140)")
     arg_parser.add_argument("--working_dir", "-w", default=".",
 	    help="Directory where data should be put, default PWD")
     arg_parser.add_argument("--glove", "-g", action="store_true")
+    arg_parser.add_argument("--results_dir", "-r", default=None, help="(optional) custom subfolder to store results and weights in (defaults to dataset)")
+    arg_parser.add_argument("--data_path", "-d", default=None, help="(optional) custom path to original data")
+    arg_parser.add_argument("--hdf5_path", "-5", default=None, help="(optional) custom path to split data in HDF5")
+    arg_parser.add_argument("--weights_path", default=None, help="(optional) path to weights to initialize model with")
 
     args = arg_parser.parse_args()
     dataset_name = args.dataset
-    model_args = { "imdb": {
-            'base_dir'      : os.path.join(args.working_dir, "imdb"),
-            'data_filename' : "",
-            'hdf5_name'     : "imdb_split.hd5"},
-        'amazon': {
-            'base_dir'      : os.path.join(args.working_dir, "amazon"),
-            'data_filename' : "reviews_Health_and_Personal_Care.json.gz",
-            'hdf5_name'     : "home_kitch_split.hd5"            
-            },
-        'sentiment140': {
-            'base_dir'      : os.path.join(args.working_dir, "sentiment140"),
-            'data_filename' : "sentiment140.csv",
-            'hdf5_name'     : "sentiment140_split.hd5",
+    args.working_dir = os.path.abspath(args.working_dir)
+    if not args.results_dir:
+        args.results_dir = dataset_name
+    args.results_dir = os.path.join(args.working_dir, args.results_dir)
+    if not args.data_path:
+        args.data_path = os.path.join(args.working_dir, model_defaults[dataset_name]['data_filename'])
+    if not args.hdf5_path:
+        args.hdf5_path = os.path.join(args.working_dir, model_defaults[dataset_name]['hdf5_name'])
+
+    model_args = { 'sentiment140' : {
             'max_length'    : 150,
             'min_length'    : 70,
             'learning_rate' : 1e-4,
             'normalizer_fun': lambda x: data_utils.normalize(x, min_length=70, max_length=150),
             'transformer_fun': data_utils.to_one_hot,
             'variant'       : 'tweet_character',
-            }
+            },
+            'imdb'      : {},
+            'amazon'    : {}
         }
     if args.glove:
         glove_embedder = WordVectorEmbedder("glove", os.path.join(args.working_dir, "glove.twitter.27B.zip"))
@@ -262,8 +294,16 @@ def main():
         model_args[dataset_name]['sequence_length'] = 50
         model_args[dataset_name]['crepe_variant'] = 'embedding'
 
-    logger.debug(model_args[dataset_name]['normalizer_fun'])
-    do_model(dataset_name, **model_args[dataset_name])
+    try:
+        logger.debug(model_args[dataset_name]['normalizer_fun'])
+    except KeyError:
+        logger.debug("No custom normalization fn specified")
+    do_model(dataset_name, 
+             args.working_dir,
+             args.results_dir,
+             args.data_path,
+             args.hdf5_path,
+             **model_args[dataset_name])
 if __name__=="__main__":
     main()
 
