@@ -35,7 +35,7 @@ datasets =  {
                 'imdb':         {
                                     'class':    IMDB,
                                     'path':     os.path.join(dir_data, 'imdb'),
-                                    'args':     { 'embed':      {   'num_features': 50 },
+                                    'args':     { 'embed':      {   'type': 'averaged' },
                                                   'normalize':  {   'encoding': None,
                                                                     'reverse': False
                                                                 }
@@ -44,7 +44,7 @@ datasets =  {
                 'sentiment140': {
                                     'class':    Sentiment140,
                                     'path':     os.path.join(dir_data, 'sentiment140.csv'),
-                                    'args':     { 'embed':      {   'num_features': 50 },
+                                    'args':     { 'embed':      {   'type': 'averaged' },
                                                   'normalize':  {   'min_length': 70,
                                                                     'max_length': 150,
                                                                     'reverse': False
@@ -53,8 +53,6 @@ datasets =  {
                                 }
             }
 
-def embedding_type():
-    return 'concatenated' #averaged
 
 # word embeddings
 def embedders():
@@ -110,9 +108,9 @@ def timed_dataload(loader, data, args, values, labels):
             tokens = data_utils.tokenize(text_normalized)
 
             # choose embedding type
-            if embedding_type() == 'concatenated':
+            if args['embed']['type'] == 'concatenated':
                 values.append(embedder.embed_words_into_vectors_concatenated(tokens, **args['embed']))
-            elif embedding_type() == 'averaged':
+            elif args['embed']['type'] == 'averaged':
                 values.append(embedder.embed_words_into_vectors_averaged(tokens) )
             else:
                 pass
