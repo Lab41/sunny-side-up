@@ -8,9 +8,7 @@ import json
 import time
 import datetime
 import logging
-logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
 import numpy as np
 import neon
 import neon.transforms.cost

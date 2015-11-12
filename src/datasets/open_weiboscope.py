@@ -7,9 +7,7 @@ import random
 import codecs
 import csv
 import logging
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 import numpy as np
 #import pandas as pd
