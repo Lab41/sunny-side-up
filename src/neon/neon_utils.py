@@ -118,6 +118,8 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         self.write_to_json(self.costs, self.save_path, "_costs")
         self.write_to_json(self.epoch_times, self.save_path, "_epochtimes")
 
+        self.old_cost[:] = 0
+
 class NeonCallbacks(neon.callbacks.callbacks.Callbacks):
     def add_neon_callback(self, metrics_path, **kwargs):
         self.add_callback(NeonCallback(self.model,
