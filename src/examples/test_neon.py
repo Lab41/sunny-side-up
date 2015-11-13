@@ -153,6 +153,7 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
         batch_size=128,
         vocab_size=67,
         learning_rate=0.01,
+        momentum_coef=0.9,
         min_length=100,
         max_length=1014,
         sequence_length=None,
@@ -234,7 +235,7 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
 
     optimizer = neon.optimizers.GradientDescentMomentum(
         learning_rate=learning_rate,
-        momentum_coef=0.9,
+        momentum_coef=momentum_coef,
         schedule=neon.optimizers.Schedule([2,5,8], 0.5))
 
     logger.info("Doing training...")
@@ -268,6 +269,8 @@ def main():
     arg_parser.add_argument("--hdf5_path", "-5", default=None, help="custom path to split data in HDF5")
     arg_parser.add_argument("--weights_path", default=None, help="path to weights to initialize model with")
     arg_parser.add_argument("--gpu_id", "-g", default=0, help="GPU device ID (integer)")
+    arg_parser.add_argument("--learning_rate", default=0.01, help="Learning rate, default 0.01")
+    arg_parser.add_argument("--momentum_coef", default=0.9, help="Momentum coefficient, default 0.9")
 
     args = arg_parser.parse_args()
     dataset_name = args.dataset
@@ -283,7 +286,6 @@ def main():
     model_args = { 'sentiment140' : {
             'max_length'    : 150,
             'min_length'    : 70,
-            'learning_rate' : 1e-4,
             'normalizer_fun': lambda x: data_utils.normalize(x, min_length=70, max_length=150),
             'transformer_fun': data_utils.to_one_hot,
             'variant'       : 'tweet_character',
@@ -309,6 +311,8 @@ def main():
              args.data_path,
              args.hdf5_path,
              gpu_id=args.gpu_id,
+             learning_rate=args.learning_rate,
+             momentum_coef=args.momentum_coef,
              **model_args[dataset_name])
 if __name__=="__main__":
     main()
