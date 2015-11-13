@@ -268,9 +268,9 @@ def main():
     arg_parser.add_argument("--data_path", "-d", default=None, help="custom path to original data")
     arg_parser.add_argument("--hdf5_path", "-5", default=None, help="custom path to split data in HDF5")
     arg_parser.add_argument("--weights_path", default=None, help="path to weights to initialize model with")
-    arg_parser.add_argument("--gpu_id", "-g", default=0, help="GPU device ID (integer)")
-    arg_parser.add_argument("--learning_rate", default=0.01, help="Learning rate, default 0.01")
-    arg_parser.add_argument("--momentum_coef", default=0.9, help="Momentum coefficient, default 0.9")
+    arg_parser.add_argument("--gpu_id", "-g", default=0, type=int, help="GPU device ID (integer)")
+    arg_parser.add_argument("--learning_rate", default=0.01, type=float, help="Learning rate, default 0.01")
+    arg_parser.add_argument("--momentum_coef", default=0.9, type=float, help="Momentum coefficient, default 0.9")
 
     args = arg_parser.parse_args()
     dataset_name = args.dataset
