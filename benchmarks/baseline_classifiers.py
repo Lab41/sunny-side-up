@@ -67,7 +67,7 @@ class dataProcessingThread(threading.Thread):
                         pass
 
                     # data labeled by sentiment score (thread-safe with lock)
-                    if vector:
+                    if vector is not None:
                         threadLock.acquire()
                         values.append(vector)
                         labels.append(sentiment)
@@ -186,11 +186,8 @@ def timed_dataload(data, args, values, labels):
     value_last = 'initialize'
     while value_last is not None:
 
-        if (counter % 1000 == 0):
+        if (counter % 10000 == 0):
             print("Loading data at {}...".format(counter))
-
-        if (counter > 10000):
-            break
 
         # reset subset and threads
         subset = []
