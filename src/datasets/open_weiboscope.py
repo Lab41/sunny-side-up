@@ -212,3 +212,15 @@ class OpenWeibo:
 
     def load_data(self):
         return load_data(self.file_path)
+
+    def model_word2vec_save(self, file_path, size=200, window=5, min_count=5, workers=32):
+
+        # create iterator for w2v model
+        results = [(text, sentiment) in self.load_data()]
+        sentences = iter(results)
+
+        # build model from input
+        model = Word2Vec(sentences, size=size, window=window, min_count=min_count, workers=workers)
+
+        # save model to disk
+        model.save(file_path)
