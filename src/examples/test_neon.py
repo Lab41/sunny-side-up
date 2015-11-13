@@ -260,7 +260,7 @@ def main():
     arg_parser.add_argument("dataset", help="Name of dataset (one of amazon, imdb, sentiment140)")
     arg_parser.add_argument("--working_dir", "-w", default=".",
 	    help="Directory where data should be put, default PWD")
-    arg_parser.add_argument("--glove", "-g", action="store_true")
+    arg_parser.add_argument("--glove", action="store_true")
 
     arg_parser.add_argument("--results_dir", "-r", default=None, help="custom subfolder to store results and weights in (defaults to dataset)")
     arg_parser.add_argument("--data_path", "-d", default=None, help="custom path to original data")
