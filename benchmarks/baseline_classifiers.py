@@ -8,6 +8,7 @@ import cProfile, pstats
 import threading
 import time
 import multiprocessing
+import math
 
 from sklearn import metrics
 from sklearn import svm
