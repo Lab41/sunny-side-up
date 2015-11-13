@@ -17,7 +17,6 @@ import numpy as np
 from data_utils import get_file, to_one_hot
 
 
-vocabulary=ur"""abcdefghijklmnopqrstuvwxyz0123456789-,;.!?:'"/\|_@#$%^&*~`+-=<>()[]{}""" + "\n"
 
 
 def unicode_csv_reader(unicode_csv_data, dialect=csv.excel, **kwargs):
@@ -171,16 +170,6 @@ def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_rec
 
                 except GeneratorExit:
                     return
-
-#def text_to_one_hot(txt, vocabulary=vocabulary):
-#    # setup the vocabulary for one-hot encoding
-#    vocab_chars = set(list(vocabulary))
-#
-#    # create the output list
-#    chars = list(txt)
-#    categorical_chars = pd.Categorical(chars, categories=vocab_chars)
-#    vectorized_chars = np.array(pd.get_dummies(categorical_chars))
-#    return vectorized_chars
 
 def romanize_tweet(txt):
     """
