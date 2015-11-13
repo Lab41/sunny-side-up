@@ -30,6 +30,9 @@ RUN cd /tmp && \
 RUN apt-get install --assume-yes libhdf5-dev
 RUN pip install h5py
 
+# add open weibo processing
+RUN pip install jieba pypinyin
+
 # setup data volume
 VOLUME ["/data"]
 WORKDIR /data
