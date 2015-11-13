@@ -39,7 +39,11 @@ datasets =  {
                                     'class':    AmazonReviews,
                                     'path':     os.path.join(dir_data, 'amazonreviews.gz'),
                                     'args':     { 'embed':      {   'type': 'averaged' },
-                                                  'normalize':  {   'reverse': False },
+                                                  'normalize':  {   'encoding': None,
+                                                                    'reverse': False,
+                                                                    'min_length': 0,
+                                                                    'max_length': 9999999
+                                                                },
                                                   'shuffle_after_load': True
                                                 }
                                 },
