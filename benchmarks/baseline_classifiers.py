@@ -125,15 +125,17 @@ def timed_dataload(loader, data, args, values, labels):
     for text, sentiment in data:
 
         if (counter % 10000 == 0):
-            logger.info("Embedding {} ({})...".format(counter, sentiment))
+            logger.info("Embedding {}...".format(counter))
 
         try:
             # normalize and tokenize if necessary
             if args.has_key('normalize'):
                 text_normalized = data_utils.normalize(text, **args['normalize'])
-                tokens = data_utils.tokenize(text_normalized)
             else:
-                tokens = text
+                text_normalized = text
+
+            # tokenize
+            tokens = data_utils.tokenize(text_normalized)
 
             # choose embedding type
             if args['embed']['type'] == 'concatenated':
