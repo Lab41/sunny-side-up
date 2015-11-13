@@ -266,7 +266,7 @@ def main():
     arg_parser.add_argument("--data_path", "-d", default=None, help="custom path to original data")
     arg_parser.add_argument("--hdf5_path", "-5", default=None, help="custom path to split data in HDF5")
     arg_parser.add_argument("--weights_path", default=None, help="path to weights to initialize model with")
-    arg_parser.add_argument("--gpu_id", "-g", default=1, help="GPU device ID (integer)")
+    arg_parser.add_argument("--gpu_id", "-g", default=0, help="GPU device ID (integer)")
 
     args = arg_parser.parse_args()
     dataset_name = args.dataset
@@ -307,6 +307,7 @@ def main():
              args.results_dir,
              args.data_path,
              args.hdf5_path,
+             gpu_id=args.gpu_id,
              **model_args[dataset_name])
 if __name__=="__main__":
     main()
