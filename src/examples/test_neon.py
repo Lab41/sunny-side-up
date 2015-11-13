@@ -40,6 +40,8 @@ from src.datasets.neon_iterator import DiskDataIterator
 from src.neon.neon_utils import ConfusionMatrixBinary, NeonCallbacks, NeonCallback, Accuracy
 from src.datasets.word_vector_embedder import WordVectorEmbedder
 
+# turn down certain verbose logging levels
+logging.getLogger("src.datasets.batch_data").setLevel(logging.INFO)
 
 def lstm_model(nvocab=67, hidden_size=20, embedding_dim=60):
     init_emb = neon.initializers.Uniform(low=-0.1/embedding_dim, high=0.1/embedding_dim)
@@ -259,10 +261,12 @@ def main():
     arg_parser.add_argument("--working_dir", "-w", default=".",
 	    help="Directory where data should be put, default PWD")
     arg_parser.add_argument("--glove", "-g", action="store_true")
-    arg_parser.add_argument("--results_dir", "-r", default=None, help="(optional) custom subfolder to store results and weights in (defaults to dataset)")
-    arg_parser.add_argument("--data_path", "-d", default=None, help="(optional) custom path to original data")
-    arg_parser.add_argument("--hdf5_path", "-5", default=None, help="(optional) custom path to split data in HDF5")
-    arg_parser.add_argument("--weights_path", default=None, help="(optional) path to weights to initialize model with")
+
+    arg_parser.add_argument("--results_dir", "-r", default=None, help="custom subfolder to store results and weights in (defaults to dataset)")
+    arg_parser.add_argument("--data_path", "-d", default=None, help="custom path to original data")
+    arg_parser.add_argument("--hdf5_path", "-5", default=None, help="custom path to split data in HDF5")
+    arg_parser.add_argument("--weights_path", default=None, help="path to weights to initialize model with")
+    arg_parser.add_argument("--gpu_id", "-g", default=1, help="GPU device ID (integer)")
 
     args = arg_parser.parse_args()
     dataset_name = args.dataset
