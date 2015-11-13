@@ -23,7 +23,9 @@ RUN cd /root/caffe && \
 
 ENV PYTHONPATH /root/caffe/python
 
-RUN pip install keras
+ENV THEANO_FLAGS mode=FAST_RUN,device=gpu,floatX=float32
+
+RUN pip install keras && conda install -y Theano
 
 WORKDIR /root/caffe
 
