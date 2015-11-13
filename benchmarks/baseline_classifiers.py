@@ -178,6 +178,7 @@ def timed_dataload(data, args, values, labels):
 
     # use separate counter to account for invalid input along the way
     counter = 0
+    print_every = math.floor(10000/num_threads)*num_threads
 
     # iterate data
     data_iterator = iter(data)
@@ -186,7 +187,7 @@ def timed_dataload(data, args, values, labels):
     value_last = 'initialize'
     while value_last is not None:
 
-        if (counter % 10000 == 0):
+        if (counter % print_every == 0):
             print("Loading data at {}...".format(counter))
 
         # reset subset and threads
