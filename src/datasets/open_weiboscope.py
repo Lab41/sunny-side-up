@@ -7,16 +7,16 @@ import random
 import codecs
 import csv
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
 import numpy as np
 #import pandas as pd
 
 from data_utils import get_file, to_one_hot
 
 
+# setup logger
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def unicode_csv_reader(unicode_csv_data, dialect=csv.excel, **kwargs):
@@ -160,13 +160,11 @@ def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_rec
                             raise StopIteration()
                 # log various exception cases from loop body
                 except TextTooShortException:
-                    logger.info("Record {} thrown out (too short)".format(post_id))
+                    logger.debug("Record {} thrown out (too short)".format(post_id))
                 except BadRecordException as e:
-                    logger.info(e)
+                    logger.debug(e)
                 except IndexError as e:
-                    logger.info(e)
-                except UnicodeEncodeError as e:
-                    logger.info(e)
+                    logger.debug(e)
 
                 except GeneratorExit:
                     return
