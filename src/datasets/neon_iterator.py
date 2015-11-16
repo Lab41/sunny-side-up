@@ -32,7 +32,7 @@ from data_utils import from_one_hot
 
 class DiskDataIterator(NervanaObject):
 
-    def __init__(self, batch_gen_fun, ndata, doclength, nvocab, nlabels=2):
+    def __init__(self, batch_gen_fun, ndata, doclength, nvocab, nlabels=2, labels_onehot=None, batch_limit=None):
         """
         Implements loading of given data into backend tensor objects. If the
         backend is specific to an accelarator device, the data is copied over
@@ -56,15 +56,22 @@ class DiskDataIterator(NervanaObject):
         self.nlabels = nlabels
         self.nvocab = nvocab
         self.nsteps = doclength
+        if labels_onehot==None:
+            labels_onehot = nlabels > 2
+        self.labels_onehot = labels_onehot
+        self.batch_limit = batch_limit
 
         # on device tensor for review chars and one hot
-        self.xlabels_flat = self.be.iobuf((1, self.nsteps), dtype=np.int16)
+        self.xlabels_flat = self.be.iobuf((1, self.nsteps))
         self.xlabels = self.xlabels_flat.reshape((self.nsteps, self.be.bsz))
         self.Xbuf_flat = self.be.iobuf((self.nvocab, self.nsteps))
         self.Xbuf = self.Xbuf_flat.reshape((self.nvocab * self.nsteps, self.be.bsz))
 
         self.ylabels = self.be.iobuf(1, dtype=np.int32)
-        self.ybuf = self.be.iobuf(self.nlabels)
+        if self.labels_onehot:
+            self.ybuf = self.be.iobuf(self.nlabels)
+        else:
+            self.ybuf = self.be.iobuf(1)
 
         # This makes upstream layers interpret each example as a 1d image
         self.shape = (1, self.nvocab, self.nsteps)
@@ -90,21 +97,23 @@ class DiskDataIterator(NervanaObject):
             labels.
         """
         self.reset()
-        for i1 in range(0, self.ndata, self.be.bsz):
+        for batch_i, i1 in enumerate(range(0, self.ndata, self.be.bsz)):
+            if self.batch_limit and batch_i >= self.batch_limit:
+                return
             i2 = min(i1 + self.be.bsz, self.ndata)
             bsz = i2 - i1
             # TODO: implement wraparound. as of now, partial batches are discarded
             X, y = next(self.datagen)
-            logger.debug("\nX labels shape: {}, X' shape: {}"
-                        "\nXbuf shape: {}, Xbuf flat shape: {}"
-                        "\nY labels shape: {}, Y buffer shape: {}, Y input shape: {}".format(
-                   self.xlabels.shape,
-                   X.T.shape,
-                   self.Xbuf.shape,
-                   self.Xbuf_flat.shape,
-                   self.ylabels.shape,
-                   self.ybuf.shape,
-                   y.shape))
+            # logger.debug("\nX labels shape: {}, X' shape: {}"
+            #             "\nXbuf shape: {}, Xbuf flat shape: {}"
+            #             "\nY labels shape: {}, Y buffer shape: {}, Y input shape: {}".format(
+            #        self.xlabels.shape,
+            #        X.T.shape,
+            #        self.Xbuf.shape,
+            #        self.Xbuf_flat.shape,
+            #        self.ylabels.shape,
+            #        self.ybuf.shape,
+            #        y.shape))
             # This is where data is copied from host memory
             # to the backend. For some reason, it is
             # best to transpose it. X is expected to 
@@ -112,16 +121,13 @@ class DiskDataIterator(NervanaObject):
             # or embedded, probably)
             # y is expected to come as a count-from-zero integer,
             # which we convert to one-hot encoding here
-            self.ylabels[:] = y.T.copy()
-            ylabels = self.ylabels.get()
-            logger.debug(ylabels.T.shape)
-            zerosum=np.sum([1 for _ in np.nditer(ylabels) if _ == 0])
-            onesum=np.sum([1 for _ in np.nditer(ylabels) if _ == 1])
-            othersum=np.sum([1 for _ in np.nditer(ylabels) if _ not in (0, 1)])
-            #logger.debug("Num 0: {}, Num 1: {}, Other: {}".format(zerosum, onesum, othersum))
             self.Xbuf[:] = X.T.copy()
-            self.ybuf[:] = self.be.onehot(self.ylabels, axis=0)
-            logger.debug(y.shape)
+            if self.labels_onehot:
+                self.ylabels[:] = y.T.copy()
+                self.ybuf[:] = self.be.onehot(self.ylabels, axis=0)
+            else:
+                self.ybuf[:] = y.T.copy()
+            #logger.debug(y.shape)
             #logger.debug(np.concatenate((y, ylabels.T, self.ybuf.get().T), axis=1))
             yield (self.Xbuf, self.ybuf)
 
