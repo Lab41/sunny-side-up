@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# name Docker imagee 
-__image=lab41/neon-cuda
+# choose Docker image to use 
+__image=lab41/neon-cuda7.5
+#__image=lab41/neon-cuda
 
 # put together docker cmd with variable number of devices
 CMDSTR="docker run -it --device /dev/nvidiactl:/dev/nvidiactl --device /dev/nvidia-uvm:/dev/nvidia-uvm "
