@@ -43,7 +43,8 @@ from src.datasets.word_vector_embedder import WordVectorEmbedder
 
 # turn down certain verbose logging levels
 logging.getLogger("src.datasets.batch_data").setLevel(logging.INFO)
-logging.getLogger("src.datasets.neon_iterator").setLevel(logging.DEBUG)
+logging.getLogger("src.datasets.neon_iterator").setLevel(logging.INFO)
+logging.getLogger("src.neon.neon_utils").setLevel(logging.INFO)
 
 def lstm_model(nvocab=67, hidden_size=20, embedding_dim=60):
     init_emb = neon.initializers.Uniform(low=-0.1/embedding_dim, high=0.1/embedding_dim)
