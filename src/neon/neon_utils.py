@@ -11,6 +11,8 @@ import logging
 logger = logging.getLogger(__name__)
 import numpy as np
 import neon
+import neon.callbacks
+import neon.callbacks.callbacks
 import neon.transforms.cost
 #import matplotlib
 #import sklearn.metrics
@@ -83,7 +85,7 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         # save total cost to placeholder to compute difference in next batch
         self.old_cost[:] = self.model.total_cost
         # serialize every so often
-        if len(self.costs[epoch]) % 500 == 0:
+        if len(self.costs[epoch]) % 1 == 0:
             self.write_to_json(self.costs, self.save_path, "_costs")
 
     def on_epoch_begin(self, epoch):
@@ -154,14 +156,26 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
             dict: Returns the metric
         """
         # convert back from onehot and compare
-        self.preds[:] = self.be.argmax(y, axis=0)
-        self.hyps[:] = self.be.argmax(t, axis=0)
+        #logger.debug("Fitting a ... {} shaped thing".format(y.shape))
+        # if outputs are arrays
+        if y.shape[0] > 1:
+            self.preds[:] = self.be.argmax(y, axis=0)
+            self.hyps[:] = self.be.argmax(t, axis=0)
+        # if outputs are scalars
+        else:
+            # in case of single-neuron output (not onehot)
+            self.preds[:] = y
+            self.preds[:] = np.around(self.preds.get())
+            self.hyps[:] = t
+
         self.matches[:] = self.be.equal(self.preds, self.hyps)
 
         conf_matrix = dict()
         predictions = self.preds.get().astype(bool)
         truth = self.hyps.get().astype(bool)
         matches = self.matches.get().astype(bool)
+
+        #logger.debug("predictions: {}\ntruth: {}\nmatches: {}".format(predictions, truth, matches))
         
         # true positives
         conf_matrix['tp'] = np.sum(matches & truth)
@@ -187,11 +201,17 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
         running_sums = [0,0]
         for x,t in data:
             y = model.fprop(x, inference=True)
+            #answers_sample = y.get()[:,:10].tolist()
+            #truth_sample = t.get()[:,:10].tolist()
+            #answers_sample = answers_sample + truth_sample
+            #answers_sample = zip(*answers_sample)
+            #logger.debug(answers_sample)
             new_conf_matrix = self(y, t)
             conf_matrix = { a: conf_matrix[a] + new_conf_matrix[a] for a in conf_matrix.keys() }
             running_sums[0] += np.sum([1 for a in np.nditer(t.get()) if a == 1.])
             running_sums[1] += np.sum([1 for a in np.nditer(t.get()) if a == 0.])
         return conf_matrix
+
 
 class Accuracy(neon.transforms.cost.Metric):
     """
@@ -214,9 +234,13 @@ class Accuracy(neon.transforms.cost.Metric):
         Returns:
             float: Returns the metric
         """
-        # convert back from onehot and compare
-        self.preds[:] = self.be.argmax(y, axis=0)
-        self.hyps[:] = self.be.argmax(t, axis=0)
+        if y.shape[0] == 1:
+            # use labels
+            self.preds[:] = np.around(y.get())
+            self.hyps[:] = np.around(t.get())
+        else:
+            # convert back from onehot
+            self.preds[:] = self.be.argmax(y, axis=0)
+            self.hyps[:] = self.be.argmax(t, axis=0)
         self.outputs[:] = self.be.equal(self.preds, self.hyps)
-
         return self.outputs.get().mean()
