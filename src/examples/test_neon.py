@@ -12,6 +12,7 @@ import datetime
 import argparse
 import pprint
 import logging
+import json
 logging.basicConfig(level=logging.DEBUG)
 logger=logging.getLogger(__name__)
 
@@ -42,7 +43,7 @@ from src.datasets.word_vector_embedder import WordVectorEmbedder
 
 # turn down certain verbose logging levels
 logging.getLogger("src.datasets.batch_data").setLevel(logging.INFO)
-logging.getLogger("src.datasets.neon_iterator").setLevel(logging.INFO)
+logging.getLogger("src.datasets.neon_iterator").setLevel(logging.DEBUG)
 
 def lstm_model(nvocab=67, hidden_size=20, embedding_dim=60):
     init_emb = neon.initializers.Uniform(low=-0.1/embedding_dim, high=0.1/embedding_dim)
@@ -81,7 +82,7 @@ def simple_model(nvocab=67,
     ]
     return layers
 
-def crepe_model(nvocab=67, nframes=256, batch_norm=False, variant=None):
+def crepe_model(nvocab=67, nframes=256, batch_norm=False, noutput=2, variant=None):
     init_gaussian = neon.initializers.Gaussian(0, 0.05)
     layers = [
         neon.layers.Conv((nvocab, 7, nframes), 
@@ -129,7 +130,7 @@ def crepe_model(nvocab=67, nframes=256, batch_norm=False, variant=None):
 
         neon.layers.Dropout(0.5),
 
-        neon.layers.Affine(2,
+        neon.layers.Affine(noutput,
             init=neon.initializers.Uniform(),
             activation=neon.transforms.Logistic())
         
@@ -150,7 +151,7 @@ def crepe_model(nvocab=67, nframes=256, batch_norm=False, variant=None):
 
 def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path, 
         valid_freq=2,
-        batch_size=128,
+        batch_size=256,
         vocab_size=67,
         learning_rate=0.01,
         momentum_coef=0.9,
@@ -167,6 +168,7 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
         save_freq=2,
         crepe_variant=None,
         warm_start_path=None,
+        batch_limit=None,
         **kwargs):
     dataset_loaders = { 'amazon'    : amazon.load_data,
                         'imdb'      : imdb.load_data,
@@ -179,11 +181,22 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
     model_state_path=os.path.join(results_path, "neon_crepe_model_{}.pkl".format(present_time))
     model_weights_history_path=os.path.join(results_path, "neon_crepe_weights_{}.pkl".format(present_time))
     metrics_path_template=os.path.join(results_path, "metrics.json")
+    metadata_path=os.path.join(results_path, "metadata.json")
     logger.debug("\n"
         "Working directory: {}\n"
         "Results path: {}\n"
         "Metrics path: {}\n".format(working_dir, results_path, metrics_path_template))
 
+    # record run metadata
+    run_metadata = {
+        'dataset_name'      : dataset_name,
+        'batch_size'        : batch_size,
+        'nr_epochs'         : nr_epochs,
+        'learning_rate'     : learning_rate,
+        'momentum_coef'     : momentum_coef
+    }
+    with open(metadata_path, "w") as f:
+        json.dump(run_metadata, f)
     logger.info("Getting backend...")
     be = gen_backend(backend='gpu', batch_size=batch_size, device_id=gpu_id, rng_seed=rng_seed)
     logger.info("Getting data...")
@@ -214,32 +227,42 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
 
     train_iter = DiskDataIterator(train_get, ndata=train_size, 
                                   doclength=sequence_length, 
-                                  nvocab=vocab_size)
+                                  nvocab=vocab_size,
+                                  nlabels=2,
+                                  labels_onehot=True,
+                                  batch_limit=batch_limit)
     test_iter = DiskDataIterator(test_get, ndata=test_size, 
                                   doclength=sequence_length, 
-                                  nvocab=vocab_size)
+                                  nvocab=vocab_size,
+                                  nlabels=2,
+                                  labels_onehot=True)
     logger.info("Building model...")
-    model_layers = crepe_model(nvocab=vocab_size,nframes=nframes,variant=crepe_variant)
+    model_layers = crepe_model(nvocab=vocab_size,nframes=nframes,variant=crepe_variant,batch_norm=True)
     mlp = neon.models.Model(model_layers)
 
     if warm_start_path:
         mlp.load_weights(warm_start_path)
 
-    layers_description = [l.get_description() for l in mlp.layers]
-    logger.info(pprint.pformat(layers_description))
+    #layers_description = [l.get_description() for l in mlp.layers]
+    #logger.info(pprint.pformat(layers_description))
     cost = neon.layers.GeneralizedCost(neon.transforms.CrossEntropyBinary())
+    #cost = neon.layers.GeneralizedCost(neon.transforms.SumSquared())
+    #cost = neon.layers.GeneralizedCost(neon.transforms.CrossEntropyMulti())
     callbacks = NeonCallbacks(mlp,train_iter,valid_set=test_iter,valid_freq=valid_freq,progress_bar=True)
     callbacks.add_neon_callback(metrics_path=metrics_path_template, insert_pos=0)
     callbacks.add_save_best_state_callback(model_state_path)
     callbacks.add_serialize_callback(save_freq, model_weights_history_path,history=nr_to_save)
 
-    optimizer = neon.optimizers.GradientDescentMomentum(
+    decay_schedule = neon.optimizers.Schedule([n for n in range(1, nr_epochs) if n % 3 == 2 and n < 10], 0.5)
+    #decay_schedule = neon.optimizers.Schedule()
+    sgd = neon.optimizers.GradientDescentMomentum(
         learning_rate=learning_rate,
         momentum_coef=momentum_coef,
-        schedule=neon.optimizers.Schedule([2,5,8], 0.5))
+        schedule=decay_schedule)
+    rmsprop = neon.optimizers.RMSProp(learning_rate=learning_rate)
 
     logger.info("Doing training...")
-    mlp.fit(train_iter, optimizer=optimizer, 
+    mlp.fit(train_iter, optimizer=sgd, 
               num_epochs=nr_epochs, cost=cost, callbacks=callbacks)
     logger.info("Testing accuracy: {}".format(mlp.eval(test_iter, metric=Accuracy())))
 
@@ -271,6 +294,8 @@ def main():
     arg_parser.add_argument("--gpu_id", "-g", default=0, type=int, help="GPU device ID (integer)")
     arg_parser.add_argument("--learning_rate", default=0.01, type=float, help="Learning rate, default 0.01")
     arg_parser.add_argument("--momentum_coef", default=0.9, type=float, help="Momentum coefficient, default 0.9")
+    arg_parser.add_argument("--batch_size", default=128, type=int, help="Batch size")
+    arg_parser.add_argument("--nframes", default=256, type=int, help="Frame buffer size for CREPE. 256 or 1024.")
 
     args = arg_parser.parse_args()
     dataset_name = args.dataset
@@ -293,6 +318,7 @@ def main():
             'imdb'      : {},
             'amazon'    : {}
         }
+    model_args[dataset_name]['nframes']=args.nframes
     if args.glove:
         glove_embedder = WordVectorEmbedder("glove", os.path.join(args.working_dir, "glove.twitter.27B.zip"))
         model_args[dataset_name]['normalizer_fun'] = lambda x: x.encode('ascii', 'ignore').lower()
@@ -313,6 +339,7 @@ def main():
              gpu_id=args.gpu_id,
              learning_rate=args.learning_rate,
              momentum_coef=args.momentum_coef,
+             batch_size=args.batch_size,
              **model_args[dataset_name])
 if __name__=="__main__":
     main()
