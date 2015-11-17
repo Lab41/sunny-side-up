@@ -2,7 +2,6 @@
 
 import os
 import logging
-logger = logging.getLogger(__name__)
 
 import numpy as np
 import h5py
@@ -11,7 +10,8 @@ import data_utils
 
 
 def batch_data(data_loader, batch_size=128, normalizer_fun=None, 
-               transformer_fun=None, flatten=True):
+               transformer_fun=None, flatten=True,
+               max_records=None, balance_labels=False):
     '''
     Batches data, doing all necessary preprocessing and
     normalization.
@@ -43,15 +43,25 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
             be flattened (collapsed to one dimension)? If true, the 
             batch yielded will be 2-D (num batches, record size).
 
+        max_records -- if not None, batch only up to this number
+            of records and no more. If the number of records is less than
+            this, then fewer than max_records records may be batched
+
+        balance_labels -- if true, will attempt to achieve equal numbers
+            of positive and negative labels. Labels must be zero-based and 
+            may not work for datasets
+            with more than two labels
+
     @Returns:
         generator that yields 2-tuples of (data, label), where data
         and label are numpy arrays representing a batch of data,  
         equally sized in the first dimension
     '''
 
-    docs = []
-    labels = []
+    nlabels = 2
+    docs = [ [] for a in range(nlabels) ]
 
+    logger = logging.getLogger(__name__)
     logger.debug(data_loader)
 
     # set (near) identity functions for transformation functions when None
@@ -64,29 +74,49 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
     # loop over data, applying transforming fns,
     # accumulating records into batches,
     # and yielding them when batch size is reached
+    nr_yielded = 0
     for doc_text, label in data_loader:
+        if max_records and nr_yielded > max_records:
+            return
         # transformation and normalization
         try:
             #logger.debug("Normalization........")
             doc_text = normalizer_fun(doc_text)
             # transform document into a numpy array
             transformed_doc = transformer_fun(doc_text)
-            docs.append(transformed_doc)
-            labels.append(label)
+            docs[label].append(transformed_doc)
         except data_utils.DataException as e:
             logger.debug("Type of input: {}".format(type(doc_text)))
-            logger.info("{}: {}".format(type(e), e))
+            logger.debug("{}: {}".format(type(e), e))
 
         # dispatch once batch is of appropriate size 
-        if len(docs) >= batch_size:
-            docs_np = np.array(docs)
+        if all(len(doc_subset) >= batch_size/nlabels for doc_subset in docs) or \
+                (balance_labels == False and sum(len(doc_subset) for doc_subset in docs) >= batch_size):
+            # proceed in turn through documents of each label
+            # popping off until batch_size is reached
+            batched_docs = []
+            labels = []
+            cur_label = 0
+            logger.debug("Accumulated records: {}".format([len(a) for a in docs]))
+            while(len(batched_docs) < batch_size):
+                try:
+                    batched_docs.append(docs[cur_label].pop(0))
+                    labels.append(cur_label)
+                    logger.debug("Label: {}, Length: {}".format(cur_label, len(batched_docs)))
+                except IndexError as e:
+                    if e.message != 'pop from empty list':
+                        raise
+                finally:
+                    cur_label += 1
+                    if cur_label == nlabels:
+                        cur_label = 0
+            docs_np = np.array(batched_docs)
             if flatten==True:
                 # transform to form (batch_size, w*h); flattening doc
                 docs_np = docs_np.reshape((batch_size,-1))
             # labels come out in a separate (batch_size, 1) np array
             labels_np = np.array(labels).reshape((batch_size, -1))
-            docs = []
-            labels = []
+            nr_yielded += batch_size
 
             yield docs_np, labels_np
 
@@ -164,6 +194,7 @@ class H5Iterator:
         self.h5file.close()
     
     def __iter__(self):
+        logger = logging.getLogger(__name__)
         if self.shuffle == True:
             indices = np.random.permutation(self.indices)
         else:
@@ -372,9 +403,9 @@ def split_and_batch(data_loader,
                 
 if __name__=="__main__":
     # some demo code
-    import imdb
+    logging.basicConfig()
+    logging.getLogger(__name__).setLevel(logging.INFO)
     import amazon_reviews
-    import batch_data
     import data_utils
     import argparse
 
@@ -413,7 +444,8 @@ if __name__=="__main__":
         am_train_batch = batch_data(amtr,
             normalizer_fun=lambda x: data_utils.normalize(x, 
                 max_length=300, 
-                truncate_left=True),
+                truncate_left=True,
+                encoding=None),
             transformer_fun=None)
         am_test_batch = batch_data(amte,
             normalizer_fun=None,transformer_fun=None)
@@ -438,6 +470,15 @@ if __name__=="__main__":
         print "Translated back into characters:\n"
         print ''.join(data_utils.from_one_hot(oh))
 
+        # demo balanced batching
+        am_balanced_batcher = batch_data(amtr,balance_labels=True)
+        balanced_batch = am_balanced_batcher.next()
+        print 'Balanced batch:'
+        balanced_label_counts = {}
+        for idx in range(balanced_batch[1].shape[0]):
+            label = balanced_batch[1][idx,0]
+            balanced_label_counts[label] = balanced_label_counts.get(label, 0) + 1
+        print balanced_label_counts
 
     # Demo iterator utility classes
     # iterate multiple times over same data 
