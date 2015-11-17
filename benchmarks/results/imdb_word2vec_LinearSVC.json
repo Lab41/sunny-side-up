@@ -1,0 +1,32 @@
+{
+    "classifier": "LinearSVC",
+    "data": {
+        "negative": "4974.0",
+        "positive": "5021.0",
+        "source": "imdb",
+        "testsize": "9995",
+        "time_in_seconds_loading": "45.948796"
+    },
+    "embedding": {
+        "model": "word2vec",
+        "subset": "GoogleNews-vectors-negative300.bin"
+    },
+    "data_args": {
+        "normalize": {
+            "encoding": null,
+            "reverse": false
+        }
+    },
+    "metrics": {
+        "FN": "854",
+        "FP": "864",
+        "TN": "4110",
+        "TP": "4167",
+        "accuracy": "0.828114057029",
+        "f1": "0.829088738559",
+        "precision": "0.828264758497",
+        "recall": "0.829914359689",
+        "time_in_seconds_testing": "0.009827",
+        "time_in_seconds_training": "2.385829"
+    }
+}

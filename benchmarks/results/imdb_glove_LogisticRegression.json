@@ -1,0 +1,32 @@
+{
+    "classifier": "LogisticRegression",
+    "data": {
+        "negative": "5028.0",
+        "positive": "4967.0",
+        "source": "imdb",
+        "testsize": "9995",
+        "time_in_seconds_loading": "24.758371"
+    },
+    "embedding": {
+        "model": "glove",
+        "subset": "glove.twitter.27B.200d"
+    },
+    "data_args": {
+        "normalize": {
+            "encoding": null,
+            "reverse": false
+        }
+    },
+    "metrics": {
+        "FN": "948",
+        "FP": "979",
+        "TN": "4049",
+        "TP": "4019",
+        "accuracy": "0.807203601801",
+        "f1": "0.806623181134",
+        "precision": "0.804121648659",
+        "recall": "0.809140326153",
+        "time_in_seconds_testing": "0.005895",
+        "time_in_seconds_training": "2.835082"
+    }
+}

@@ -1,10 +1,12 @@
-import os, re, csv
+import os, re, csv, errno, sys
 import logging
 import random
 from urllib2 import urlopen, HTTPError, URLError
+from nltk.tokenize import wordpunct_tokenize
 import numpy as np
 import logging
-from word_vector_embedder import WordVectorEmbedder
+import cPickle as pickle
+from gensim.models import Doc2Vec, Word2Vec
 logging.basicConfig()
 logger=logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -14,6 +16,213 @@ class DataException(Exception):
 
 class TextTooShortException(DataException):
     pass
+
+class TextIterator:
+    '''
+        Iterator for text in (text,sentiment) tuples returned by a generator
+    '''
+    def __init__(self, klass, dirname):
+        self.data = klass(dirname).load_data()
+        self.counter = 0
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        text,sentiment = self.data.next()
+        self.counter += 1
+        return tokenize(text)
+
+
+class DataSampler:
+    '''
+        Data sampling class to load samples from data loader
+    '''
+    def __init__(self, klass, file_path, num_classes):
+        self.klass = klass
+        self.file_path = file_path
+        self.samples = {}
+        self.num_classes = num_classes
+
+    def min_current_samples(self):
+        '''
+            Return the lowest number of samples of all class types
+        '''
+        if len(self.samples):
+            return min([len(samples) for samples in self.samples.itervalues()])
+        else:
+            return 0
+
+    def sample_balanced(self, min_samples=None, shuffle=True, sample=False):
+        '''
+            Returns dataset with equal numbers of each label
+
+            @Arguments:
+                min_samples --  if not None, will return dataset with each label having <= this number datapoints
+                                if None, will return dataset with each label having a size equal to the smallest subset size
+
+                shuffle     --  if True, will return dataset with shuffled (data,label) tuples
+                                if False, will return dataset ordered by (data,label1)...(data,label2)...
+
+                sample      --  if True, will sample from overrepresented datasets after loading
+                                if False, will simply return the first-N samples from each label type
+
+            @Returns:
+                list of (data, label) tuples
+        '''
+
+        # return expected (text,sentiment) tuples
+        tuples = []
+        self.samples = {}
+
+        # process all samples
+        for text,sentiment in self.klass(self.file_path).load_data():
+
+            # calculate minimum samples in each category
+            min_current_samples = self.min_current_samples()
+            num_classes = len(self.samples)
+            if (min_samples and (min_current_samples >= min_samples) and (num_classes == self.num_classes)):
+                break
+            else:
+
+                # append to list of samples for that type
+                try:
+
+                    # append value if sampling or if more values needed
+                    if sample or len(self.samples[sentiment]) < min_samples:
+                        self.samples[sentiment].append(text)
+
+                # create list of samples for first entry
+                except KeyError as e:
+                    self.samples[sentiment] = [text]
+
+        # truncate to lowest minimum number (in case total number are less than desired min)
+        min_current_samples = self.min_current_samples()
+
+        # process each label type via either sampling or N-first
+        for sentiment in self.samples.iterkeys():
+
+            # randomly sample among all possible
+            if sample:
+
+                # generate subsample of random indices out of total available
+                indices = range(len(self.samples[sentiment]))
+                random.shuffle(indices)
+                indices_sample = random.sample(indices, min_current_samples)
+
+                # keep entries at those random indices
+                for i in indices_sample:
+                    tuples.append( (self.samples[sentiment][i],sentiment) )
+
+            # only return
+            else:
+                for text in self.samples[sentiment][:min_current_samples]:
+                    tuples.append( (text,sentiment) )
+
+        # optionally-shuffle tuples when not sampling
+        if shuffle:
+            random.shuffle(tuples)
+
+        # return results
+        return tuples
+
+
+class WordVectorBuilder:
+    '''
+        Build a word vector model from a set of input data
+    '''
+    def __init__(self, loader, data_path):
+        self.loader = loader
+        self.data_path = data_path
+
+    @staticmethod
+    def filename_components(model_path):
+        '''
+            Split the dirname, basename name, and basename extension from a file path
+        '''
+        model_path_dir, model_path_file = os.path.split(model_path)
+        model_path_filename, model_path_filext = os.path.splitext(model_path_file)
+        return (model_path_dir, model_path_filename, model_path_filext)
+
+    @staticmethod
+    def filename_train(model_path):
+        '''
+            Generate the name for a pickled set of training samples corresponding to a saved model
+        '''
+        model_path_dir, model_path_filename, model_path_filext = WordVectorBuilder.filename_components(model_path)
+        return os.path.join(model_path_dir, '{}_samples_train{}'.format(model_path_filename, model_path_filext))
+
+    @staticmethod
+    def filename_test(model_path):
+        '''
+            Generate the name for a pickled set of testing samples corresponding to a saved model
+        '''
+        model_path_dir, model_path_filename, model_path_filext = WordVectorBuilder.filename_components(model_path)
+        return os.path.join(model_path_dir, '{}_samples_test{}'.format(model_path_filename, model_path_filext))
+
+    def word2vec_save(self, model_path, size=200, window=5, min_count=5, workers=32, data_fraction_train=0.8, data_fraction_test=0.20, num_classes=2, min_samples=None):
+        '''
+            Build a word2vec model from a set of input data
+
+            @Arguments
+                model_path                                  --  full path to save word2vec model
+
+                size,window,min_count,workers               --  input parameters to gensim.Word2Vec
+
+                data_fraction_train, data_fraction_test     --  train/test split fractions
+
+                num_classes                                 --  number of classes of input data
+
+                min_samples                                 --  minimum number of samples of each label type
+
+            @Returns
+                saves word2vec model to disk
+        '''
+
+        # setup logger
+        logger = syslogger(__name__)
+
+        # get balanced set of sentences
+        logger.info('getting minimum of {} samples...'.format(min_samples))
+        data_sampler = DataSampler(self.loader, file_path=self.data_path, num_classes=num_classes)
+        samples = data_sampler.sample_balanced(min_samples)
+        samples_train, samples_dev, samples_test = split_data(samples, train=data_fraction_train, dev=0, test=data_fraction_test)
+
+        # save off datasets to avoid train-test contamination
+        logger.info('saving model training and test data...')
+        with open(self.__class__.filename_train(model_path), 'wb') as f:
+            pickle.dump(samples_train, f)
+        with open(self.__class__.filename_test(model_path), 'wb') as f:
+            pickle.dump(samples_test, f)
+
+        # load list of words for model
+        sentences = [text for text,sentiment in samples_train]
+
+        # build vocabulary and model
+        logger.info('building vocabulary...')
+        model = Word2Vec(size=size, window=window, min_count=min_count, workers=workers)
+        model.build_vocab(sentences)
+
+        # train model
+        logger.info('building word2vec model...')
+        model.train(sentences)
+
+        # save model to disk
+        logger.info('saving model to {}...'.format(model_path))
+        model.save(model_path)
+
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc: # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else: raise
+
+def tokenize(txt):
+    return wordpunct_tokenize(txt)
+
 
 def normalize(txt, vocab=None, replace_char=' ',
                 min_length=100, max_length=1014, pad_out=True, 
@@ -112,10 +321,6 @@ def index_as_one_hot(indices, axis=0, dtype=np.int32):
         encoded_indices.append(encoded_index)
     onehot_encoding = np.concatenate(encoded_indices, axis=axis)
     return onehot_encoding
-
-def to_embedded_word(txt):
-    embedder = WordVectorEmbedder('glove')
-    return embedder.embed_words_into_vectors(text)
 
 def latin_csv_reader(csv_data, dialect=csv.excel, **kwargs):
     ''' Function that takes an opened CSV file with
@@ -226,9 +431,9 @@ def split_data(data, train=.7, dev=.2, test=.1, shuffle=False):
     dev_size = int(dev * data_size)
 
     # Partition data
-    train_set = data[0:train_size]
-    dev_set = data[train_size + 1:train_size + dev_size]
-    test_set = data[train_size + dev_size + 1:data_size]
+    train_set = data[:train_size]
+    dev_set = data[train_size:train_size + dev_size]
+    test_set = data[train_size + dev_size:]
 
     return train_set, dev_set, test_set
 
@@ -290,3 +495,52 @@ def preprocess_tweet(text):
     text = re_sub(ur"([A-Z]){2,}", allcaps)
 
     return text.lower()
+
+
+# simple structure to hold results of profiled methods
+class ProfileResults():
+    def __init__(self):
+        self.results = None
+        self.timer = None
+
+# decorator to profile execution time
+def timed(func):
+    import cProfile, pstats
+    def func_wrapper(*args, **kwargs):
+        # return object
+        profile_results = ProfileResults() #{ 'results': None, 'timer': None }
+
+        # initialize profiler
+        pr = cProfile.Profile()
+        pr.enable()
+
+        # execute method
+        profile_results.results = func(*args, **kwargs)
+
+        # profile results
+        pr.disable()
+        ps = pstats.Stats(pr)
+        profile_results.timer = ps
+
+        # return object with results and timer
+        return profile_results
+
+    return func_wrapper
+
+
+def syslogger(name="logger"):
+
+    # setup stdout logger
+    log = logging.getLogger(name)
+    out_hdlr = logging.StreamHandler(sys.stdout)
+
+    # set formatting
+    out_hdlr.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
+
+    # set default level to info
+    out_hdlr.setLevel(logging.INFO)
+    log.addHandler(out_hdlr)
+    log.setLevel(logging.INFO)
+
+    # return logger
+    return log

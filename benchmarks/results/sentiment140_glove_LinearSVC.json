@@ -1,0 +1,33 @@
+{
+    "classifier": "LinearSVC",
+    "data": {
+        "negative": "80000.0",
+        "positive": "79192.0",
+        "source": "sentiment140",
+        "testsize": "159192",
+        "time_in_seconds_loading": "158.872056"
+    },
+    "embedding": {
+        "model": "glove",
+        "subset": "glove.twitter.27B.200d"
+    },
+    "data_args": {
+        "normalize": {
+            "max_length": 150,
+            "min_length": 70,
+            "reverse": false
+        }
+    },
+    "metrics": {
+        "FN": "20557",
+        "FP": "20388",
+        "TN": "59612",
+        "TP": "58635",
+        "accuracy": "0.742794864064",
+        "f1": "0.741206585975",
+        "precision": "0.7419991648",
+        "recall": "0.740415698555",
+        "time_in_seconds_testing": "0.141726",
+        "time_in_seconds_training": "795.946656"
+    }
+}

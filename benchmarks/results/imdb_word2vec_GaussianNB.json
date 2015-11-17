@@ -1,0 +1,32 @@
+{
+    "classifier": "GaussianNB",
+    "data": {
+        "negative": "4974.0",
+        "positive": "5021.0",
+        "source": "imdb",
+        "testsize": "9995",
+        "time_in_seconds_loading": "45.948796"
+    },
+    "embedding": {
+        "model": "word2vec",
+        "subset": "GoogleNews-vectors-negative300.bin"
+    },
+    "data_args": {
+        "normalize": {
+            "encoding": null,
+            "reverse": false
+        }
+    },
+    "metrics": {
+        "FN": "1884",
+        "FP": "1251",
+        "TN": "3723",
+        "TP": "3137",
+        "accuracy": "0.686343171586",
+        "f1": "0.66680837496",
+        "precision": "0.714904284412",
+        "recall": "0.624775941048",
+        "time_in_seconds_testing": "0.06587",
+        "time_in_seconds_training": "0.085035"
+    }
+}

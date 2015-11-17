@@ -1,44 +1,19 @@
 #!/usr/bin/env python
-
-import os
+import os, sys
 import re
 from itertools import izip_longest
 import random
-import codecs
 import csv
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
 import numpy as np
-#import pandas as pd
+import data_utils
+from data_utils import get_file, to_one_hot, syslogger
 
-from data_utils import get_file, to_one_hot
+# update field size
+csv.field_size_limit(sys.maxsize)
 
-
-vocabulary=ur"""abcdefghijklmnopqrstuvwxyz0123456789-,;.!?:'"/\|_@#$%^&*~`+-=<>()[]{}""" + "\n"
-
-
-def unicode_csv_reader(unicode_csv_data, dialect=csv.excel, **kwargs):
-    # csv.py doesn't do Unicode; encode temporarily as UTF-8:
-    csv_reader = csv.reader(utf_8_encoder(unicode_csv_data),
-                            dialect=dialect, **kwargs)
-    for row in csv_reader:
-        # decode UTF-8 back to Unicode, cell by cell:
-        yield [unicode(cell, 'utf-8') for cell in row]
-
-def utf_8_encoder(unicode_csv_data): 
-    while True:
-        try:
-            line = unicode_csv_data.next()
-            yield line.encode('utf-8')
-        except UnicodeDecodeError:
-            yield ""
-        except StopIteration:
-            raise StopIteration()
-        except GeneratorExit:
-            break
+# setup logging
+logger = data_utils.syslogger(__name__)
 
 class BadRecordException(Exception):
     pass
@@ -56,6 +31,23 @@ def enforce_length(txt, min_length=None, max_length=None, pad_out=False):
     if pad_out is True:
         txt = txt +  ' ' * (max_length - len(txt))
     return txt
+
+def download_data(file_path):
+
+    url_weibo = "http://weiboscope.jmsc.hku.hk/datazip/week{}.zip"
+
+    if not os.path.exists(file_path) or not check_csvs(file_path):
+        # download repository files and unzip them
+        try:
+            os.makedirs(file_path)
+        except OSError as e:
+            logger.debug(e)
+            if not os.path.isdir(file_path):
+                raise
+        for remote_path in [ url_weibo.format(a) for a in [ str(b) for b in range(1, 52) ] ]:
+            local_zip = get_file(remote_path, file_path)
+            with ZipFile(local_zip) as zf:
+                zf.extractall(file_path)
 
 def check_for_csvs(data_path):
     """Search in data_path for all the CSVs
@@ -99,19 +91,8 @@ def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_rec
         the tweet was deleted (bool)
 
     """
-
-    if not os.path.exists(file_path) or not check_for_csvs(file_path):
-        # download repository files and unzip them
-        try:
-            os.makedirs(file_path)
-        except OSError as e:
-            logger.debug(e)
-            if not os.path.isdir(file_path):
-                raise
-        for remote_path in [ "http://weiboscope.jmsc.hku.hk/datazip/week{}.zip".format(a) for a in [ str(b) for b in range(1, 52) ] ]:
-            local_zip = get_file(remote_path, file_path)
-            with ZipFile(local_zip) as zf:
-                zf.extractall(file_path)
+    
+    download_data(file_path)
 
     # get list of weekNN.csv files at file_path
     ow_files = [ os.path.join(file_path, f) for f in os.listdir(file_path) if re.match(r"week[0-9]{,2}\.csv", f) is not None ]
@@ -130,11 +111,14 @@ def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_rec
     logger.debug(data_sets)
     nr_yielded = 0
     for table_path in data_sets[which_set]:
-        with codecs.open(table_path, "r", encoding="utf-8") as f:
+
+        with open(table_path, 'rb') as f:
+            csv_reader = csv.reader(f, dialect=csv.excel)
+
             logging.debug("In file {}".format(table_path))
-            for line in unicode_csv_reader(f):
+            for line in csv_reader:
                 try:
-                    records_split = line
+                    records_split = [unicode(cell, 'utf-8') for cell in line]
                     post_id = records_split[0]
                     
                     if len(records_split) != 11:
@@ -169,26 +153,16 @@ def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_rec
                             raise StopIteration()
                 # log various exception cases from loop body
                 except TextTooShortException:
-                    logger.info("Record {} thrown out (too short)".format(post_id))
+                    logger.debug("Record {} thrown out (too short)".format(post_id))
                 except BadRecordException as e:
-                    logger.info(e)
+                    logger.debug(e)
                 except IndexError as e:
-                    logger.info(e)
-                except UnicodeEncodeError as e:
-                    logger.info(e)
+                    logger.debug(e)
+                except (UnicodeEncodeError, UnicodeDecodeError) as e:
+                    logger.debug(e)
 
                 except GeneratorExit:
                     return
-
-#def text_to_one_hot(txt, vocabulary=vocabulary):
-#    # setup the vocabulary for one-hot encoding
-#    vocab_chars = set(list(vocabulary))
-#
-#    # create the output list
-#    chars = list(txt)
-#    categorical_chars = pd.Categorical(chars, categories=vocab_chars)
-#    vectorized_chars = np.array(pd.get_dummies(categorical_chars))
-#    return vectorized_chars
 
 def romanize_tweet(txt):
     """
@@ -239,3 +213,14 @@ def romanize_tweet(txt):
     hanzi_wds = segment_hanzi(txt)
     pinyin_wds = [ hanzi_to_pinyin(word_chars) for word_chars in hanzi_wds ]
     return u' '.join(pinyin_wds)
+
+
+class OpenWeibo:
+
+    def __init__(self, file_path):
+        self.samples = 0
+        self.file_path = file_path
+        download_data(file_path)
+
+    def load_data(self):
+        return load_data(self.file_path)
