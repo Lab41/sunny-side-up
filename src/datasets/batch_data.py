@@ -25,7 +25,7 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
             record at a time, as a tuple (data, label).
             Records must be valid input for normalizer_fun;
             by default, this implies string (bytes, unicode)
-            data. Labels must be hashable.
+            data.
         
         batch_size -- how many records should the batcher 
             yield at a time?
@@ -45,15 +45,16 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
             batch yielded will be 2-D (num batches, record size).
 
         max_records -- if not None, batch only up to this number
-            of records and no more. If the number of records is less than
-            this, then fewer than max_records records may be batched
+            of records and no more. Partial batches are not yielded,
+            so the lesser of dataset size or max_records, rounded
+            to batch_size, will be the total number of records yielded
 
         balance_labels -- if true, will attempt to achieve equal numbers
             of labels. Labels must be hashable, and nlabels must be 
             provided
 
         nlabels -- number of unique labels to be expected in the dataset,
-            used if balance_labels is True
+            used only if balance_labels is True
             
     @Returns:
         generator that yields 2-tuples of (data, label), where data
