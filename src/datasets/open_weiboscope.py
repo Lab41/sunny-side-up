@@ -106,6 +106,8 @@ def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_rec
             os.makedirs(file_path)
         except OSError as e:
             logger.debug(e)
+            if not os.path.isdir(file_path):
+                raise
         for remote_path in [ "http://weiboscope.jmsc.hku.hk/datazip/week{}.zip".format(a) for a in [ str(b) for b in range(1, 52) ] ]:
             local_zip = get_file(remote_path, file_path)
             with ZipFile(local_zip) as zf:
