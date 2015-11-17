@@ -32,6 +32,99 @@ class TextIterator:
         return tokenize(text)
 
 
+class DataSampler:
+    '''
+        Data sampling class to load samples from data loader
+    '''
+    def __init__(self, klass, file_path, num_classes):
+        self.klass = klass
+        self.file_path = file_path
+        self.samples = {}
+        self.num_classes = num_classes
+
+    def min_current_samples(self):
+        '''
+            Return the lowest number of samples of all class types
+        '''
+        if len(self.samples):
+            return min([len(samples) for samples in self.samples.itervalues()])
+        else:
+            return 0
+
+    def sample_balanced(self, min_samples=None, shuffle=True, sample=False):
+        '''
+            Returns dataset with equal numbers of each label
+
+            @Arguments:
+                min_samples --  if not None, will return dataset with each label having <= this number datapoints
+                                if None, will return dataset with each label having a size equal to the smallest subset size
+
+                shuffle     --  if True, will return dataset with shuffled (data,label) tuples
+                                if False, will return dataset ordered by (data,label1)...(data,label2)...
+
+                sample      --  if True, will sample from overrepresented datasets after loading
+                                if False, will simply return the first-N samples from each label type
+
+            @Returns:
+                list of (data, label) tuples
+        '''
+
+        # return expected (text,sentiment) tuples
+        tuples = []
+        self.samples = {}
+
+        # process all samples
+        for text,sentiment in self.klass(self.file_path).load_data():
+
+            # calculate minimum samples in each category
+            min_current_samples = self.min_current_samples()
+            num_classes = len(self.samples)
+            if (min_samples and (min_current_samples >= min_samples) and (num_classes == self.num_classes)):
+                break
+            else:
+
+                # append to list of samples for that type
+                try:
+
+                    # append value if sampling or if more values needed
+                    if sample or len(self.samples[sentiment]) < min_samples:
+                        self.samples[sentiment].append(text)
+
+                # create list of samples for first entry
+                except KeyError as e:
+                    self.samples[sentiment] = [text]
+
+        # truncate to lowest minimum number (in case total number are less than desired min)
+        min_current_samples = self.min_current_samples()
+
+        # process each label type via either sampling or N-first
+        for sentiment in self.samples.iterkeys():
+
+            # randomly sample among all possible
+            if sample:
+
+                # generate subsample of random indices out of total available
+                indices = range(len(self.samples[sentiment]))
+                random.shuffle(indices)
+                indices_sample = random.sample(indices, min_current_samples)
+
+                # keep entries at those random indices
+                for i in indices_sample:
+                    tuples.append( (self.samples[sentiment][i],sentiment) )
+
+            # only return
+            else:
+                for text in self.samples[sentiment][:min_current_samples]:
+                    tuples.append( (text,sentiment) )
+
+        # optionally-shuffle tuples when not sampling
+        if shuffle:
+            random.shuffle(tuples)
+
+        # return results
+        return tuples
+
+
 
 def mkdir_p(path):
     try:
