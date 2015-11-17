@@ -15,6 +15,23 @@ class DataException(Exception):
 class TextTooShortException(DataException):
     pass
 
+class TextIterator:
+    '''
+        Iterator for text in (text,sentiment) tuples returned by a generator
+    '''
+    def __init__(self, klass, dirname):
+        self.data = klass(dirname).load_data()
+        self.counter = 0
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        text,sentiment = self.data.next()
+        self.counter += 1
+        return tokenize(text)
+
+
 
 def mkdir_p(path):
     try:
