@@ -6,16 +6,14 @@ import random
 import csv
 import logging
 import numpy as np
-from data_utils import get_file, to_one_hot
+import data_utils
+from data_utils import get_file, to_one_hot, syslogger
 
 # update field size
 csv.field_size_limit(sys.maxsize)
 
-# setup logger
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
+# setup logging
+logger = data_utils.syslogger(__name__)
 
 class BadRecordException(Exception):
     pass
@@ -203,24 +201,12 @@ def romanize_tweet(txt):
     return u' '.join(pinyin_wds)
 
 
-
 class OpenWeibo:
 
     def __init__(self, file_path):
+        self.samples = 0
         self.file_path = file_path
         download_data(file_path)
 
     def load_data(self):
         return load_data(self.file_path)
-
-    def model_word2vec_save(self, file_path, size=200, window=5, min_count=5, workers=32):
-
-        # create iterator for w2v model
-        results = [(text, sentiment) in self.load_data()]
-        sentences = iter(results)
-
-        # build model from input
-        model = Word2Vec(sentences, size=size, window=window, min_count=min_count, workers=workers)
-
-        # save model to disk
-        model.save(file_path)
