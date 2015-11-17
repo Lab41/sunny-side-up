@@ -13,7 +13,7 @@ import argparse
 import pprint
 import logging
 import json
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger=logging.getLogger(__name__)
 
 
@@ -42,9 +42,9 @@ from src.neon.neon_utils import ConfusionMatrixBinary, NeonCallbacks, NeonCallba
 from src.datasets.word_vector_embedder import WordVectorEmbedder
 
 # turn down certain verbose logging levels
-logging.getLogger("src.datasets.batch_data").setLevel(logging.INFO)
-logging.getLogger("src.datasets.neon_iterator").setLevel(logging.INFO)
-logging.getLogger("src.neon.neon_utils").setLevel(logging.INFO)
+#logging.getLogger("src.datasets.batch_data").setLevel(logging.INFO)
+#logging.getLogger("src.datasets.neon_iterator").setLevel(logging.INFO)
+#logging.getLogger("src.neon.neon_utils").setLevel(logging.INFO)
 
 def lstm_model(nvocab=67, hidden_size=20, embedding_dim=60):
     init_emb = neon.initializers.Uniform(low=-0.1/embedding_dim, high=0.1/embedding_dim)
@@ -196,12 +196,6 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
         'learning_rate'     : learning_rate,
         'momentum_coef'     : momentum_coef
     }
-    with open(metadata_path, "w") as f:
-        json.dump(run_metadata, f)
-    logger.info("Getting backend...")
-    be = gen_backend(backend='gpu', batch_size=batch_size, device_id=gpu_id, rng_seed=rng_seed)
-    logger.info("Getting data...")
-
     try:
         os.mkdir(working_dir)
     except OSError:
@@ -212,6 +206,13 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
     except OSError:
         logger.debug("Was trying to create results directory, but it may already exist",
             exc_info=True)
+    with open(metadata_path, "w") as f:
+        json.dump(run_metadata, f)
+
+    logger.info("Getting backend...")
+    be = gen_backend(backend='gpu', batch_size=batch_size, device_id=gpu_id, rng_seed=rng_seed)
+    logger.info("Getting data...")
+
 
     data_loader = dataset_loaders[dataset_name](data_path)
     logger.debug("Keyword args: {}".format(kwargs))
