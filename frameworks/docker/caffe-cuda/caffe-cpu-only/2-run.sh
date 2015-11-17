@@ -9,5 +9,5 @@ __ipython_port=$2
 # run image
 docker run -it\
         --volume=$__volume_host:$__volume_cntr \
-        -p $2:5000 \
+        -p $__ipython_port:5000 \
         $__image

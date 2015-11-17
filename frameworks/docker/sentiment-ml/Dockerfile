@@ -22,13 +22,16 @@ RUN pip install six==1.9.0
 
 # install custom glove code
 RUN cd /tmp && \
-    git clone https://github.com/danforth36phd/sunny-side-up.git && \
+    git clone https://github.com/Lab41/sunny-side-up.git && \
     cd sunny-side-up/src/glove && \
     python setup.py install
 
 # add hdf5
 RUN apt-get install --assume-yes libhdf5-dev
 RUN pip install h5py
+
+# add open weibo processing
+RUN pip install jieba pypinyin
 
 # setup data volume
 VOLUME ["/data"]

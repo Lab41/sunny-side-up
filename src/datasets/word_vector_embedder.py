@@ -1,10 +1,9 @@
 import os
-import logging
 import numpy as np
 from glove.glove import Glove
 from gensim.models import Doc2Vec
 from model_downloader import ModelDownloader
-from data_utils import DataException
+from data_utils import TextTooShortException
 
 class WordVectorEmbedder:
     '''
@@ -17,6 +16,7 @@ class WordVectorEmbedder:
             initialize a model from a saved object file
         '''
         self.model_type = model_type
+        model_args          = {}
         if self.model_type == 'word2vec':
 
             # default model
@@ -27,7 +27,11 @@ class WordVectorEmbedder:
                 model_args      = { 'binary': True }
 
             # setup importer and converter
-            self.model_import_method = Doc2Vec.load_word2vec_format
+            binary = model_args.get('binary', False)
+            if binary:
+                self.model_import_method = Doc2Vec.load_word2vec_format
+            else:
+                self.model_import_method = Doc2Vec.load
             self.word_vector = self.word_vector_word2vec
 
         elif self.model_type == 'glove':
@@ -36,13 +40,7 @@ class WordVectorEmbedder:
             if model_fullpath is None:
                 model_dir       = '/data'
                 model_group     = 'twitter-2b'
-                model_subset    = 'glove.twitter.27B.25d'
-                model_args      = {}
-            else:
-                model_dir       = os.path.dirname(model_fullpath)
-                model_group     = 'twitter-2b'
-                model_subset    = 'glove.twitter.27B.25d'
-                model_args      = {}
+                model_subset    = 'glove.twitter.27B.200d'
 
             # setup importer and converter
             self.model_import_method = Glove.load_obj
@@ -50,19 +48,34 @@ class WordVectorEmbedder:
 
         else:
             raise NameError("Error! You must specify a model type from: <word2vec|glove>")
-        
-        
+
+        # save subset for documentation
+        self.model_subset = model_subset
 
         # download and save the model (ModelDownloader will skip if exists)
-        downloader = ModelDownloader(self.model_type)
-        downloader.download_and_save(outdir=model_dir, datafile=model_subset, dataset=model_group)
+        if not model_fullpath:
+            downloader = ModelDownloader(self.model_type)
+            downloader.download_and_save(outdir=model_dir, datafile=model_subset, dataset=model_group)
 
-        # locate the model
-        model_fullpath = downloader.download_fullpath(model_dir, model_subset)
+            # locate the model
+            model_fullpath = downloader.download_fullpath(model_dir, model_subset)
 
         # load the model
         print("Loading model from {}...".format(model_fullpath))
         self.model = self.model_import_method(model_fullpath, **model_args)
+
+        # setup the word lookup
+        if self.model_type == 'word2vec':
+            self.word_set = set(self.model.index2word)
+        else:
+            self.word_set = set(self.model.dictionary)
+
+
+    def num_features(self):
+        if self.model_type == 'word2vec':
+            return self.model.vector_size
+        else:
+            return self.model.no_components
 
 
     def word_vector_glove(self, word):
@@ -84,13 +97,12 @@ class WordVectorEmbedder:
         '''
             embed words into model's vector space
         '''
-        logger = logging.getLogger(__name__)
-        logger.debug(words)
+
         # store vectors as list
         vectors = []
 
         # process tokens
-        for word in words.split():
+        for word in words:
             try:
 
                 # add vector
@@ -107,21 +119,20 @@ class WordVectorEmbedder:
             # truncate if longer
             if (len(vectors) >= num_features):
                 vectors = vectors[:num_features]
-            elif len(vectors) == 0:
-                raise DataException("No words could be embedded")
 
             # pad if necessary by appending right-sized 0 vectors
             else:
                 padding_length = num_features - len(vectors)
                 for i in xrange(padding_length):
-                    vectors.append(np.zeros_like(vectors[0]))
-
-        # convert into ndarray
-        vectors = np.array(vectors)
+                    vectors.append(np.zeros(num_features*self.num_features()))
 
         # return ndarray of embedded words
-        return vectors
+        return np.array(vectors)
 
+
+    def embed_words_into_vectors_concatenated(self, words, num_features=None):
+        vectors = self.embed_words_into_vectors(words, num_features)
+        return vectors.flatten()
 
 
     def embed_words_into_vectors_averaged(self, words):
@@ -131,29 +142,21 @@ class WordVectorEmbedder:
         # Function to average all of the word vectors in a given
         # paragraph
 
-        # setup dictionary
-        if self.model_type == 'word2vec':
-            dictionary = self.model.index2word
-            num_features = self.model.syn0.shape[1]
+        # choose model
+        if self.model_type == 'glove':
+            vector = self.model.transform_paragraph(words, ignore_missing=True, epochs=0)
+            return np.nan_to_num(vector)
         else:
-            dictionary = self.model.dictionary
-            num_features = self.model.word_vectors.shape[1]
 
-        # Pre-initialize an empty numpy array (for speed)
-        featureVec = np.zeros((num_features,),dtype="float32")
+            # process valid words
+            valid_words = [word for word in words if word in self.word_set]
+            if len(valid_words):
 
-        nwords = 0.
+                # get vectors for valid words
+                vectors = self.word_vector(valid_words)
 
-        # names of the words in model's vocabulary converted to a set for speed
-        word_set = set(dictionary)
+                # find the average/paragraph vector
+                return np.mean(vectors, axis=0)
 
-        # Loop over each word in the review and, if it is in the model's
-        # vocabulary, add its feature vector to the total
-        for word in words:
-            if word in word_set:
-                nwords = nwords + 1.
-                featureVec = np.add(featureVec, self.word_vector(word))
-
-        # Divide the result by the number of words to get the average
-        featureVec = np.divide(featureVec, nwords)
-        return featureVec
+            else:
+                raise TextTooShortException()

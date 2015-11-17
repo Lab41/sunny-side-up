@@ -1,0 +1,32 @@
+{
+    "classifier": "RandomForestClassifier",
+    "data": {
+        "negative": "5028.0",
+        "positive": "4967.0",
+        "source": "imdb",
+        "testsize": "9995",
+        "time_in_seconds_loading": "24.758371"
+    },
+    "embedding": {
+        "model": "glove",
+        "subset": "glove.twitter.27B.200d"
+    },
+    "data_args": {
+        "normalize": {
+            "encoding": null,
+            "reverse": false
+        }
+    },
+    "metrics": {
+        "FN": "1240",
+        "FP": "1369",
+        "TN": "3659",
+        "TP": "3727",
+        "accuracy": "0.738969484742",
+        "f1": "0.740733379708",
+        "precision": "0.731357927786",
+        "recall": "0.750352325347",
+        "time_in_seconds_testing": "0.147588",
+        "time_in_seconds_training": "1.441832"
+    }
+}
