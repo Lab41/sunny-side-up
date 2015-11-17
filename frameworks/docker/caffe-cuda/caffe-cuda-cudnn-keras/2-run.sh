@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # image name
-__image=lab41/caffe-cuda-cudnn
+__image=lab41/caffe-cuda-cudnn-keras
 __volume_host=$1
 __volume_cntr=/data
 __ipython_port=$2
