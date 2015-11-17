@@ -11,7 +11,8 @@ import data_utils
 
 def batch_data(data_loader, batch_size=128, normalizer_fun=None, 
                transformer_fun=None, flatten=True,
-               max_records=None, balance_labels=False):
+               max_records=None, balance_labels=False,
+               nlabels=None):
     '''
     Batches data, doing all necessary preprocessing and
     normalization.
@@ -44,22 +45,30 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
             batch yielded will be 2-D (num batches, record size).
 
         max_records -- if not None, batch only up to this number
-            of records and no more. If the number of records is less than
-            this, then fewer than max_records records may be batched
+            of records and no more. Partial batches are not yielded,
+            so the lesser of dataset size or max_records, rounded
+            to batch_size, will be the total number of records yielded
 
         balance_labels -- if true, will attempt to achieve equal numbers
-            of positive and negative labels. Labels must be zero-based and 
-            may not work for datasets
-            with more than two labels
+            of labels. Labels must be hashable, and nlabels must be 
+            provided
 
+        nlabels -- number of unique labels to be expected in the dataset,
+            used only if balance_labels is True
+            
     @Returns:
         generator that yields 2-tuples of (data, label), where data
         and label are numpy arrays representing a batch of data,  
         equally sized in the first dimension
     '''
 
-    nlabels = 2
-    docs = [ [] for a in range(nlabels) ]
+    # for the balanced_labels case: store a hash of docs indexed by label
+    docs = {}
+    if balance_labels:
+        assert nlabels is not None
+        assert batch_size % nlabels == 0
+    # for the unbalanced labels case: store tuples of doc, label
+    docs_labels = []
 
     logger = logging.getLogger(__name__)
     logger.debug(data_loader)
@@ -76,7 +85,7 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
     # and yielding them when batch size is reached
     nr_yielded = 0
     for doc_text, label in data_loader:
-        if max_records and nr_yielded > max_records:
+        if max_records is not None and nr_yielded > max_records:
             return
         # transformation and normalization
         try:
@@ -84,45 +93,63 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
             doc_text = normalizer_fun(doc_text)
             # transform document into a numpy array
             transformed_doc = transformer_fun(doc_text)
-            docs[label].append(transformed_doc)
+            # add to the appropriate queue of labeled docs
+            if balance_labels:
+                try:
+                    docs[label].append(transformed_doc)
+                except KeyError as e:
+                    docs[label] = [transformed_doc]
+            else:
+                docs_labels.append((transformed_doc, label))
         except data_utils.DataException as e:
+            # text is rejected for being too short, or its rating is not usable, etc
             logger.debug("Type of input: {}".format(type(doc_text)))
             logger.debug("{}: {}".format(type(e), e))
 
         # dispatch once batch is of appropriate size 
         if all(len(doc_subset) >= batch_size/nlabels for doc_subset in docs) or \
-                (balance_labels == False and sum(len(doc_subset) for doc_subset in docs) >= batch_size):
+                (balance_labels == False and len(docs_labels) >= batch_size):
             # proceed in turn through documents of each label
             # popping off until batch_size is reached
             batched_docs = []
-            labels = []
-            cur_label = 0
+            batched_labels = []
+            cur_label_idx = 0
+            if balance_labels:
+                sorted_unique_labels = sorted(docs.keys())
             logger.debug("Accumulated records: {}".format([len(a) for a in docs]))
+            # main accumulation loop
             while(len(batched_docs) < batch_size):
                 try:
-                    batched_docs.append(docs[cur_label].pop(0))
-                    labels.append(cur_label)
+                    if balance_labels:
+                        # find which label to pop a document off for
+                        next_label = sorted_unique_labels[cur_label_idx]
+                        next_doc = docs[cur_label].pop(0)
+                    else:
+                        next_doc, next_label = docs_labels.pop(0)
+                    batched_docs.append(next_doc)
+                    batched_labels.append(next_label)
                     logger.debug("Label: {}, Length: {}".format(cur_label, len(batched_docs)))
                 except IndexError as e:
+                    # catch only when one of the lists in docs is empty
                     if e.message != 'pop from empty list':
                         raise
                 finally:
-                    cur_label += 1
-                    if cur_label == nlabels:
-                        cur_label = 0
+                    # increment label index and wrap around if necessary
+                    # only needed if balance_labels is True, but harmless if not
+                    cur_label_idx += 1
+                    if cur_label_idx == nlabels:
+                        cur_label_idx = 0
             docs_np = np.array(batched_docs)
             if flatten==True:
                 # transform to form (batch_size, w*h); flattening doc
                 docs_np = docs_np.reshape((batch_size,-1))
             # labels come out in a separate (batch_size, 1) np array
-            labels_np = np.array(labels).reshape((batch_size, -1))
+            labels_np = np.array(batched_labels).reshape((batch_size, -1))
             nr_yielded += batch_size
 
             yield docs_np, labels_np
 
 
-# Not fully tested -- still recommended to use
-# batch_data
 class BatchIterator:
     """Iterator class to wrap around batching functionality.
     Allows batched data to be iterated over multiple times.
@@ -138,8 +165,11 @@ class BatchIterator:
     def __iter__(self):
         return batch_data(*self.reset_args, **self.reset_kwargs)
 
-# not fully tested -- still recommended to use 
-# xyz.load_data
+    def next(self):
+       batch_iterator = iter(self)
+       for batch in batch_iterator:
+           yield batch
+
 class DataIterator:
     """Utility class to wrap a data loading generator function,
     providing a reusable data container if needed.
@@ -158,6 +188,11 @@ class DataIterator:
 
     def __iter__(self):
         return self.load_fun(*self.reset_args, **self.reset_kwargs)
+
+    def next(self):
+        data_iterator = iter(self)
+        for datum in data_iterator:
+            yield datum
 
 
 class H5Iterator:
