@@ -36,7 +36,7 @@ def download_data(file_path):
 
     url_weibo = "http://weiboscope.jmsc.hku.hk/datazip/week{}.zip"
 
-    if not os.path.exists(file_path) or not check_csvs(file_path):
+    if not os.path.exists(file_path) or not check_for_csvs(file_path):
         # download repository files and unzip them
         try:
             os.makedirs(file_path)
