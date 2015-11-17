@@ -107,8 +107,10 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
             logger.debug("{}: {}".format(type(e), e))
 
         # dispatch once batch is of appropriate size 
-        if all(len(doc_subset) >= batch_size/nlabels for doc_subset in docs) or \
-                (balance_labels == False and len(docs_labels) >= batch_size):
+        if (balance_labels and 
+                all(len(docs[doc_subset]) >= batch_size/nlabels for doc_subset in docs) and
+                len(docs) == nlabels) or \
+            (balance_labels == False and len(docs_labels) >= batch_size):
             # proceed in turn through documents of each label
             # popping off until batch_size is reached
             batched_docs = []
@@ -116,19 +118,19 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
             cur_label_idx = 0
             if balance_labels:
                 sorted_unique_labels = sorted(docs.keys())
-            logger.debug("Accumulated records: {}".format([len(a) for a in docs]))
+                logger.debug("Accumulated records: {}".format({a: len(docs[a]) for a in docs}))
             # main accumulation loop
             while(len(batched_docs) < batch_size):
                 try:
                     if balance_labels:
                         # find which label to pop a document off for
                         next_label = sorted_unique_labels[cur_label_idx]
-                        next_doc = docs[cur_label].pop(0)
+                        next_doc = docs[cur_label_idx].pop(0)
                     else:
                         next_doc, next_label = docs_labels.pop(0)
                     batched_docs.append(next_doc)
                     batched_labels.append(next_label)
-                    logger.debug("Label: {}, Length: {}".format(cur_label, len(batched_docs)))
+                    logger.debug("Label: {}, Length: {}".format(next_label, len(batched_docs)))
                 except IndexError as e:
                     # catch only when one of the lists in docs is empty
                     if e.message != 'pop from empty list':
