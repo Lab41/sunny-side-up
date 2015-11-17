@@ -32,6 +32,23 @@ def enforce_length(txt, min_length=None, max_length=None, pad_out=False):
         txt = txt +  ' ' * (max_length - len(txt))
     return txt
 
+def download_data(file_path):
+
+    url_weibo = "http://weiboscope.jmsc.hku.hk/datazip/week{}.zip"
+
+    if not os.path.exists(file_path) or not check_csvs(file_path):
+        # download repository files and unzip them
+        try:
+            os.makedirs(file_path)
+        except OSError as e:
+            logger.debug(e)
+            if not os.path.isdir(file_path):
+                raise
+        for remote_path in [ url_weibo.format(a) for a in [ str(b) for b in range(1, 52) ] ]:
+            local_zip = get_file(remote_path, file_path)
+            with ZipFile(local_zip) as zf:
+                zf.extractall(file_path)
+
 def check_for_csvs(data_path):
     """Search in data_path for all the CSVs
     from the Open Weiboscope data. If any 
@@ -74,19 +91,8 @@ def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_rec
         the tweet was deleted (bool)
 
     """
-
-    if not os.path.exists(file_path) or not check_for_csvs(file_path):
-        # download repository files and unzip them
-        try:
-            os.makedirs(file_path)
-        except OSError as e:
-            logger.debug(e)
-            if not os.path.isdir(file_path):
-                raise
-        for remote_path in [ "http://weiboscope.jmsc.hku.hk/datazip/week{}.zip".format(a) for a in [ str(b) for b in range(1, 52) ] ]:
-            local_zip = get_file(remote_path, file_path)
-            with ZipFile(local_zip) as zf:
-                zf.extractall(file_path)
+    
+    download_data(file_path)
 
     # get list of weekNN.csv files at file_path
     ow_files = [ os.path.join(file_path, f) for f in os.listdir(file_path) if re.match(r"week[0-9]{,2}\.csv", f) is not None ]
@@ -157,16 +163,6 @@ def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_rec
 
                 except GeneratorExit:
                     return
-
-#def text_to_one_hot(txt, vocabulary=vocabulary):
-#    # setup the vocabulary for one-hot encoding
-#    vocab_chars = set(list(vocabulary))
-#
-#    # create the output list
-#    chars = list(txt)
-#    categorical_chars = pd.Categorical(chars, categories=vocab_chars)
-#    vectorized_chars = np.array(pd.get_dummies(categorical_chars))
-#    return vectorized_chars
 
 def romanize_tweet(txt):
     """
