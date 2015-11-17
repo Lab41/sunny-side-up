@@ -3,6 +3,7 @@ import json
 import numpy as np
 import random
 from collections import defaultdict, Counter
+import cPickle as pickle
 
 import cProfile, pstats
 import threading
@@ -17,7 +18,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
 from src.datasets import data_utils
-from src.datasets.data_utils import timed, TextTooShortException
+from src.datasets.data_utils import timed, TextTooShortException, DataSampler, WordVectorBuilder
 from src.datasets.imdb import IMDB
 from src.datasets.sentiment140 import Sentiment140
 from src.datasets.amazon_reviews import AmazonReviews
@@ -142,6 +143,7 @@ datasets =  {
 
 
 
+
 # word embeddings
 def embedders():
     return ['glove','word2vec']
@@ -237,12 +239,8 @@ def timed_dataload(data, args, values, labels):
 
 
 
-
 # test all vector models
 for embedder_model in embedders():
-
-    # initialize vector embedder
-    embedder = WordVectorEmbedder(embedder_model)
 
     # iterate all datasources
     for data_source, data_params in datasets.iteritems():
@@ -257,8 +255,23 @@ for embedder_model in embedders():
         values = []
         labels = []
 
+        # initialize vector embedder
+        prebuilt_model_path = data_args.get('models', {}).get(embedder_model, {}).get('prebuilt_model_path', None)
+        embedder = WordVectorEmbedder(embedder_model, prebuilt_model_path)
+
+        # load pre-sampled data from disk
+        if prebuilt_model_path:
+            with open(WordVectorBuilder.filename_train(prebuilt_model_path), 'rb') as f:
+                data = pickle.load(f)
+        else:
+
+            # get equal-sized subsets of each class
+            min_samples = data_args['min_samples'] if data_args.has_key('min_samples') else None
+            data_sampler = DataSampler(klass, file_path=data_params['path'], num_classes=2)
+            data = data_sampler.sample_balanced(min_samples)
+
         # load dataset
-        logger.info("loading dataset {}...".format(data_params['path']))
+        logger.info("processing {} samples from {}...".format(len(data), data_params['path']))
         profile_results = timed_dataload(data, data_args, values, labels)
 
         # store loading time
