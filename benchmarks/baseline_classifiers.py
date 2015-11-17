@@ -93,16 +93,15 @@ except NameError:
 
 # data inputs
 datasets =  {
-                'amazon':       {
-                                    'class':    AmazonReviews,
-                                    'path':     os.path.join(dir_data, 'amazonreviews.gz'),
+                'sentiment140': {
+                                    'class':    Sentiment140,
+                                    'path':     os.path.join(dir_data, 'sentiment140.csv'),
                                     'args':     { 'embed':      {   'type': 'averaged' },
-                                                  'normalize':  {   'encoding': None,
-                                                                    'reverse': False,
-                                                                    'min_length': 0,
-                                                                    'max_length': 9999999
+                                                  'normalize':  {   'min_length': 70,
+                                                                    'max_length': 150,
+                                                                    'reverse': False
                                                                 },
-                                                  'shuffle_after_load': True
+                                                  'shuffle_after_load': False
                                                 }
                                 },
                 'imdb':         {
@@ -115,22 +114,28 @@ datasets =  {
                                                   'shuffle_after_load': False
                                                 }
                                 },
-                'sentiment140': {
-                                    'class':    Sentiment140,
-                                    'path':     os.path.join(dir_data, 'sentiment140.csv'),
+                'amazon':       {
+                                    'class':    AmazonReviews,
+                                    'path':     os.path.join(dir_data, 'amazonreviews.gz'),
                                     'args':     { 'embed':      {   'type': 'averaged' },
-                                                  'normalize':  {   'min_length': 70,
-                                                                    'max_length': 150,
-                                                                    'reverse': False
+                                                  'normalize':  {   'encoding': None,
+                                                                    'reverse': False,
+                                                                    'min_length': 0,
+                                                                    'max_length': 9999999
                                                                 },
-                                                  'shuffle_after_load': False
+                                                  'shuffle_after_load': True
                                                 }
                                 },
                 'openweibo':    {
                                     'class':    OpenWeibo,
                                     'path':     os.path.join(dir_data, 'openweibo'),
                                     'args':     { 'embed':      {   'type': 'averaged' },
-                                                  'shuffle_after_load': True
+                                                  'shuffle_after_load': True,
+                                                  'models': {
+                                                        'word2vec': {
+                                                            'prebuilt_model_path': '/data/openweibo.bin'
+                                                        }
+                                                  }
                                                 }
                                 }
             }
