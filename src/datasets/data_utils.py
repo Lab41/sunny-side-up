@@ -345,9 +345,9 @@ def split_data(data, train=.7, dev=.2, test=.1, shuffle=False):
     dev_size = int(dev * data_size)
 
     # Partition data
-    train_set = data[0:train_size]
-    dev_set = data[train_size + 1:train_size + dev_size]
-    test_set = data[train_size + dev_size + 1:data_size]
+    train_set = data[:train_size]
+    dev_set = data[train_size:train_size + dev_size]
+    test_set = data[train_size + dev_size:]
 
     return train_set, dev_set, test_set
 
