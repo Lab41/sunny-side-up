@@ -16,6 +16,7 @@ class WordVectorEmbedder:
             initialize a model from a saved object file
         '''
         self.model_type = model_type
+        model_args          = {}
         if self.model_type == 'word2vec':
 
             # default model
@@ -26,7 +27,11 @@ class WordVectorEmbedder:
                 model_args      = { 'binary': True }
 
             # setup importer and converter
-            self.model_import_method = Doc2Vec.load_word2vec_format
+            binary = model_args.get('binary', False)
+            if binary:
+                self.model_import_method = Doc2Vec.load_word2vec_format
+            else:
+                self.model_import_method = Doc2Vec.load
             self.word_vector = self.word_vector_word2vec
 
         elif self.model_type == 'glove':
@@ -36,7 +41,6 @@ class WordVectorEmbedder:
                 model_dir       = '/data'
                 model_group     = 'twitter-2b'
                 model_subset    = 'glove.twitter.27B.200d'
-                model_args      = {}
 
             # setup importer and converter
             self.model_import_method = Glove.load_obj
@@ -49,11 +53,12 @@ class WordVectorEmbedder:
         self.model_subset = model_subset
 
         # download and save the model (ModelDownloader will skip if exists)
-        downloader = ModelDownloader(self.model_type)
-        downloader.download_and_save(outdir=model_dir, datafile=model_subset, dataset=model_group)
+        if not model_fullpath:
+            downloader = ModelDownloader(self.model_type)
+            downloader.download_and_save(outdir=model_dir, datafile=model_subset, dataset=model_group)
 
-        # locate the model
-        model_fullpath = downloader.download_fullpath(model_dir, model_subset)
+            # locate the model
+            model_fullpath = downloader.download_fullpath(model_dir, model_subset)
 
         # load the model
         print("Loading model from {}...".format(model_fullpath))
