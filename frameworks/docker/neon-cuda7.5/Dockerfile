@@ -1,4 +1,4 @@
-# build from ubuntu
+# build from ubuntu 14.04, matching host
 FROM ubuntu:14.04
 MAINTAINER Kyle F <kylef@lab41.org>
 
@@ -81,12 +81,11 @@ ENV IPYTHONDIR /ipython
 RUN mkdir /ipython && \
     ipython profile create nbserver
 
-# install/configure CUDA
-# Uses .run file; .deb files install CUDA 7.5 for some reason
+# install/configure CUDA 7.5 (for driver version 352.39)
 # Change to the /tmp directory
 RUN cd /tmp && \
 # Download run file
-  wget -nv http://developer.download.nvidia.com/compute/cuda/7_0/Prod/local_installers/cuda_7.0.28_linux.run && \
+  wget -nv http://developer.download.nvidia.com/compute/cuda/7.5/Prod/local_installers/cuda_7.5.18_linux.run && \ 
 # Make the run file executable and extract
   chmod +x cuda_*_linux.run && ./cuda_*_linux.run -extract=`pwd` && \
 # Install CUDA drivers (silent, no kernel)
@@ -106,7 +105,6 @@ RUN echo "/usr/local/cuda/lib64" > /etc/ld.so.conf.d/cuda.conf && \
 RUN pip install virtualenv
 RUN cd /opt/ && \
     wget -nv https://github.com/NervanaSystems/neon/archive/v1.0.0.tar.gz
-# untar to a standard location
 RUN cd /opt && tar -xzvf v1.0.0.tar.gz && \
     mv neon-1.0.0 neon
 RUN cd /opt/neon && \
@@ -117,10 +115,10 @@ RUN cd /opt/neon && \
 # make some updates
 RUN pip install -U six
 
-# add gensim 
+# add gensim
 RUN pip install gensim
 
-# add python
+# add glove-python
 #RUN cd /tmp && \
 #    git clone https://github.com/maciejkula/glove-python.git && \
 #    cd glove-python && \
