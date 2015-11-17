@@ -5,6 +5,8 @@ from urllib2 import urlopen, HTTPError, URLError
 from nltk.tokenize import wordpunct_tokenize
 import numpy as np
 import logging
+import cPickle as pickle
+from gensim.models import Doc2Vec, Word2Vec
 logging.basicConfig()
 logger=logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -124,6 +126,90 @@ class DataSampler:
         # return results
         return tuples
 
+
+class WordVectorBuilder:
+    '''
+        Build a word vector model from a set of input data
+    '''
+    def __init__(self, loader, data_path):
+        self.loader = loader
+        self.data_path = data_path
+
+    @staticmethod
+    def filename_components(model_path):
+        '''
+            Split the dirname, basename name, and basename extension from a file path
+        '''
+        model_path_dir, model_path_file = os.path.split(model_path)
+        model_path_filename, model_path_filext = os.path.splitext(model_path_file)
+        return (model_path_dir, model_path_filename, model_path_filext)
+
+    @staticmethod
+    def filename_train(model_path):
+        '''
+            Generate the name for a pickled set of training samples corresponding to a saved model
+        '''
+        model_path_dir, model_path_filename, model_path_filext = WordVectorBuilder.filename_components(model_path)
+        return os.path.join(model_path_dir, '{}_samples_train{}'.format(model_path_filename, model_path_filext))
+
+    @staticmethod
+    def filename_test(model_path):
+        '''
+            Generate the name for a pickled set of testing samples corresponding to a saved model
+        '''
+        model_path_dir, model_path_filename, model_path_filext = WordVectorBuilder.filename_components(model_path)
+        return os.path.join(model_path_dir, '{}_samples_test{}'.format(model_path_filename, model_path_filext))
+
+    def word2vec_save(self, model_path, size=200, window=5, min_count=5, workers=32, data_fraction_train=0.8, data_fraction_test=0.20, num_classes=2, min_samples=None):
+        '''
+            Build a word2vec model from a set of input data
+
+            @Arguments
+                model_path                                  --  full path to save word2vec model
+
+                size,window,min_count,workers               --  input parameters to gensim.Word2Vec
+
+                data_fraction_train, data_fraction_test     --  train/test split fractions
+
+                num_classes                                 --  number of classes of input data
+
+                min_samples                                 --  minimum number of samples of each label type
+
+            @Returns
+                saves word2vec model to disk
+        '''
+
+        # setup logger
+        logger = syslogger(__name__)
+
+        # get balanced set of sentences
+        logger.info('getting minimum of {} samples...'.format(min_samples))
+        data_sampler = DataSampler(self.loader, file_path=self.data_path, num_classes=num_classes)
+        samples = data_sampler.sample_balanced(min_samples)
+        samples_train, samples_dev, samples_test = split_data(samples, train=data_fraction_train, dev=0, test=data_fraction_test)
+
+        # save off datasets to avoid train-test contamination
+        logger.info('saving model training and test data...')
+        with open(self.__class__.filename_train(model_path), 'wb') as f:
+            pickle.dump(samples_train, f)
+        with open(self.__class__.filename_test(model_path), 'wb') as f:
+            pickle.dump(samples_test, f)
+
+        # load list of words for model
+        sentences = [text for text,sentiment in samples_train]
+
+        # build vocabulary and model
+        logger.info('building vocabulary...')
+        model = Word2Vec(size=size, window=window, min_count=min_count, workers=workers)
+        model.build_vocab(sentences)
+
+        # train model
+        logger.info('building word2vec model...')
+        model.train(sentences)
+
+        # save model to disk
+        logger.info('saving model to {}...'.format(model_path))
+        model.save(model_path)
 
 
 def mkdir_p(path):
