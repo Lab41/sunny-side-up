@@ -4,9 +4,7 @@ import os
 import tarfile
 import random
 import logging
-logging.basicConfig()
 logger=logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 from data_utils import get_file
 
 pos_label = 1

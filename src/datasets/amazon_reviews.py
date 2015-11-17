@@ -3,9 +3,7 @@ import gzip
 import json
 import logging
 import h5py
-logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
 from data_utils import get_file
 
 

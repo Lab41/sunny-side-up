@@ -7,15 +7,13 @@ import random
 import codecs
 import csv
 import logging
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 import numpy as np
 #import pandas as pd
 
 from data_utils import get_file, to_one_hot
-
+from zipfile import ZipFile
 
 vocabulary=ur"""abcdefghijklmnopqrstuvwxyz0123456789-,;.!?:'"/\|_@#$%^&*~`+-=<>()[]{}""" + "\n"
 
