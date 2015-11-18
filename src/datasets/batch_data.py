@@ -159,40 +159,74 @@ class BatchIterator:
     """Iterator class to wrap around batching functionality.
     Allows batched data to be iterated over multiple times.
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, data, auto_reset=False, *args, **kwargs):
         """
+        Arguments:
+            auto_reset -- should the generator underlying iteration be
+                reset every time __iter__ is called? This
+                allows BatchIterator to be used in loops multiple
+                times, but will necessarily change the behavior of next(),
+                e.g. causing it to stop throwing StopIteration when 
+                the generator is refreshed
+
         Args and kwargs should be arguments to batch_data.
         data_loader should be an iterator (i.e., able to be reused)
         """
-        self.reset_args = args
+        #self.reset_args = args
         self.reset_kwargs = kwargs
-        self.batch_iterator = iter(self)
+        self.auto_reset = auto_reset
+        self.data_iterable = data
+        self.batch_generator = self.get_batch_generator()
 
     def __iter__(self):
-        return batch_data(*self.reset_args, **self.reset_kwargs)
+        if self.auto_reset:
+            self.batch_generator = self.get_batch_generator()
+        return self
+
+    def get_batch_generator(self):
+        logger=logging.getLogger(__name__)
+        #logger.debug(self.reset_args)
+        logger.debug(self.reset_kwargs)
+        #return batch_data(self.data_iterable, *self.reset_args, **self.reset_kwargs)
+        return batch_data(self.data_iterable, **self.reset_kwargs)
 
     def next(self):
-       return self.batch_iterator.next()
+       return self.batch_generator.next()
 
 class DataIterator:
     """Utility class to wrap a data loading generator function,
     providing a reusable data container if needed.
     """
-    def __init__(self, load_fun, *args, **kwargs):
+    def __init__(self, load_fun, auto_reset=False, *args, **kwargs):
         """
         @Arguments:
             load_fun -- function object which returns
-            a generator over tuples of individual records (data, label)
+                a generator over tuples of individual records (data, label)
 
-            args, kwargs are passed on to load_fun on every fresh iteration
+            auto_reset -- should the generator underlying iteration be
+                reset every time __iter__ is called? This
+                allows DataIterator to be used in loops multiple
+                times, but will necessarily change the behavior of next(),
+                e.g. causing it to stop throwing StopIteration when 
+                the generator is refreshed
+
+            args, kwargs are passed on to load_fun every time get_data_generator
+            is called
         """
         self.load_fun = load_fun
-        self.reset_args = args
+        #self.reset_args = args
         self.reset_kwargs = kwargs
-        self.data_iterator = iter(self)
+        self.auto_reset = auto_reset
+        self.data_iterator = self.get_data_generator()
 
     def __iter__(self):
-        return self.load_fun(*self.reset_args, **self.reset_kwargs)
+        if self.auto_reset:
+            self.data_iterator = self.get_data_generator()
+        return self
+
+    def get_data_generator(self):
+        #return self.load_fun(*self.reset_args, **self.reset_kwargs)
+        return self.load_fun(**self.reset_kwargs)
 
     def next(self):
         return self.data_iterator.next()
@@ -443,7 +477,7 @@ def split_and_batch(data_loader,
 if __name__=="__main__":
     # some demo code
     logging.basicConfig()
-    logging.getLogger(__name__).setLevel(logging.INFO)
+    logging.getLogger(__name__).setLevel(logging.DEBUG)
     import amazon_reviews
     import data_utils
     import argparse
@@ -463,7 +497,7 @@ if __name__=="__main__":
     if args.batch_hdf5_demo:  
         print args.batch_hdf5_demo
         # get training and testing sets, and their sizes for amazon
-        (amtr, amte), (amntr, amnte) = datasets, sizes = split_data(
+        (amz_train, amz_test), (train_size, test_size) = split_data(
             None, 
             h5_path=args.batch_hdf5_demo, 
             overwrite_previous=False,
@@ -471,7 +505,7 @@ if __name__=="__main__":
         import sys
 
         # get a record
-        next_text, next_label = next(iter(amtr))
+        next_text, next_label = next(iter(amz_train))
 
         try:
             print "Next record shape: {}".format(next_text.shape)
@@ -480,17 +514,17 @@ if __name__=="__main__":
 
 
         # batch training, testing sets
-        am_train_batch = batch_data(amtr,
+        amz_train_batch = batch_data(amz_train,
             normalizer_fun=lambda x: data_utils.normalize(x, 
                 max_length=300, 
                 truncate_left=True,
                 encoding=None),
             transformer_fun=None)
-        am_test_batch = batch_data(amte,
+        amz_test_batch = batch_data(amz_test,
             normalizer_fun=None,transformer_fun=None)
 
         # Spit out some sample data
-        next_batch = am_train_batch.next()
+        next_batch = amz_train_batch.next()
         data, label = next_batch
         np.set_printoptions(threshold=np.nan)
         print "Batch properties:"
@@ -510,8 +544,8 @@ if __name__=="__main__":
         print ''.join(data_utils.from_one_hot(oh))
 
         # demo balanced batching
-        am_balanced_batcher = batch_data(amtr,balance_labels=True)
-        balanced_batch = am_balanced_batcher.next()
+        amz_balanced_batcher = batch_data(amz_train,balance_labels=True)
+        balanced_batch = amz_balanced_batcher.next()
         print 'Balanced batch:'
         balanced_label_counts = {}
         for idx in range(balanced_batch[1].shape[0]):
@@ -523,7 +557,7 @@ if __name__=="__main__":
     # iterate multiple times over same data 
     if args.iterator_demo:
         # Demo dataIterator class
-        amz_iterator = DataIterator(amazon_reviews.load_data, args.iterator_demo)
+        amz_iterator = DataIterator(amazon_reviews.load_data, file_path=args.iterator_demo, auto_reset=True)
         print "First run:"
         for i, (data, label) in enumerate(amz_iterator):
             print "{}: {}...".format(i, data[:50])
@@ -535,12 +569,13 @@ if __name__=="__main__":
             if i >= 3: break
         # Demo batch iterator utility class
         amz_batches = BatchIterator(
-            DataIterator(amazon_reviews.load_data, args.iterator_demo),
+            DataIterator(amazon_reviews.load_data, file_path=args.iterator_demo),
             batch_size=5, normalizer_fun=data_utils.normalize, 
             transformer_fun=lambda x: data_utils.to_one_hot(x), flatten=True)
         for i, (batch_features, batch_labell) in enumerate(amz_batches):
             print "Batch {}".format(i)
             print batch_features.shape
+            print 'First record:'
             print ''.join(data_utils.from_one_hot(batch_features[0].reshape(67, -1)))[::-1][:50], "..."
             if i >= 3: break
 
