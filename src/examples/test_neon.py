@@ -16,8 +16,6 @@ import json
 logging.basicConfig(level=logging.INFO)
 logger=logging.getLogger(__name__)
 
-
-
 import numpy as np
 
 
@@ -34,6 +32,7 @@ from neon.backends import gen_backend
 import src.datasets.imdb as imdb
 import src.datasets.amazon_reviews as amazon
 import src.datasets.sentiment140 as sentiment140
+import src.datasets.open_weiboscope as open_weiboscope
 import src.datasets.data_utils as data_utils
 from src.datasets.batch_data import batch_data, split_data, split_and_batch
 from src.datasets.data_utils import from_one_hot
@@ -169,11 +168,13 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
         save_freq=2,
         crepe_variant=None,
         warm_start_path=None,
-        batch_limit=None,
+        max_records=None,
+        balance_labels=False,
         **kwargs):
-    dataset_loaders = { 'amazon'    : amazon.load_data,
-                        'imdb'      : imdb.load_data,
-                        'sentiment140'  : sentiment140.load_data }
+    dataset_loaders = { 'amazon'            : amazon.load_data,
+                        'imdb'              : imdb.load_data,
+                        'sentiment140'      : sentiment140.load_data,
+                        'open_weiboscope'   : open_weiboscope.load_data }
     if sequence_length==None:
         sequence_length = max_length
 
@@ -223,7 +224,9 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
         hdf5_path,
         rng_seed=rng_seed,
         normalizer_fun=normalizer_fun,
-        transformer_fun=transformer_fun)
+        transformer_fun=transformer_fun,
+        balance_labels=balance_labels,
+        max_records=max_records)
     train_batch_beta = test_get()
     logger.debug("First record shape: {}".format(train_batch_beta.next()[0].shape))
 
@@ -231,8 +234,7 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
                                   doclength=sequence_length, 
                                   nvocab=vocab_size,
                                   nlabels=2,
-                                  labels_onehot=True,
-                                  batch_limit=batch_limit)
+                                  labels_onehot=True)
     test_iter = DiskDataIterator(test_get, ndata=test_size, 
                                   doclength=sequence_length, 
                                   nvocab=vocab_size,
@@ -280,17 +282,21 @@ def main():
         'sentiment140': {
             'data_filename' : "sentiment140.csv",
             'hdf5_name'     : "sentiment140_split.hd5" 
-            }
+            },
+        'open_weiboscope': {
+            'data_filename' : "",
+            'hdf5_name'     : "open_weiboscope.hd5"
+            },
         }
 
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("dataset", help="Name of dataset (one of amazon, imdb, sentiment140)")
+    arg_parser.add_argument("dataset", help="Name of dataset (one of amazon, imdb, sentiment140, open_weiboscope)")
     arg_parser.add_argument("--working_dir", "-w", default=".",
-	    help="Directory where data should be put, default PWD")
+	    help="Directory where data and results should be put, default PWD.")
     arg_parser.add_argument("--glove", action="store_true")
 
     arg_parser.add_argument("--results_dir", "-r", default=None, help="custom subfolder to store results and weights in (defaults to dataset)")
-    arg_parser.add_argument("--data_path", "-d", default=None, help="custom path to original data")
+    arg_parser.add_argument("--data_path", "-d", default=None, help="custom path to original data, partially overrides working_dir")
     arg_parser.add_argument("--hdf5_path", "-5", default=None, help="custom path to split data in HDF5")
     arg_parser.add_argument("--weights_path", default=None, help="path to weights to initialize model with")
     arg_parser.add_argument("--gpu_id", "-g", default=0, type=int, help="GPU device ID (integer)")
@@ -298,8 +304,10 @@ def main():
     arg_parser.add_argument("--momentum_coef", default=0.9, type=float, help="Momentum coefficient, default 0.9")
     arg_parser.add_argument("--batch_size", default=128, type=int, help="Batch size")
     arg_parser.add_argument("--nframes", default=256, type=int, help="Frame buffer size for CREPE. 256 or 1024.")
+    arg_parser.add_argument("--log_level", default=logging.INFO, type=int)
 
     args = arg_parser.parse_args()
+    logging.getLogger().setLevel(args.log_level)
     dataset_name = args.dataset
     args.working_dir = os.path.abspath(args.working_dir)
     if not args.results_dir:
@@ -310,22 +318,27 @@ def main():
     if not args.hdf5_path:
         args.hdf5_path = os.path.join(args.working_dir, model_defaults[dataset_name]['hdf5_name'])
 
-    model_args = { 'sentiment140' : {
+    model_args = { 
+        'sentiment140' : {
             'max_length'    : 150,
             'min_length'    : 70,
             'normalizer_fun': lambda x: data_utils.normalize(x, min_length=70, max_length=150),
             'transformer_fun': data_utils.to_one_hot,
             'variant'       : 'tweet_character',
             },
-            'imdb'      : {},
-            'amazon'    : {}
+        'imdb'      : {},
+        'amazon'    : {},
+        'open_weiboscope' : {
+            'balance_labels'    : True,
+            'max_records'       : 2e6,
+            },
         }
     model_args[dataset_name]['nframes']=args.nframes
     if args.glove:
         glove_embedder = WordVectorEmbedder("glove", os.path.join(args.working_dir, "glove.twitter.27B.zip"))
         model_args[dataset_name]['normalizer_fun'] = lambda x: x.encode('ascii', 'ignore').lower()
         model_args[dataset_name]['transformer_fun'] = lambda x: glove_embedder.embed_words_into_vectors(x, 50)
-        model_args[dataset_name]['vocab_size'] = 25
+        model_args[dataset_name]['vocab_size'] = 200
         model_args[dataset_name]['sequence_length'] = 50
         model_args[dataset_name]['crepe_variant'] = 'embedding'
 
@@ -345,5 +358,3 @@ def main():
              **model_args[dataset_name])
 if __name__=="__main__":
     main()
-
-
