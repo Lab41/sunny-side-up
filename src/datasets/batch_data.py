@@ -85,8 +85,6 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
     # and yielding them when batch size is reached
     nr_yielded = 0
     for doc_text, label in data_loader:
-        if max_records is not None and nr_yielded > max_records:
-            return
         # transformation and normalization
         try:
             #logger.debug("Normalization........")
@@ -121,6 +119,8 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
                 logger.debug("Accumulated records: {}".format({a: len(docs[a]) for a in docs}))
             # main accumulation loop
             while(len(batched_docs) < batch_size):
+                if max_records is not None and nr_yielded + batch_size > max_records:
+                    return
                 try:
                     if balance_labels:
                         # find which label to pop a document off for
@@ -149,6 +149,8 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
             labels_np = np.array(batched_labels).reshape((batch_size, -1))
             nr_yielded += batch_size
 
+            logger.debug("Nr Yielded: {}, Max: {}".format(
+                nr_yielded, max_records))
             yield docs_np, labels_np
 
 
