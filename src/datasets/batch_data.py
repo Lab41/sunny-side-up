@@ -406,7 +406,9 @@ def split_and_batch(data_loader,
                     h5_path,
                     rng_seed=888,
                     normalizer_fun=data_utils.normalize,
-                    transformer_fun=data_utils.to_one_hot):
+                    transformer_fun=data_utils.to_one_hot,
+                    balance_labels=False,
+                    max_records=None):
     """
     Convenience wrapper for most common splitting and batching
     workflow in neon. Splits data to an HDF5 path, if it does not already exist,
@@ -415,7 +417,10 @@ def split_and_batch(data_loader,
     """
     data_batches = batch_data(data_loader, batch_size,
         normalizer_fun=normalizer_fun,
-        transformer_fun=None)
+        transformer_fun=None,
+        max_records=max_records,
+        balance_labels=balance_labels,
+        nlabels=2)
     (_, _), (train_size, test_size) = split_data(data_batches, 
             h5_path, overwrite_previous=False, rng_seed=rng_seed)
     def train_batcher():
