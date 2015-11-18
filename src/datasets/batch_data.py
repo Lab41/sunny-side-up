@@ -101,8 +101,9 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
                 docs_labels.append((transformed_doc, label))
         except data_utils.DataException as e:
             # text is rejected for being too short, or its rating is not usable, etc
-            logger.debug("Type of input: {}".format(type(doc_text)))
-            logger.debug("{}: {}".format(type(e), e))
+            #logger.debug("Type of input: {}".format(type(doc_text)))
+            #logger.debug("{}: {}".format(type(e), e))
+            pass
 
         # dispatch once batch is of appropriate size 
         if (balance_labels and 
@@ -130,7 +131,7 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
                         next_doc, next_label = docs_labels.pop(0)
                     batched_docs.append(next_doc)
                     batched_labels.append(next_label)
-                    logger.debug("Label: {}, Length: {}".format(next_label, len(batched_docs)))
+                    #logger.debug("Label: {}, Length: {}".format(next_label, len(batched_docs)))
                 except IndexError as e:
                     # catch only when one of the lists in docs is empty
                     if e.message != 'pop from empty list':
@@ -269,6 +270,7 @@ def pick_splits(splits):
     splits.append(1 - np.sum(splits))
     # generate the strictly increasing cutoffs for each split from >0 to 1 
     cum_cutoffs = np.cumsum(splits)
+    logger = logging.getLogger(__name__)
     logger.debug(cum_cutoffs)
     # roll the die
     pick_num = np.random.random()
