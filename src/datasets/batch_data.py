@@ -390,32 +390,28 @@ def split_data(batch_iterator,
     nb_slices = len(splits) + 1
     np.random.seed(rng_seed)
     bin_sizes = [0]*nb_slices
-
+    initialized_file=False
                     
     # Check for HDF5 file already on disk
     if overwrite_previous or not os.path.isfile(h5_path):
         with h5py.File(h5_path, "w") as  h5_file:
         
-            # get one batch to diagnose dimensions and dtypes
-            first_data, first_labels = batch_iterator.next()
-
-            # create one dataset for each slice
-            bin_names = [str(bin_i) for bin_i in range(nb_slices)]
-            for bin_name in bin_names:
-                h5_file.create_dataset(name="data_" + bin_name,
-                                   shape=first_data.shape,
-                                   maxshape=(None,) +  first_data.shape[1:],
-                                   dtype=first_data.dtype)
-                h5_file.create_dataset(name="labels_" + bin_name,
-                                   shape=first_labels.shape,
-                                   maxshape=(None,) +  first_labels.shape[1:],
-                                   dtype=first_labels.dtype)
-            # loop batches into dataset
-            # write first batch in
-            #data_sizes = {}
-            bin_sizes = write_batch_to_h5(splits,h5_file,bin_sizes,first_data,first_labels)
-            # then do rest
             for new_data, new_labels in batch_iterator:
+                # use the first batch to diagnose dimensions and dtypes
+                if not initialized_file:
+                    # create two datasets (features and labels) for each slice
+                    bin_names = [str(bin_i) for bin_i in range(nb_slices)]
+                    for bin_name in bin_names:
+                        h5_file.create_dataset(name="data_" + bin_name,
+                                           shape=new_data.shape,
+                                           maxshape=(None,) +  new_data.shape[1:],
+                                           dtype=new_data.dtype)
+                        h5_file.create_dataset(name="labels_" + bin_name,
+                                           shape=new_labels.shape,
+                                           maxshape=(None,) +  new_labels.shape[1:],
+                                           dtype=new_labels.dtype)
+                    initialized_file=True
+                # loop other batches into dataset
                 bin_sizes = write_batch_to_h5(splits, h5_file, bin_sizes, new_data, new_labels)
     else:
         # fill in counts of each data slice
