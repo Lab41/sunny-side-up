@@ -166,14 +166,13 @@ class BatchIterator:
         """
         self.reset_args = args
         self.reset_kwargs = kwargs
+        self.batch_iterator = iter(self)
 
     def __iter__(self):
         return batch_data(*self.reset_args, **self.reset_kwargs)
 
     def next(self):
-       batch_iterator = iter(self)
-       for batch in batch_iterator:
-           yield batch
+       return self.batch_iterator.next()
 
 class DataIterator:
     """Utility class to wrap a data loading generator function,
@@ -190,15 +189,13 @@ class DataIterator:
         self.load_fun = load_fun
         self.reset_args = args
         self.reset_kwargs = kwargs
+        self.data_iterator = iter(self)
 
     def __iter__(self):
         return self.load_fun(*self.reset_args, **self.reset_kwargs)
 
     def next(self):
-        data_iterator = iter(self)
-        for datum in data_iterator:
-            yield datum
-
+        return self.data_iterator.next()
 
 class H5Iterator:
     """Small utility class for iterating over an HDF5 file.
