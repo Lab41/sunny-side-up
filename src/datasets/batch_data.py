@@ -159,46 +159,77 @@ class BatchIterator:
     """Iterator class to wrap around batching functionality.
     Allows batched data to be iterated over multiple times.
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, data, auto_reset=False, *args, **kwargs):
         """
+        Arguments:
+            auto_reset -- should the generator underlying iteration be
+                reset every time __iter__ is called? This
+                allows BatchIterator to be used in loops multiple
+                times, but will necessarily change the behavior of next(),
+                e.g. causing it to stop throwing StopIteration when 
+                the generator is refreshed
+
         Args and kwargs should be arguments to batch_data.
         data_loader should be an iterator (i.e., able to be reused)
         """
-        self.reset_args = args
+        #self.reset_args = args
         self.reset_kwargs = kwargs
+        self.auto_reset = auto_reset
+        self.data_iterable = data
+        self.batch_generator = self.get_batch_generator()
 
     def __iter__(self):
-        return batch_data(*self.reset_args, **self.reset_kwargs)
+        if self.auto_reset:
+            self.batch_generator = self.get_batch_generator()
+        return self
+
+    def get_batch_generator(self):
+        logger=logging.getLogger(__name__)
+        #logger.debug(self.reset_args)
+        logger.debug(self.reset_kwargs)
+        #return batch_data(self.data_iterable, *self.reset_args, **self.reset_kwargs)
+        return batch_data(self.data_iterable, **self.reset_kwargs)
 
     def next(self):
-       batch_iterator = iter(self)
-       for batch in batch_iterator:
-           yield batch
+       return self.batch_generator.next()
 
 class DataIterator:
     """Utility class to wrap a data loading generator function,
     providing a reusable data container if needed.
     """
-    def __init__(self, load_fun, *args, **kwargs):
+    def __init__(self, load_fun, auto_reset=False, *args, **kwargs):
         """
         @Arguments:
             load_fun -- function object which returns
-            a generator over tuples of individual records (data, label)
+                a generator over tuples of individual records (data, label)
 
-            args, kwargs are passed on to load_fun on every fresh iteration
+            auto_reset -- should the generator underlying iteration be
+                reset every time __iter__ is called? This
+                allows DataIterator to be used in loops multiple
+                times, but will necessarily change the behavior of next(),
+                e.g. causing it to stop throwing StopIteration when 
+                the generator is refreshed
+
+            args, kwargs are passed on to load_fun every time get_data_generator
+            is called
         """
         self.load_fun = load_fun
-        self.reset_args = args
+        #self.reset_args = args
         self.reset_kwargs = kwargs
+        self.auto_reset = auto_reset
+        self.data_iterator = self.get_data_generator()
 
     def __iter__(self):
-        return self.load_fun(*self.reset_args, **self.reset_kwargs)
+        if self.auto_reset:
+            self.data_iterator = self.get_data_generator()
+        return self
+
+    def get_data_generator(self):
+        #return self.load_fun(*self.reset_args, **self.reset_kwargs)
+        return self.load_fun(**self.reset_kwargs)
 
     def next(self):
-        data_iterator = iter(self)
-        for datum in data_iterator:
-            yield datum
-
+        return self.data_iterator.next()
 
 class H5Iterator:
     """Small utility class for iterating over an HDF5 file.
