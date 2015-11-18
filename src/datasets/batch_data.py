@@ -440,7 +440,9 @@ def split_and_batch(data_loader,
                     h5_path,
                     rng_seed=888,
                     normalizer_fun=data_utils.normalize,
-                    transformer_fun=data_utils.to_one_hot):
+                    transformer_fun=data_utils.to_one_hot,
+                    balance_labels=False,
+                    max_records=None):
     """
     Convenience wrapper for most common splitting and batching
     workflow in neon. Splits data to an HDF5 path, if it does not already exist,
@@ -449,7 +451,10 @@ def split_and_batch(data_loader,
     """
     data_batches = batch_data(data_loader, batch_size,
         normalizer_fun=normalizer_fun,
-        transformer_fun=None)
+        transformer_fun=None,
+        max_records=max_records,
+        balance_labels=balance_labels,
+        nlabels=2)
     (_, _), (train_size, test_size) = split_data(data_batches, 
             h5_path, overwrite_previous=False, rng_seed=rng_seed)
     def train_batcher():
@@ -492,7 +497,7 @@ if __name__=="__main__":
     if args.batch_hdf5_demo:  
         print args.batch_hdf5_demo
         # get training and testing sets, and their sizes for amazon
-        (amtr, amte), (amntr, amnte) = datasets, sizes = split_data(
+        (amz_train, amz_test), (train_size, test_size) = split_data(
             None, 
             h5_path=args.batch_hdf5_demo, 
             overwrite_previous=False,
@@ -500,7 +505,7 @@ if __name__=="__main__":
         import sys
 
         # get a record
-        next_text, next_label = next(iter(amtr))
+        next_text, next_label = next(iter(amz_train))
 
         try:
             print "Next record shape: {}".format(next_text.shape)
@@ -509,17 +514,17 @@ if __name__=="__main__":
 
 
         # batch training, testing sets
-        am_train_batch = batch_data(amtr,
+        amz_train_batch = batch_data(amz_train,
             normalizer_fun=lambda x: data_utils.normalize(x, 
                 max_length=300, 
                 truncate_left=True,
                 encoding=None),
             transformer_fun=None)
-        am_test_batch = batch_data(amte,
+        amz_test_batch = batch_data(amz_test,
             normalizer_fun=None,transformer_fun=None)
 
         # Spit out some sample data
-        next_batch = am_train_batch.next()
+        next_batch = amz_train_batch.next()
         data, label = next_batch
         np.set_printoptions(threshold=np.nan)
         print "Batch properties:"
@@ -539,8 +544,8 @@ if __name__=="__main__":
         print ''.join(data_utils.from_one_hot(oh))
 
         # demo balanced batching
-        am_balanced_batcher = batch_data(amtr,balance_labels=True)
-        balanced_batch = am_balanced_batcher.next()
+        amz_balanced_batcher = batch_data(amz_train,balance_labels=True)
+        balanced_batch = amz_balanced_batcher.next()
         print 'Balanced batch:'
         balanced_label_counts = {}
         for idx in range(balanced_batch[1].shape[0]):
@@ -552,7 +557,7 @@ if __name__=="__main__":
     # iterate multiple times over same data 
     if args.iterator_demo:
         # Demo dataIterator class
-        amz_iterator = DataIterator(amazon_reviews.load_data, args.iterator_demo)
+        amz_iterator = DataIterator(amazon_reviews.load_data, file_path=args.iterator_demo, auto_reset=True)
         print "First run:"
         for i, (data, label) in enumerate(amz_iterator):
             print "{}: {}...".format(i, data[:50])
@@ -564,12 +569,13 @@ if __name__=="__main__":
             if i >= 3: break
         # Demo batch iterator utility class
         amz_batches = BatchIterator(
-            DataIterator(amazon_reviews.load_data, args.iterator_demo),
+            DataIterator(amazon_reviews.load_data, file_path=args.iterator_demo),
             batch_size=5, normalizer_fun=data_utils.normalize, 
             transformer_fun=lambda x: data_utils.to_one_hot(x), flatten=True)
         for i, (batch_features, batch_labell) in enumerate(amz_batches):
             print "Batch {}".format(i)
             print batch_features.shape
+            print 'First record:'
             print ''.join(data_utils.from_one_hot(batch_features[0].reshape(67, -1)))[::-1][:50], "..."
             if i >= 3: break
 
