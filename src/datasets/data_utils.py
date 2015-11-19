@@ -209,7 +209,7 @@ class WordVectorBuilder:
 
         # save model to disk
         logger.info('saving model to {}...'.format(model_path))
-        model.save(model_path)
+        model.save_word2vec_format(model_path)
 
 
 def mkdir_p(path):
