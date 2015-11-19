@@ -30,57 +30,6 @@ data_fraction_train = 0.80
 
 num_threads = multiprocessing.cpu_count()
 threadLock = threading.Lock()
-class dataProcessingThread(threading.Thread):
-    '''
-        process text,sentiment pair in a thread
-        significantly speeds up text vectorization phase
-    '''
-    def __init__(self, threadID, data, args, values, labels):
-        threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.data = data
-        self.args = args
-
-    def run(self):
-
-        # process valid entries
-        if self.data[0]:
-
-            # process valid data
-            text, sentiment = self.data
-            if text:
-                try:
-                    # normalize and tokenize if necessary
-                    if self.args.has_key('normalize'):
-                        text_normalized = data_utils.normalize(text, **self.args['normalize'])
-                    else:
-                        text_normalized = text
-
-                    # tokenize
-                    tokens = data_utils.tokenize(text_normalized)
-
-                    # choose embedding type
-                    vector = None
-                    if self.args['embed']['type'] == 'concatenated':
-                        vector = embedder.embed_words_into_vectors_concatenated(tokens, **self.args['embed'])
-                    elif self.args['embed']['type'] == 'averaged':
-                        vector = embedder.embed_words_into_vectors_averaged(tokens)
-                    else:
-                        pass
-
-                    # data labeled by sentiment score (thread-safe with lock)
-                    if vector is not None:
-                        threadLock.acquire()
-                        values.append(vector)
-                        labels.append(sentiment)
-                        threadLock.release()
-
-                except TextTooShortException as e:
-                    pass
-
-
-
-
 
 # setup logging
 logger = data_utils.syslogger(__name__)
@@ -180,62 +129,44 @@ def timed_training(classifier, values, labels):
 def timed_testing(classifier, values):
     return classifier.predict(values)
 
-
 @timed
 def timed_dataload(data, args, values, labels):
 
     # use separate counter to account for invalid input along the way
     counter = 0
-    print_every = math.floor(10000/num_threads)*num_threads
 
-    # iterate data
-    data_iterator = iter(data)
+    for text,sentiment in data:
 
-    # continue processing until no data is left
-    value_last = 'initialize'
-    while value_last is not None:
+        try:
+            if (counter % 10000 == 0):
+                print("Loading at {}".format(counter))
 
-        if (counter % print_every == 0):
-            print("Loading data at {}...".format(counter))
-
-        # reset subset and threads
-        subset = []
-        threads = []
-
-        # retrieve the next num_threads entries
-        for i in xrange(num_threads):
-
-            # retrieve next entry if available
-            pair = next(data_iterator, None)
-            if pair is None:
-                text = sentiment = None
+            # normalize and tokenize if necessary
+            if args.has_key('normalize'):
+                text_normalized = data_utils.normalize(text, **args['normalize'])
             else:
-                text, sentiment = pair
+                text_normalized = text
+
+            # tokenize
+            tokens = data_utils.tokenize(text_normalized)
+
+            # choose embedding type
+            vector = None
+            if args['embed']['type'] == 'concatenated':
+                vector = embedder.embed_words_into_vectors_concatenated(tokens, **self.args['embed'])
+            elif args['embed']['type'] == 'averaged':
+                vector = embedder.embed_words_into_vectors_averaged(tokens)
+            else:
+                pass
+
+            # data labeled by sentiment score (thread-safe with lock)
+            if vector is not None:
+                values.append(vector)
+                labels.append(sentiment)
                 counter += 1
 
-            # set the last value for stopping condition
-            value_last = text
-
-            # store subset of values for parallel processing
-            subset.append( (text, sentiment) )
-
-
-        # setup threads
-        for i in xrange(num_threads):
-
-            # process data in new thread
-            thread = dataProcessingThread(i, subset[i], args, values, labels)
-
-            # start thread
-            thread.start()
-
-            # add thread to list
-            threads.append(thread)
-
-
-        # wit for all threads to complete
-        for t in threads:
-            t.join()
+        except TextTooShortException as e:
+            pass
 
 
 
