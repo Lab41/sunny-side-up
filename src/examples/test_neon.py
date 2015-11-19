@@ -361,13 +361,15 @@ def main():
 
     model_args[dataset_name]['nframes']=args.nframes
     if args.glove:
-        glove_embedder = WordVectorEmbedder("glove", os.path.join(args.working_dir, "glove.twitter.27B.zip"))
+        glove_embedder = WordVectorEmbedder("glove", os.path.join(args.working_dir, "glove.twitter.27B.200d.obj"))
         model_args[dataset_name]['normalizer_fun'] = lambda x: x.encode('ascii', 'ignore').lower()
         model_args[dataset_name]['transformer_fun'] = \
             lambda x: glove_embedder.embed_words_into_vectors(x, embedding_nr_words)
         model_args[dataset_name]['vocab_size'] = 200
         model_args[dataset_name]['sequence_length'] = embedding_nr_words
         model_args[dataset_name]['crepe_variant'] = 'embedding{}'.format(embedding_nr_words)
+    if args.word2vec:
+        w2v_embedder = WordVectorEmbedder("word2vec")
 
     try:
         logger.debug(model_args[dataset_name]['normalizer_fun'])
