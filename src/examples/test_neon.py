@@ -45,7 +45,7 @@ from src.datasets.word_vector_embedder import WordVectorEmbedder
 #logging.getLogger("src.datasets.neon_iterator").setLevel(logging.INFO)
 #logging.getLogger("src.neon.neon_utils").setLevel(logging.INFO)
 
-def lstm_model(nvocab=67, hidden_size=20, embedding_dim=60):
+def lstm_model_draft(nvocab=67, hidden_size=20, embedding_dim=60):
     init_emb = neon.initializers.Uniform(low=-0.1/embedding_dim, high=0.1/embedding_dim)
     layers = [
         neon.layers.LookupTable(vocab_size=nvocab, embedding_dim=embedding_dim, init=init_emb),
@@ -58,6 +58,21 @@ def lstm_model(nvocab=67, hidden_size=20, embedding_dim=60):
         neon.layers.Affine(2, neon.initializers.GlorotUniform(),
                            bias=neon.initializers.GlorotUniform(),
                            activation=neon.transforms.Softmax())
+        ]
+    return layers
+
+def lstm_model(hidden_size=300, noutput=2):
+    layers = [
+        neon.layers.LSTM(hidden_size,
+                         init=neon.initializers.GlorotUniform(),
+                         bias=neon.initializers.Constant(1),
+                         activation=neon.transforms.Tanh(),
+                         gate_activation=neon.transforms.Logistic()),
+        neon.layers.Dropout(0.5),
+        neon.layers.Affine(noutput, 
+                           init=neon.initializers.GlorotUniform(),
+                           bias=neon.initializers.GlorotUniform(),
+                           activation=neon.transforms.Logistic())
         ]
     return layers
 
@@ -82,8 +97,9 @@ def simple_model(nvocab=67,
     ]
     return layers
 
-def crepe_model(nvocab=67, nframes=256, batch_norm=False, noutput=2, variant=None):
-    init_gaussian = neon.initializers.Gaussian(0, 0.05)
+def crepe_model(nvocab=67, nframes=256, gaussian_sd=0.05,
+                batch_norm=False, noutput=2, variant=None):
+    init_gaussian = neon.initializers.Gaussian(0, gaussian_sd)
     layers = [
         neon.layers.Conv((nvocab, 7, nframes), 
             batch_norm=batch_norm,
@@ -136,14 +152,14 @@ def crepe_model(nvocab=67, nframes=256, batch_norm=False, noutput=2, variant=Non
         
     ]
     # remove certain layers if we are asked for a variant
-    if variant == 'embedding' or variant == 'tweet_character':
-        del layers[8]
-        del layers[3]
+    if variant in ('embedding50', 'embedding99') or variant == 'tweet_character':
+        del layers[8]       # last pooling
+        del layers[3]       # 2nd pooling
     elif variant != None:
         raise Exception("variant must be one of embedding|tweet_character")
 
-    if variant == 'embedding':
-        del layers[1] 
+    if variant in ('embedding50', ):
+        del layers[1]       # 1st pooling
 
     logger.debug(variant)
     logger.debug(layers)
@@ -293,8 +309,10 @@ def main():
     arg_parser.add_argument("dataset", help="Name of dataset (one of amazon, imdb, sentiment140, open_weiboscope)")
     arg_parser.add_argument("--working_dir", "-w", default=".",
 	    help="Directory where data and results should be put, default PWD.")
-    arg_parser.add_argument("--glove", action="store_true")
-
+    #arg_parser.add_argument("embedding", choices=('glove','word2vec'), required=False)
+    group=arg_parser.add_mutually_exclusive_group()
+    group.add_argument("--glove", action='store_true')
+    group.add_argument("--word2vec", action='store_true')
     arg_parser.add_argument("--results_dir", "-r", default=None, help="custom subfolder to store results and weights in (defaults to dataset)")
     arg_parser.add_argument("--data_path", "-d", default=None, help="custom path to original data, partially overrides working_dir")
     arg_parser.add_argument("--hdf5_path", "-5", default=None, help="custom path to split data in HDF5")
@@ -326,21 +344,30 @@ def main():
             'transformer_fun': data_utils.to_one_hot,
             'variant'       : 'tweet_character',
             },
-        'imdb'      : {},
+        'imdb'      : {
+            'normalizer_fun'    : lambda x: data_utils.normalize(x,
+                                    encoding=None) 
+            },
         'amazon'    : {},
         'open_weiboscope' : {
             'balance_labels'    : True,
             'max_records'       : 2e6,
             },
         }
+    if dataset_name in ('sentiment140','open_weiboscope'):
+        embedding_nr_words = 50
+    else:
+        embedding_nr_words = 99
+
     model_args[dataset_name]['nframes']=args.nframes
     if args.glove:
         glove_embedder = WordVectorEmbedder("glove", os.path.join(args.working_dir, "glove.twitter.27B.zip"))
         model_args[dataset_name]['normalizer_fun'] = lambda x: x.encode('ascii', 'ignore').lower()
-        model_args[dataset_name]['transformer_fun'] = lambda x: glove_embedder.embed_words_into_vectors(x, 50)
+        model_args[dataset_name]['transformer_fun'] = \
+            lambda x: glove_embedder.embed_words_into_vectors(x, embedding_nr_words)
         model_args[dataset_name]['vocab_size'] = 200
-        model_args[dataset_name]['sequence_length'] = 50
-        model_args[dataset_name]['crepe_variant'] = 'embedding'
+        model_args[dataset_name]['sequence_length'] = embedding_nr_words
+        model_args[dataset_name]['crepe_variant'] = 'embedding{}'.format(embedding_nr_words)
 
     try:
         logger.debug(model_args[dataset_name]['normalizer_fun'])
