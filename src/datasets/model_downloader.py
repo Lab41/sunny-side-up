@@ -188,16 +188,16 @@ if __name__ == '__main__':
     parser.add_argument('--outdir', '-o', action='store',
                         required=True,
                         help='The output directory to download/save the models.')
+    parser.add_argument('--embedding_type', action='store', type=str,
+                        help="glove or word2vec", required=True)
     parser.add_argument('--dataset', '-d', action='store',
                         default='all',
                         help='The dataset to download')
     parser.add_argument('--maxmegabytes', '-m', action='store',
-                        default=250,
+                        default=25000,
                         help='The dataset to download')
     args = parser.parse_args()
 
-    downloader = ModelDownloader('glove')
-    downloader.download_and_save(outdir=args.outdir, dataset='wikipedia-2014', datafile='glove.6B.50d.obj', maxmegabytes=args.maxmegabytes)
+    downloader = ModelDownloader(args.embedding_type)
+    downloader.download_and_save(outdir=args.outdir, dataset=args.dataset, datafile='glove.twitter.27B.200d', maxmegabytes=args.maxmegabytes)
 
-    downloader = ModelDownloader('word2vec')
-    downloader.download_and_save(outdir='/data', dataset='google-news', datafile='GoogleNews-vectors-negative300.bin', maxmegabytes=args.maxmegabytes)
