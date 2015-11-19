@@ -1,0 +1,36 @@
+{
+    "classifier": "LogisticRegression",
+    "data": {
+        "negative": "131211.0",
+        "positive": "650299.0",
+        "source": "amazon",
+        "testsize": "781510",
+        "time_in_seconds_loading": "1722.417913"
+    },
+    "data_args": {
+        "embed": {
+            "type": "averaged"
+        },
+        "normalize": {
+            "encoding": null,
+            "reverse": false
+        },
+        "shuffle_after_load": true
+    },
+    "embedding": {
+        "model": "word2vec",
+        "subset": "GoogleNews-vectors-negative300.bin"
+    },
+    "metrics": {
+        "FN": "21556",
+        "FP": "56051",
+        "TN": "75160",
+        "TP": "628743",
+        "accuracy": "0.900696088342",
+        "f1": "0.941871465134",
+        "precision": "0.918149107615",
+        "recall": "0.966852171078",
+        "time_in_seconds_testing": "1.026296",
+        "time_in_seconds_training": "425.444305"
+    }
+}

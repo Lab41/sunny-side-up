@@ -1,0 +1,36 @@
+{
+    "classifier": "GaussianNB",
+    "data": {
+        "negative": "132141.0",
+        "positive": "649628.0",
+        "source": "amazon",
+        "testsize": "781769",
+        "time_in_seconds_loading": "1266.025711"
+    },
+    "data_args": {
+        "embed": {
+            "type": "averaged"
+        },
+        "normalize": {
+            "encoding": null,
+            "reverse": false
+        },
+        "shuffle_after_load": true
+    },
+    "embedding": {
+        "model": "glove",
+        "subset": "glove.twitter.27B.200d"
+    },
+    "metrics": {
+        "FN": "258382",
+        "FP": "29406",
+        "TN": "102735",
+        "TP": "391246",
+        "accuracy": "0.631875912194",
+        "f1": "0.731109616175",
+        "precision": "0.930094234664",
+        "recall": "0.602261602025",
+        "time_in_seconds_testing": "3.080048",
+        "time_in_seconds_training": "4.075584"
+    }
+}

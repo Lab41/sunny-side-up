@@ -1,0 +1,32 @@
+{
+    "classifier": "LinearSVC",
+    "data": {
+        "negative": "259819.0",
+        "positive": "17862.0",
+        "source": "openweibo",
+        "testsize": "277681",
+        "time_in_seconds_loading": "12188.695802"
+    },
+    "data_args": {
+        "embed": {
+            "type": "averaged"
+        },
+        "shuffle_after_load": true
+    },
+    "embedding": {
+        "model": "glove",
+        "subset": "glove.twitter.27B.200d"
+    },
+    "metrics": {
+        "FN": "17862",
+        "FP": "0",
+        "TN": "259819",
+        "TP": "0",
+        "accuracy": "0.935674388957",
+        "f1": "0.0",
+        "precision": "0.0",
+        "recall": "0.0",
+        "time_in_seconds_testing": "0.175023",
+        "time_in_seconds_training": "1400.876121"
+    }
+}
