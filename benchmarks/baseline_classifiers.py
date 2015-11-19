@@ -51,7 +51,11 @@ datasets =  {
                                                                     'max_length': 150,
                                                                     'reverse': False
                                                                 },
-                                                  'shuffle_after_load': False
+                                                  'shuffle_after_load': False,
+                                                  'models': [
+                                                        'glove',
+                                                        'word2vec'
+                                                  ]
                                                 }
                                 },
                 'imdb':         {
@@ -61,7 +65,11 @@ datasets =  {
                                                   'normalize':  {   'encoding': None,
                                                                     'reverse': False
                                                                 },
-                                                  'shuffle_after_load': False
+                                                  'shuffle_after_load': False,
+                                                  'models': [
+                                                        'glove',
+                                                        'word2vec'
+                                                  ]
                                                 }
                                 },
                 'amazon':       {
@@ -73,7 +81,12 @@ datasets =  {
                                                                     'min_length': 0,
                                                                     'max_length': 9999999
                                                                 },
-                                                  'shuffle_after_load': True
+                                                  'shuffle_after_load': True,
+                                                  'models': [
+                                                        'glove',
+                                                        'word2vec',
+                                                        { 'word2vec': '/data/amazon/amazon_800000.bin' }
+                                                  ]
                                                 }
                                 },
                 'openweibo':    {
@@ -81,21 +94,17 @@ datasets =  {
                                     'path':     os.path.join(dir_data, 'openweibo'),
                                     'args':     { 'embed':      {   'type': 'averaged' },
                                                   'shuffle_after_load': True,
-                                                  'models': {
-                                                        'word2vec': {
-                                                            'prebuilt_model_path': '/data/openweibo.bin'
-                                                        }
-                                                  }
+                                                  'models': [
+                                                        'glove',
+                                                        'word2vec',
+                                                        { 'word2vec': '/data/openweibo/openweibo_800000.bin' }
+                                                  ]
                                                 }
                                 }
             }
 
 
 
-
-# word embeddings
-def embedders():
-    return ['glove','word2vec']
 
 def classifiers():
     """
@@ -170,61 +179,107 @@ def timed_dataload(data, args, values, labels):
 
 
 
-# test all vector models
-for embedder_model in embedders():
+# iterate all datasources
+for data_source, data_params in datasets.iteritems():
 
-    # iterate all datasources
-    for data_source, data_params in datasets.iteritems():
+    # prepare data loader
+    klass = data_params['class']
+    loader = klass(data_params['path'])
+    data_args = data_params['args']
+    data = loader.load_data()
 
-        # prepare data loader
-        klass = data_params['class']
-        loader = klass(data_params['path'])
-        data_args = data_params['args']
-        data = loader.load_data()
+    # test all vector models
+    for embedder_model in data_args['models']:
 
-        # initialize lists (will be converted later into numpy arrays)
-        values = []
-        labels = []
+        # identify prebuilt model if exists
+        prebuilt_model_path = None
+        if isinstance(embedder_model, dict):
+            embedder_model, prebuilt_model_path = embedder_model.items().pop()
 
-        # initialize vector embedder
-        prebuilt_model_path = data_args.get('models', {}).get(embedder_model, {}).get('prebuilt_model_path', None)
+        # initialize word vector embedder
         embedder = WordVectorEmbedder(embedder_model, prebuilt_model_path)
 
         # load pre-sampled data from disk
         if prebuilt_model_path:
+
+            # import pickled data
             with open(WordVectorBuilder.filename_train(prebuilt_model_path), 'rb') as f:
-                data = pickle.load(f)
+                data_train = pickle.load(f)
+            with open(WordVectorBuilder.filename_test(prebuilt_model_path), 'rb') as f:
+                data_test = pickle.load(f)
+
+            # update embedder parameters
+            model_path_dir, model_path_filename, model_path_filext = WordVectorBuilder.filename_components(prebuilt_model_path)
+            embedder.model_group = model_path_filename
+            embedder.model_subset = model_path_filename
+
+            # initialize lists (will be converted later into numpy arrays)
+            values_train = []
+            labels_train = []
+            values_test = []
+            labels_test = []
+
+            # initialize timer
+            seconds_loading = 0
+            logger.info("processing {} samples from {}...".format(len(data_train)+len(data_test), prebuilt_model_path))
+
+            # load training dataset
+            profile_results = timed_dataload(data_train, data_args, values_train, labels_train)
+
+            # store loading time
+            seconds_loading += profile_results.timer.total_tt
+
+            # load training dataset
+            profile_results = timed_dataload(data_test, data_args, values_test, labels_test)
+
+            # store loading time
+            seconds_loading += profile_results.timer.total_tt
+
+            # create numpy arrays for classifier input
+            values_train = np.array(values_train, dtype='float32')
+            labels_train = np.array(labels_train, dtype='float32')
+            values_test = np.array(values_test, dtype='float32')
+            labels_test = np.array(labels_test, dtype='float32')
+
+            # shuffle if necessary
+            if data_args['shuffle_after_load']:
+                np.random.shuffle(values_train)
+                np.random.shuffle(labels_train)
+                np.random.shuffle(values_test)
+                np.random.shuffle(labels_test)
+
         else:
+
+            # initialize lists (will be converted later into numpy arrays)
+            values = []
+            labels = []
 
             # get equal-sized subsets of each class
             min_samples = data_args['min_samples'] if data_args.has_key('min_samples') else None
             data_sampler = DataSampler(klass, file_path=data_params['path'], num_classes=2)
             data = data_sampler.sample_balanced(min_samples)
 
-        # load dataset
-        logger.info("processing {} samples from {}...".format(len(data), data_params['path']))
-        profile_results = timed_dataload(data, data_args, values, labels)
+            # load dataset
+            logger.info("processing {} samples from {}...".format(len(data), data_params['path']))
+            profile_results = timed_dataload(data, data_args, values, labels)
 
-        # store loading time
-        seconds_loading = profile_results.timer.total_tt
+            # store loading time
+            seconds_loading = profile_results.timer.total_tt
 
-        # shuffle if necessary
-        if data_args['shuffle_after_load']:
-            indices = np.arange(len(labels))
-            np.random.shuffle(indices)
-            values = [values[i] for i in indices]
-            labels = [labels[i] for i in indices]
+            # convert into nparray for sklearn
+            values = np.array(values, dtype="float32")
+            labels = np.array(labels, dtype="float32")
+            logger.info("Loaded {} samples...".format(len(values)))
 
-        # convert into nparray for sklearn
-        values = np.array(values, dtype="float32")
-        labels = np.array(labels, dtype="float32")
-        logger.info("Loaded {} samples...".format(len(values)))
+            # shuffle if necessary
+            if data_args['shuffle_after_load']:
+                np.random.shuffle(values)
+                np.random.shuffle(labels)
 
-        # split into training and test data
-        logger.info("splitting dataset into training and testing sets...")
-        labels_train, labels_dev, labels_test = data_utils.split_data(labels, train=data_fraction_train, dev=0, test=data_fraction_test)
-        values_train, values_dev, values_test = data_utils.split_data(values, train=data_fraction_train, dev=0, test=data_fraction_test)
-        logger.info("Training on {}, Testing on {}...".format(len(values_train), len(values_test)))
+            # split into training and test data
+            logger.info("splitting dataset into training and testing sets...")
+            labels_train, labels_dev, labels_test = data_utils.split_data(labels, train=data_fraction_train, dev=0, test=data_fraction_test)
+            values_train, values_dev, values_test = data_utils.split_data(values, train=data_fraction_train, dev=0, test=data_fraction_test)
 
 
         # calculate distribution
@@ -233,6 +288,7 @@ for embedder_model in embedders():
 
 
         # setup classifier
+        logger.info("Training on {}, Testing on {}...".format(len(values_train), len(values_test)))
         for classifier_name,classifier in classifiers():
 
             # profiled training
