@@ -196,7 +196,7 @@ class WordVectorBuilder:
             pickle.dump(samples_test, f)
 
         # load list of words for model
-        sentences = [text for text,sentiment in samples_train]
+        sentences = [tokenize(text) for text,sentiment in samples_train]
 
         # build vocabulary and model
         logger.info('building vocabulary...')
