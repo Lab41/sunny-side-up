@@ -144,8 +144,8 @@ class WordVectorEmbedder:
 
         # choose model
         if self.model_type == 'glove':
-            vector = self.model.transform_paragraph(words, ignore_missing=True, epochs=0)
-            return np.nan_to_num(vector)
+            word_ids = [self.model.dictionary[word] for word in words if word in self.word_set]
+            return np.mean(self.model.word_vectors[word_ids], axis=0)
         else:
 
             # process valid words

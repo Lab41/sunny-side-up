@@ -89,7 +89,7 @@ class DataSampler:
                 try:
 
                     # append value if sampling or if more values needed
-                    if sample or len(self.samples[sentiment]) < min_samples:
+                    if sample or not min_samples or len(self.samples[sentiment]) < min_samples:
                         self.samples[sentiment].append(text)
 
                 # create list of samples for first entry
