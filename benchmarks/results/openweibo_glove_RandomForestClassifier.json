@@ -30,3 +30,38 @@
         "time_in_seconds_training": "38.835554"
     }
 }
+{
+    "classifier": "RandomForestClassifier",
+    "data": {
+        "negative": "160117.0",
+        "positive": "159883.0",
+        "source": "openweibo",
+        "testsize": "320000",
+        "time_in_seconds_loading": "203.597981"
+    },
+    "data_args": {
+        "embed": {
+            "type": "averaged"
+        },
+        "models": [
+            "glove"
+        ],
+        "shuffle_after_load": true
+    },
+    "embedding": {
+        "model": "glove",
+        "subset": "glove.twitter.27B.200d"
+    },
+    "metrics": {
+        "FN": "83466",
+        "FP": "76185",
+        "TN": "83932",
+        "TP": "76417",
+        "accuracy": "0.501090625",
+        "f1": "0.489092276429",
+        "precision": "0.500760147311",
+        "recall": "0.477955755146",
+        "time_in_seconds_testing": "1.280578",
+        "time_in_seconds_training": "220.749996"
+    }
+}

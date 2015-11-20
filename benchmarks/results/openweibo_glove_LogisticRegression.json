@@ -30,3 +30,38 @@
         "time_in_seconds_training": "175.535504"
     }
 }
+{
+    "classifier": "LogisticRegression",
+    "data": {
+        "negative": "160117.0",
+        "positive": "159883.0",
+        "source": "openweibo",
+        "testsize": "320000",
+        "time_in_seconds_loading": "203.597981"
+    },
+    "data_args": {
+        "embed": {
+            "type": "averaged"
+        },
+        "models": [
+            "glove"
+        ],
+        "shuffle_after_load": true
+    },
+    "embedding": {
+        "model": "glove",
+        "subset": "glove.twitter.27B.200d"
+    },
+    "metrics": {
+        "FN": "76494",
+        "FP": "83413",
+        "TN": "76704",
+        "TP": "83389",
+        "accuracy": "0.500290625",
+        "f1": "0.510516246537",
+        "precision": "0.499928058417",
+        "recall": "0.521562642682",
+        "time_in_seconds_testing": "0.46354",
+        "time_in_seconds_training": "436.555546"
+    }
+}
