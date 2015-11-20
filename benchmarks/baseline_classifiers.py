@@ -49,7 +49,8 @@ datasets =  {
                                     'args':     { 'embed':      {   'type': 'averaged' },
                                                   'normalize':  {   'min_length': 70,
                                                                     'max_length': 150,
-                                                                    'reverse': False
+                                                                    'reverse': False,
+                                                                    'pad_out': False
                                                                 },
                                                   'shuffle_after_load': False,
                                                   'models': [
@@ -63,7 +64,10 @@ datasets =  {
                                     'path':     os.path.join(dir_data, 'imdb'),
                                     'args':     { 'embed':      {   'type': 'averaged' },
                                                   'normalize':  {   'encoding': None,
-                                                                    'reverse': False
+                                                                    'reverse': False,
+                                                                    'pad_out': False,
+                                                                    'min_length': 0,
+                                                                    'max_length': 9999999
                                                                 },
                                                   'shuffle_after_load': False,
                                                   'models': [
@@ -79,7 +83,8 @@ datasets =  {
                                                   'normalize':  {   'encoding': None,
                                                                     'reverse': False,
                                                                     'min_length': 0,
-                                                                    'max_length': 9999999
+                                                                    'max_length': 9999999,
+                                                                    'pad_out': False
                                                                 },
                                                   'shuffle_after_load': True,
                                                   'models': [
@@ -176,7 +181,6 @@ def timed_dataload(data, args, values, labels):
 
         except TextTooShortException as e:
             pass
-
 
 
 # iterate all datasources
