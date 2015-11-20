@@ -184,3 +184,38 @@
         "time_in_seconds_training": "1.535963"
     }
 }
+{
+    "classifier": "GaussianNB",
+    "data": {
+        "negative": "116681.0",
+        "positive": "115601.0",
+        "source": "openweibo",
+        "testsize": "232282",
+        "time_in_seconds_loading": "138.458811"
+    },
+    "data_args": {
+        "embed": {
+            "type": "averaged"
+        },
+        "models": [
+            "word2vec"
+        ],
+        "shuffle_after_load": true
+    },
+    "embedding": {
+        "model": "word2vec",
+        "subset": "GoogleNews-vectors-negative300.bin"
+    },
+    "metrics": {
+        "FN": "81750",
+        "FP": "34365",
+        "TN": "82316",
+        "TP": "33851",
+        "accuracy": "0.500111932909",
+        "f1": "0.368311962441",
+        "precision": "0.496232555412",
+        "recall": "0.292826186625",
+        "time_in_seconds_testing": "1.93631",
+        "time_in_seconds_training": "1.990026"
+    }
+}
