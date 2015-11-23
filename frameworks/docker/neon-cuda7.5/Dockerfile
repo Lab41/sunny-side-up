@@ -115,8 +115,9 @@ RUN cd /opt/neon && \
 # make some updates
 RUN pip install -U six
 
-# add gensim
+# add gensim and nltk
 RUN pip install gensim
+RUN pip install nltk
 
 # add glove-python
 #RUN cd /tmp && \
