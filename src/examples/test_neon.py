@@ -166,6 +166,7 @@ def crepe_model(nvocab=67, nframes=256, gaussian_sd=0.05,
     return layers
 
 def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path, 
+        model_type='cnn',
         valid_freq=2,
         batch_size=256,
         vocab_size=67,
@@ -211,7 +212,9 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
         'batch_size'        : batch_size,
         'nr_epochs'         : nr_epochs,
         'learning_rate'     : learning_rate,
-        'momentum_coef'     : momentum_coef
+        'momentum_coef'     : momentum_coef,
+        'model_type'        : model_type,
+        'model_variant'     : crepe_variant,
     }
     try:
         os.mkdir(working_dir)
@@ -230,9 +233,8 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
     be = gen_backend(backend='gpu', batch_size=batch_size, device_id=gpu_id, rng_seed=rng_seed)
     logger.info("Getting data...")
 
-
+    # Get helper functions to load dataset
     data_loader = dataset_loaders[dataset_name](data_path)
-    logger.debug("Keyword args: {}".format(kwargs))
     (train_get, test_get), (train_size, test_size) = split_and_batch(
         data_loader,
         batch_size, 
@@ -243,9 +245,11 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
         transformer_fun=transformer_fun,
         balance_labels=balance_labels,
         max_records=max_records)
+    # diagnostic peek at the data
     train_batch_beta = test_get()
     logger.debug("First record shape: {}".format(train_batch_beta.next()[0].shape))
 
+    # Create neon DataIterators for train and test sets
     train_iter = DiskDataIterator(train_get, ndata=train_size, 
                                   doclength=sequence_length, 
                                   nvocab=vocab_size,
@@ -256,35 +260,57 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
                                   nvocab=vocab_size,
                                   nlabels=2,
                                   labels_onehot=True)
+
     logger.info("Building model...")
-    model_layers = crepe_model(nvocab=vocab_size,nframes=nframes,variant=crepe_variant,batch_norm=True)
+    # get model layers for either convnet or lstm
+    if model_type=='cnn':
+        model_layers = crepe_model(nvocab=vocab_size,nframes=nframes,variant=crepe_variant,batch_norm=True)
+    elif model_type=='lstm':
+        model_layers = lstm_model()
+
     mlp = neon.models.Model(model_layers)
 
+    # start from saved weights
     if warm_start_path:
         mlp.load_weights(warm_start_path)
 
-    #layers_description = [l.get_description() for l in mlp.layers]
-    #logger.info(pprint.pformat(layers_description))
+    # Set cost
     cost = neon.layers.GeneralizedCost(neon.transforms.CrossEntropyBinary())
     #cost = neon.layers.GeneralizedCost(neon.transforms.SumSquared())
     #cost = neon.layers.GeneralizedCost(neon.transforms.CrossEntropyMulti())
+    
+    # create callbacks for saving model weights and diagnostic statistics
     callbacks = NeonCallbacks(mlp,train_iter,valid_set=test_iter,valid_freq=valid_freq,progress_bar=True)
     callbacks.add_neon_callback(metrics_path=metrics_path_template, insert_pos=0)
     callbacks.add_save_best_state_callback(model_state_path)
     callbacks.add_serialize_callback(save_freq, model_weights_history_path,history=nr_to_save)
 
+    # learning rate schedule
     decay_schedule = neon.optimizers.Schedule([n for n in range(1, nr_epochs) if n % 3 == 2 and n < 10], 0.5)
     #decay_schedule = neon.optimizers.Schedule()
+
+    # Possible optimizers
     sgd = neon.optimizers.GradientDescentMomentum(
         learning_rate=learning_rate,
         momentum_coef=momentum_coef,
         schedule=decay_schedule)
     rmsprop = neon.optimizers.RMSProp(learning_rate=learning_rate)
+    optimizer = sgd
 
     logger.info("Doing training...")
-    mlp.fit(train_iter, optimizer=sgd, 
+    # main training loop
+    mlp.fit(train_iter, optimizer=optimizer, 
               num_epochs=nr_epochs, cost=cost, callbacks=callbacks)
-    logger.info("Testing accuracy: {}".format(mlp.eval(test_iter, metric=Accuracy())))
+
+def normalize_tweet(txt):
+    return data_utils.normalize(txt, min_length=70, max_length=150)
+
+def transform_for_vectors(txt):
+    txt = data_utils.tokenize(txt[::-1])
+    return txt
+
+def normalize_imdb(txt):
+    return data_utils.normalize(txt, encoding=None)
 
 def main():
     model_defaults = {
@@ -310,11 +336,14 @@ def main():
     arg_parser.add_argument("--working_dir", "-w", default=".",
 	    help="Directory where data and results should be put, default PWD.")
     #arg_parser.add_argument("embedding", choices=('glove','word2vec'), required=False)
-    group=arg_parser.add_mutually_exclusive_group()
-    group.add_argument("--glove", action='store_true')
-    group.add_argument("--word2vec", action='store_true')
+    vector_group=arg_parser.add_mutually_exclusive_group()
+    vector_group.add_argument("--glove", nargs=1, metavar="LOCATION",help="Use glove, object at this path")
+    vector_group.add_argument("--word2vec", nargs=1, metavar="LOCATION",help="Use word2vec, object at this path")
     arg_parser.add_argument("--results_dir", "-r", default=None, help="custom subfolder to store results and weights in (defaults to dataset)")
     arg_parser.add_argument("--data_path", "-d", default=None, help="custom path to original data, partially overrides working_dir")
+    model_types=arg_parser.add_mutually_exclusive_group()
+    model_types.add_argument("--cnn", default=True, action="store_true", help="Use convolutional model")
+    model_types.add_argument("--lstm", action="store_true", help="Use LSTM")
     arg_parser.add_argument("--hdf5_path", "-5", default=None, help="custom path to split data in HDF5")
     arg_parser.add_argument("--weights_path", default=None, help="path to weights to initialize model with")
     arg_parser.add_argument("--gpu_id", "-g", default=0, type=int, help="GPU device ID (integer)")
@@ -338,38 +367,50 @@ def main():
 
     model_args = { 
         'sentiment140' : {
-            'max_length'    : 150,
-            'min_length'    : 70,
-            'normalizer_fun': lambda x: data_utils.normalize(x, min_length=70, max_length=150),
-            'transformer_fun': data_utils.to_one_hot,
-            'variant'       : 'tweet_character',
+            'max_length'        : 150,
+            'min_length'        : 70,
+            'normalizer_fun'    : normalize_tweet,
+            'transformer_fun'   : data_utils.to_one_hot,
+            'variant'           : 'tweet_character',
             },
-        'imdb'      : {
-            'normalizer_fun'    : lambda x: data_utils.normalize(x,
-                                    encoding=None) 
+        'imdb' : {
+            'normalizer_fun'    : normalize_imdb,
             },
-        'amazon'    : {},
-        'open_weiboscope' : {
+        'amazon'            : {
+            'normalizer_fun'    : data_utils.normalize, 
+            },
+        'open_weiboscope'   : {
+            'normalizer_fun'    : data_utils.normalize,
             'balance_labels'    : True,
             'max_records'       : 2e6,
             },
         }
+    # use 50 words in embedding-based models of microblogs,
+    # otherwise use fifty words for other embedding-based models
     if dataset_name in ('sentiment140','open_weiboscope'):
         embedding_nr_words = 50
     else:
         embedding_nr_words = 99
 
+    if args.cnn:
+        model_args[dataset_name]['model_type'] = 'cnn'
+    elif args.lstm:
+        model_args[dataset_name]['model_type'] = 'lstm'
+        
+
     model_args[dataset_name]['nframes']=args.nframes
-    if args.glove:
-        glove_embedder = WordVectorEmbedder("glove", os.path.join(args.working_dir, "glove.twitter.27B.200d.obj"))
-        model_args[dataset_name]['normalizer_fun'] = lambda x: x.encode('ascii', 'ignore').lower()
+    if args.glove or args.word2vec:
         model_args[dataset_name]['transformer_fun'] = \
-            lambda x: glove_embedder.embed_words_into_vectors(x, embedding_nr_words)
-        model_args[dataset_name]['vocab_size'] = 200
+            lambda x: glove_embedder.embed_words_into_vectors(
+                transform_for_vectors(x), embedding_nr_words)
         model_args[dataset_name]['sequence_length'] = embedding_nr_words
         model_args[dataset_name]['crepe_variant'] = 'embedding{}'.format(embedding_nr_words)
+    if args.glove:
+        glove_embedder = WordVectorEmbedder("glove", os.path.abspath(args.glove[0]))
+        model_args[dataset_name]['vocab_size'] = 200
     if args.word2vec:
-        w2v_embedder = WordVectorEmbedder("word2vec")
+        w2v_embedder = WordVectorEmbedder("word2vec", os.path.abspath(args.word2vec[0]))
+        model_args[dataset_name]['vocab_size'] = 300
 
     try:
         logger.debug(model_args[dataset_name]['normalizer_fun'])
