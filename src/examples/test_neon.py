@@ -400,16 +400,19 @@ def main():
 
     model_args[dataset_name]['nframes']=args.nframes
     if args.glove or args.word2vec:
-        model_args[dataset_name]['transformer_fun'] = \
-            lambda x: glove_embedder.embed_words_into_vectors(
-                transform_for_vectors(x), embedding_nr_words)
         model_args[dataset_name]['sequence_length'] = embedding_nr_words
         model_args[dataset_name]['crepe_variant'] = 'embedding{}'.format(embedding_nr_words)
     if args.glove:
         glove_embedder = WordVectorEmbedder("glove", os.path.abspath(args.glove[0]))
+        model_args[dataset_name]['transformer_fun'] = \
+            lambda x: glove_embedder.embed_words_into_vectors(
+                transform_for_vectors(x), embedding_nr_words)
         model_args[dataset_name]['vocab_size'] = 200
     if args.word2vec:
         w2v_embedder = WordVectorEmbedder("word2vec", os.path.abspath(args.word2vec[0]))
+        model_args[dataset_name]['transformer_fun'] = \
+            lambda x: w2v_embedder.embed_words_into_vectors(
+                transform_for_vectors(x), embedding_nr_words)
         model_args[dataset_name]['vocab_size'] = 300
 
     try:
