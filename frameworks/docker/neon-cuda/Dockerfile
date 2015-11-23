@@ -117,7 +117,7 @@ RUN cd /opt/neon && \
 # make some updates
 RUN pip install -U six
 
-# add gensim and nltk
+# add gensim 
 RUN pip install gensim
 RUN pip install nltk
 
@@ -134,6 +134,15 @@ RUN cd /tmp && \
     cd sunny-side-up/src/glove && \
     python setup.py install && \
     rm -rf *
+
+
+# six version conflict (1.5.2 vs 1.9+)
+RUN echo "\ndeb http://archive.ubuntu.com/ubuntu/ vivid main" >> /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install python-six
+# remove vivid repositories
+RUN sed -i '$d' /etc/apt/sources.list && \
+    apt-get update
 
 # default to shell in root dir
 WORKDIR /root
