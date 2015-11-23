@@ -30,57 +30,6 @@ data_fraction_train = 0.80
 
 num_threads = multiprocessing.cpu_count()
 threadLock = threading.Lock()
-class dataProcessingThread(threading.Thread):
-    '''
-        process text,sentiment pair in a thread
-        significantly speeds up text vectorization phase
-    '''
-    def __init__(self, threadID, data, args, values, labels):
-        threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.data = data
-        self.args = args
-
-    def run(self):
-
-        # process valid entries
-        if self.data[0]:
-
-            # process valid data
-            text, sentiment = self.data
-            if text:
-                try:
-                    # normalize and tokenize if necessary
-                    if self.args.has_key('normalize'):
-                        text_normalized = data_utils.normalize(text, **self.args['normalize'])
-                    else:
-                        text_normalized = text
-
-                    # tokenize
-                    tokens = data_utils.tokenize(text_normalized)
-
-                    # choose embedding type
-                    vector = None
-                    if self.args['embed']['type'] == 'concatenated':
-                        vector = embedder.embed_words_into_vectors_concatenated(tokens, **self.args['embed'])
-                    elif self.args['embed']['type'] == 'averaged':
-                        vector = embedder.embed_words_into_vectors_averaged(tokens)
-                    else:
-                        pass
-
-                    # data labeled by sentiment score (thread-safe with lock)
-                    if vector is not None:
-                        threadLock.acquire()
-                        values.append(vector)
-                        labels.append(sentiment)
-                        threadLock.release()
-
-                except TextTooShortException as e:
-                    pass
-
-
-
-
 
 # setup logging
 logger = data_utils.syslogger(__name__)
@@ -100,9 +49,14 @@ datasets =  {
                                     'args':     { 'embed':      {   'type': 'averaged' },
                                                   'normalize':  {   'min_length': 70,
                                                                     'max_length': 150,
-                                                                    'reverse': False
+                                                                    'reverse': False,
+                                                                    'pad_out': False
                                                                 },
-                                                  'shuffle_after_load': False
+                                                  'shuffle_after_load': False,
+                                                  'models': [
+                                                        'glove',
+                                                        'word2vec'
+                                                  ]
                                                 }
                                 },
                 'imdb':         {
@@ -110,9 +64,16 @@ datasets =  {
                                     'path':     os.path.join(dir_data, 'imdb'),
                                     'args':     { 'embed':      {   'type': 'averaged' },
                                                   'normalize':  {   'encoding': None,
-                                                                    'reverse': False
+                                                                    'reverse': False,
+                                                                    'pad_out': False,
+                                                                    'min_length': 0,
+                                                                    'max_length': 9999999
                                                                 },
-                                                  'shuffle_after_load': False
+                                                  'shuffle_after_load': False,
+                                                  'models': [
+                                                        'glove',
+                                                        'word2vec'
+                                                  ]
                                                 }
                                 },
                 'amazon':       {
@@ -122,9 +83,15 @@ datasets =  {
                                                   'normalize':  {   'encoding': None,
                                                                     'reverse': False,
                                                                     'min_length': 0,
-                                                                    'max_length': 9999999
+                                                                    'max_length': 9999999,
+                                                                    'pad_out': False
                                                                 },
-                                                  'shuffle_after_load': True
+                                                  'shuffle_after_load': True,
+                                                  'models': [
+                                                        'glove',
+                                                        'word2vec',
+                                                        { 'word2vec': '/data/amazon/amazon_800000.bin' }
+                                                  ]
                                                 }
                                 },
                 'openweibo':    {
@@ -132,21 +99,17 @@ datasets =  {
                                     'path':     os.path.join(dir_data, 'openweibo'),
                                     'args':     { 'embed':      {   'type': 'averaged' },
                                                   'shuffle_after_load': True,
-                                                  'models': {
-                                                        'word2vec': {
-                                                            'prebuilt_model_path': '/data/openweibo.bin'
-                                                        }
-                                                  }
+                                                  'models': [
+                                                        'glove',
+                                                        'word2vec',
+                                                        { 'word2vec': '/data/openweibo/openweibo_800000.bin' }
+                                                  ]
                                                 }
                                 }
             }
 
 
 
-
-# word embeddings
-def embedders():
-    return ['glove','word2vec']
 
 def classifiers():
     """
@@ -180,120 +143,147 @@ def timed_training(classifier, values, labels):
 def timed_testing(classifier, values):
     return classifier.predict(values)
 
-
 @timed
 def timed_dataload(data, args, values, labels):
 
     # use separate counter to account for invalid input along the way
     counter = 0
-    print_every = math.floor(10000/num_threads)*num_threads
 
-    # iterate data
-    data_iterator = iter(data)
+    for text,sentiment in data:
 
-    # continue processing until no data is left
-    value_last = 'initialize'
-    while value_last is not None:
+        try:
+            if (counter % 10000 == 0):
+                print("Loading at {}".format(counter))
 
-        if (counter % print_every == 0):
-            print("Loading data at {}...".format(counter))
-
-        # reset subset and threads
-        subset = []
-        threads = []
-
-        # retrieve the next num_threads entries
-        for i in xrange(num_threads):
-
-            # retrieve next entry if available
-            pair = next(data_iterator, None)
-            if pair is None:
-                text = sentiment = None
+            # normalize and tokenize if necessary
+            if args.has_key('normalize'):
+                text_normalized = data_utils.normalize(text, **args['normalize'])
             else:
-                text, sentiment = pair
+                text_normalized = text
+
+            # tokenize
+            tokens = data_utils.tokenize(text_normalized)
+
+            # choose embedding type
+            vector = None
+            if args['embed']['type'] == 'concatenated':
+                vector = embedder.embed_words_into_vectors_concatenated(tokens, **self.args['embed'])
+            elif args['embed']['type'] == 'averaged':
+                vector = embedder.embed_words_into_vectors_averaged(tokens)
+            else:
+                pass
+
+            # data labeled by sentiment score (thread-safe with lock)
+            if vector is not None:
+                values.append(vector)
+                labels.append(sentiment)
                 counter += 1
 
-            # set the last value for stopping condition
-            value_last = text
-
-            # store subset of values for parallel processing
-            subset.append( (text, sentiment) )
+        except TextTooShortException as e:
+            pass
 
 
-        # setup threads
-        for i in xrange(num_threads):
+# iterate all datasources
+for data_source, data_params in datasets.iteritems():
 
-            # process data in new thread
-            thread = dataProcessingThread(i, subset[i], args, values, labels)
+    # prepare data loader
+    klass = data_params['class']
+    loader = klass(data_params['path'])
+    data_args = data_params['args']
+    data = loader.load_data()
 
-            # start thread
-            thread.start()
+    # test all vector models
+    for embedder_model in data_args['models']:
 
-            # add thread to list
-            threads.append(thread)
+        # identify prebuilt model if exists
+        prebuilt_model_path = None
+        if isinstance(embedder_model, dict):
+            embedder_model, prebuilt_model_path = embedder_model.items().pop()
 
-
-        # wit for all threads to complete
-        for t in threads:
-            t.join()
-
-
-
-# test all vector models
-for embedder_model in embedders():
-
-    # iterate all datasources
-    for data_source, data_params in datasets.iteritems():
-
-        # prepare data loader
-        klass = data_params['class']
-        loader = klass(data_params['path'])
-        data_args = data_params['args']
-        data = loader.load_data()
-
-        # initialize lists (will be converted later into numpy arrays)
-        values = []
-        labels = []
-
-        # initialize vector embedder
-        prebuilt_model_path = data_args.get('models', {}).get(embedder_model, {}).get('prebuilt_model_path', None)
+        # initialize word vector embedder
         embedder = WordVectorEmbedder(embedder_model, prebuilt_model_path)
 
         # load pre-sampled data from disk
         if prebuilt_model_path:
+
+            # import pickled data
             with open(WordVectorBuilder.filename_train(prebuilt_model_path), 'rb') as f:
-                data = pickle.load(f)
+                data_train = pickle.load(f)
+            with open(WordVectorBuilder.filename_test(prebuilt_model_path), 'rb') as f:
+                data_test = pickle.load(f)
+
+            # update embedder parameters
+            model_path_dir, model_path_filename, model_path_filext = WordVectorBuilder.filename_components(prebuilt_model_path)
+            embedder.model_group = model_path_filename
+            embedder.model_subset = model_path_filename
+
+            # initialize lists (will be converted later into numpy arrays)
+            values_train = []
+            labels_train = []
+            values_test = []
+            labels_test = []
+
+            # initialize timer
+            seconds_loading = 0
+            logger.info("processing {} samples from {}...".format(len(data_train)+len(data_test), prebuilt_model_path))
+
+            # load training dataset
+            profile_results = timed_dataload(data_train, data_args, values_train, labels_train)
+
+            # store loading time
+            seconds_loading += profile_results.timer.total_tt
+
+            # load training dataset
+            profile_results = timed_dataload(data_test, data_args, values_test, labels_test)
+
+            # store loading time
+            seconds_loading += profile_results.timer.total_tt
+
+            # create numpy arrays for classifier input
+            values_train = np.array(values_train, dtype='float32')
+            labels_train = np.array(labels_train, dtype='float32')
+            values_test = np.array(values_test, dtype='float32')
+            labels_test = np.array(labels_test, dtype='float32')
+
+            # shuffle if necessary
+            if data_args['shuffle_after_load']:
+                np.random.shuffle(values_train)
+                np.random.shuffle(labels_train)
+                np.random.shuffle(values_test)
+                np.random.shuffle(labels_test)
+
         else:
+
+            # initialize lists (will be converted later into numpy arrays)
+            values = []
+            labels = []
 
             # get equal-sized subsets of each class
             min_samples = data_args['min_samples'] if data_args.has_key('min_samples') else None
             data_sampler = DataSampler(klass, file_path=data_params['path'], num_classes=2)
             data = data_sampler.sample_balanced(min_samples)
 
-        # load dataset
-        logger.info("processing {} samples from {}...".format(len(data), data_params['path']))
-        profile_results = timed_dataload(data, data_args, values, labels)
+            # load dataset
+            logger.info("processing {} samples from {}...".format(len(data), data_params['path']))
+            profile_results = timed_dataload(data, data_args, values, labels)
 
-        # store loading time
-        seconds_loading = profile_results.timer.total_tt
+            # store loading time
+            seconds_loading = profile_results.timer.total_tt
 
-        # shuffle if necessary
-        if data_args['shuffle_after_load']:
-            indices = np.arange(len(labels))
-            np.random.shuffle(indices)
-            values = [values[i] for i in indices]
-            labels = [labels[i] for i in indices]
+            # convert into nparray for sklearn
+            values = np.array(values, dtype="float32")
+            labels = np.array(labels, dtype="float32")
+            logger.info("Loaded {} samples...".format(len(values)))
 
-        # convert into nparray for sklearn
-        values = np.array(values, dtype="float32")
-        labels = np.array(labels, dtype="float32")
-        logger.info("Loaded {} samples...".format(len(values)))
+            # shuffle if necessary
+            if data_args['shuffle_after_load']:
+                np.random.shuffle(values)
+                np.random.shuffle(labels)
 
-        # split into training and test data
-        logger.info("splitting dataset into training and testing sets...")
-        labels_train, labels_dev, labels_test = data_utils.split_data(labels, train=data_fraction_train, dev=0, test=data_fraction_test)
-        values_train, values_dev, values_test = data_utils.split_data(values, train=data_fraction_train, dev=0, test=data_fraction_test)
-        logger.info("Training on {}, Testing on {}...".format(len(values_train), len(values_test)))
+            # split into training and test data
+            logger.info("splitting dataset into training and testing sets...")
+            labels_train, labels_dev, labels_test = data_utils.split_data(labels, train=data_fraction_train, dev=0, test=data_fraction_test)
+            values_train, values_dev, values_test = data_utils.split_data(values, train=data_fraction_train, dev=0, test=data_fraction_test)
 
 
         # calculate distribution
@@ -302,6 +292,7 @@ for embedder_model in embedders():
 
 
         # setup classifier
+        logger.info("Training on {}, Testing on {}...".format(len(values_train), len(values_test)))
         for classifier_name,classifier in classifiers():
 
             # profiled training

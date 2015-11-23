@@ -27,11 +27,7 @@ class WordVectorEmbedder:
                 model_args      = { 'binary': True }
 
             # setup importer and converter
-            binary = model_args.get('binary', False)
-            if binary:
-                self.model_import_method = Doc2Vec.load_word2vec_format
-            else:
-                self.model_import_method = Doc2Vec.load
+            self.model_import_method = Doc2Vec.load_word2vec_format
             self.word_vector = self.word_vector_word2vec
 
         elif self.model_type == 'glove':
