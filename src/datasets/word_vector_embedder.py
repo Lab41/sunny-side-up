@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import re
 from glove.glove import Glove
 from gensim.models import Doc2Vec
 from model_downloader import ModelDownloader
@@ -20,7 +21,7 @@ class WordVectorEmbedder:
         if self.model_type == 'word2vec':
 
             # default model
-            if model_fullpath is None:
+            if model_fullpath is None or re.search('GoogleNews-vectors-negative300.bin', model_fullpath):
                 model_dir       = '/data'
                 model_group     = 'google-news'
                 model_subset    = 'GoogleNews-vectors-negative300.bin'
