@@ -372,6 +372,8 @@ def main():
     arg_parser.add_argument("--momentum_coef", default=0.9, type=float, help="Momentum coefficient, default 0.9")
     arg_parser.add_argument("--batch_size", default=128, type=int, help="Batch size")
     arg_parser.add_argument("--nframes", default=256, type=int, help="Frame buffer size for CREPE. 256 or 1024.")
+    arg_parser.add_argument("--rng_seed",default=None,type=float, help="Random number seed")
+    arg_parser.add_argument("--do_evals", default=False, action="store_true")
     arg_parser.add_argument("--log_level", default=logging.INFO, type=int)
 
     args = arg_parser.parse_args()
@@ -465,6 +467,10 @@ def main():
              learning_rate=args.learning_rate,
              momentum_coef=args.momentum_coef,
              batch_size=args.batch_size,
+             rng_seed=args.rng_seed,
              **model_args[dataset_name])
+    if args.do_evals:
+        do_evaluations(args.results_dir)
+
 if __name__=="__main__":
     main()
