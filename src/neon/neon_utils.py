@@ -85,7 +85,7 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         # save total cost to placeholder to compute difference in next batch
         self.old_cost[:] = self.model.total_cost
         # serialize every so often
-        if len(self.costs[epoch]) % 1 == 0:
+        if len(self.costs[epoch]) % 100 == 0:
             self.write_to_json(self.costs, self.save_path, "_costs")
 
     def on_epoch_begin(self, epoch):
