@@ -302,7 +302,8 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
         momentum_coef=momentum_coef,
         schedule=decay_schedule)
     rmsprop = neon.optimizers.RMSProp(learning_rate=learning_rate)
-    optimizer = sgd
+    adam = neon.optimizers.Adam(learning_rate)
+    optimizer = rmsprop
 
     logger.info("Doing training...")
     # main training loop
