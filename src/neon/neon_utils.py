@@ -54,7 +54,7 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         path_part, ext = os.path.splitext(path_base)
         full_path = "{}{}{}".format(path_part, path_decorator, ext)
         with open(full_path, "w") as f:
-            json.dump(obj, f)
+            json.dump(obj, f, sort_keys=True, indent=2)
 
     def on_train_begin(self, epochs):
         # get start time for training
