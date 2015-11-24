@@ -53,19 +53,19 @@ class DataSampler:
         else:
             return 0
 
-    def sample_balanced(self, min_samples=None, shuffle=True, sample=False):
+    def sample_balanced(self, min_samples=None, shuffle=True, sample_after_load=False):
         '''
             Returns dataset with equal numbers of each label
 
             @Arguments:
-                min_samples --  if not None, will return dataset with each label having <= this number datapoints
-                                if None, will return dataset with each label having a size equal to the smallest subset size
+                min_samples         --  if not None, will return dataset with each label having <= this number datapoints
+                                        if None, will return dataset with each label having a size equal to the smallest subset size
 
-                shuffle     --  if True, will return dataset with shuffled (data,label) tuples
-                                if False, will return dataset ordered by (data,label1)...(data,label2)...
+                shuffle             --  if True, will return dataset with shuffled (data,label) tuples
+                                        if False, will return dataset ordered by (data,label1)...(data,label2)...
 
-                sample      --  if True, will sample from overrepresented datasets after loading
-                                if False, will simply return the first-N samples from each label type
+                sample_after_load   --  if True, will sample from overrepresented datasets after loading
+                                        if False, will simply return the first-N samples from each label type
 
             @Returns:
                 list of (data, label) tuples
@@ -89,7 +89,7 @@ class DataSampler:
                 try:
 
                     # append value if sampling or if more values needed
-                    if sample or not min_samples or len(self.samples[sentiment]) < min_samples:
+                    if sample_after_load or not min_samples or len(self.samples[sentiment]) < min_samples:
                         self.samples[sentiment].append(text)
 
                 # create list of samples for first entry
@@ -103,7 +103,7 @@ class DataSampler:
         for sentiment in self.samples.iterkeys():
 
             # randomly sample among all possible
-            if sample:
+            if sample_after_load:
 
                 # generate subsample of random indices out of total available
                 indices = range(len(self.samples[sentiment]))
@@ -185,7 +185,7 @@ class WordVectorBuilder:
         # get balanced set of sentences
         logger.info('getting minimum of {} samples...'.format(min_samples))
         data_sampler = DataSampler(self.loader, file_path=self.data_path, num_classes=num_classes)
-        samples = data_sampler.sample_balanced(min_samples)
+        samples = data_sampler.sample_balanced(min_samples, sample_after_load=True)
         samples_train, samples_dev, samples_test = split_data(samples, train=data_fraction_train, dev=0, test=data_fraction_test)
 
         # identify file paths with min samples
