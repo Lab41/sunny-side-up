@@ -190,7 +190,7 @@ class WordVectorBuilder:
 
         # identify file paths with min samples
         model_path_dir, model_path_filename, model_path_filext = WordVectorBuilder.filename_components(model_path)
-        model_path_full = '{}{}_{}{}'.format(model_path_dir, model_path_filename, data_sampler.min_current_samples(), model_path_filext)
+        model_path_full = os.path.join(model_path_dir, '{}_{}{}'.format(model_path_filename, data_sampler.min_current_samples(), model_path_filext))
 
         # save off datasets to avoid train-test contamination
         logger.info('saving model training and test data...')
