@@ -1,0 +1,76 @@
+{
+    "classifier": "GaussianNB",
+    "data": {
+        "negative": "80229.0",
+        "positive": "78957.0",
+        "source": "sentiment140",
+        "testsize": "159186",
+        "time_in_seconds_loading": "135.505742"
+    },
+    "embedding": {
+        "model": "word2vec",
+        "subset": "GoogleNews-vectors-negative300.bin"
+    },
+    "data_args": {
+        "normalize": {
+            "max_length": 150,
+            "min_length": 70,
+            "reverse": false
+        }
+    },
+    "metrics": {
+        "FN": "35707",
+        "FP": "20662",
+        "TN": "59567",
+        "TP": "43250",
+        "accuracy": "0.645892226703",
+        "f1": "0.605449747671",
+        "precision": "0.676711728627",
+        "recall": "0.54776650582",
+        "time_in_seconds_testing": "1.406346",
+        "time_in_seconds_training": "1.892677"
+    }
+}
+{
+    "classifier": "GaussianNB",
+    "data": {
+        "negative": "79608.0",
+        "positive": "78964.0",
+        "source": "sentiment140",
+        "testsize": "158572",
+        "time_in_seconds_loading": "150.116113"
+    },
+    "data_args": {
+        "embed": {
+            "type": "averaged"
+        },
+        "models": [
+            {
+                "word2vec": "/data/sentiment140_800000.bin"
+            }
+        ],
+        "normalize": {
+            "max_length": 150,
+            "min_length": 70,
+            "pad_out": false,
+            "reverse": false
+        },
+        "shuffle_after_load": false
+    },
+    "embedding": {
+        "model": "word2vec",
+        "subset": "sentiment140_800000"
+    },
+    "metrics": {
+        "FN": "32380",
+        "FP": "20551",
+        "TN": "59057",
+        "TP": "46584",
+        "accuracy": "0.666202103776",
+        "f1": "0.637704570189",
+        "precision": "0.693885454681",
+        "recall": "0.589939719366",
+        "time_in_seconds_testing": "0.671527",
+        "time_in_seconds_training": "1.388206"
+    }
+}
