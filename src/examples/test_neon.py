@@ -39,6 +39,7 @@ from src.datasets.data_utils import from_one_hot
 from src.datasets.neon_iterator import DiskDataIterator
 from src.neon.neon_utils import ConfusionMatrixBinary, NeonCallbacks, NeonCallback, Accuracy
 from src.datasets.word_vector_embedder import WordVectorEmbedder
+from src.datasets.model_downloader import ModelDownloader
 
 # turn down certain verbose logging levels
 #logging.getLogger("src.datasets.batch_data").setLevel(logging.INFO)
@@ -386,24 +387,40 @@ def main():
             },
         }
     # use 50 words in embedding-based models of microblogs,
-    # otherwise use fifty words for other embedding-based models
+    # otherwise use 99 words for other embedding-based models
     if dataset_name in ('sentiment140','open_weiboscope'):
         embedding_nr_words = 50
     else:
         embedding_nr_words = 99
 
+    # CNN or LSTM
     if args.cnn:
         model_args[dataset_name]['model_type'] = 'cnn'
+        # character-based by default (overridden for embedding-based, below)
+        model_args[dataset_name]['transformer_fun'] = data_utils.to_one_hot
     elif args.lstm:
         model_args[dataset_name]['model_type'] = 'lstm'
-        
+        # for character-based LSTM, re-reverse data
+        if not (args.glove or args.word2vec):
+            model_args[dataset_name]['transformer_fun'] = reverse_one_hot
 
+    # set default hidden size (overridden for embedding-based models below)
+    model_args[dataset_name]['hidden_size'] = 10
     model_args[dataset_name]['nframes']=args.nframes
+    # parameters for embedding-based models
     if args.glove or args.word2vec:
         model_args[dataset_name]['sequence_length'] = embedding_nr_words
         model_args[dataset_name]['crepe_variant'] = 'embedding{}'.format(embedding_nr_words)
+	model_args[dataset_name]['hidden_size'] = 200
     if args.glove:
-        glove_embedder = WordVectorEmbedder("glove", os.path.abspath(args.glove[0]))
+        glove_path = os.path.abspath(args.glove[0])
+        if not os.path.isfile(glove_path):
+            model_downloader = ModelDownloader('glove')
+            glove_url = model_downloader.data_location['twitter-2b']['url']
+            glove_dir = os.path.dirname(glove_path)
+            glove_file = os.path.basename(glove_path)
+            model_downloader.download_and_save_vectors(glove_url, glove_dir, glove_file)
+        glove_embedder = WordVectorEmbedder("glove",glove_path) 
         model_args[dataset_name]['transformer_fun'] = \
             lambda x: glove_embedder.embed_words_into_vectors(
                 transform_for_vectors(x), embedding_nr_words)
