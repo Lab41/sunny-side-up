@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import json
 import numpy as np
 import matplotlib
@@ -12,7 +13,7 @@ arg_parser.add_argument("--start", default=25, type=int)
 arg_parser.add_argument("cost_file", default="metrics_costs.json", nargs="?")
 args = arg_parser.parse_args()
 
-def plot_costs(json_path):
+def plot_costs(json_path, path_prefix=""):
     with open(json_path) as f:
         json_obj = json.load(f)
         #df = np.array(json_obj)
@@ -21,7 +22,7 @@ def plot_costs(json_path):
             costs_epoch = np.array(list(enumerate(epoch)))
             plt.figure()
             plt.plot(costs_epoch[args.start:,0], costs_epoch[args.start:,1])
-            plt.savefig("costs_{}.png".format(idx))
+            plt.savefig(os.path.join(path_prefix, "costs_{}.png".format(idx)))
             plt.close()
 
 if __name__=="__main__":
