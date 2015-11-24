@@ -253,7 +253,7 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
         balance_labels=balance_labels,
         max_records=max_records)
     # diagnostic peek at the data
-    train_batch_beta = test_get()
+    train_batch_beta = train_get()
     logger.debug("First record shape: {}".format(train_batch_beta.next()[0].shape))
 
     # Create neon DataIterators for train and test sets
