@@ -106,6 +106,20 @@ datasets =  {
                                                   ]
                                                 }
                                 }
+,
+                'openweibo':    {
+                                    'class':    OpenWeibo,
+                                    'path':     os.path.join(dir_data, 'openweibocensored'),
+                                    'args':     { 'load': { 'form': 'hanzi' },
+                                                  'embed':      {   'type': 'averaged' },
+                                                  'shuffle_after_load': True,
+                                                  'models': [
+                                                        'glove',
+                                                        'word2vec',
+                                                        { 'word2vec': '/data/openweibocensored/openweibo_hanzi.bin' }# TODO
+                                                  ]
+                                                }
+                                }
             }
 
 
@@ -162,7 +176,10 @@ def timed_dataload(data, args, values, labels):
                 text_normalized = text
 
             # tokenize
-            tokens = data_utils.tokenize(text_normalized)
+            if data_args.get('load', {}).get('form', None) == 'hanzi':
+                tokens = data_utils.tokenize_hanzi(text_normalized)
+            else:
+                tokens = data_utils.tokenize(text_normalized)
 
             # choose embedding type
             vector = None
@@ -190,7 +207,8 @@ for data_source, data_params in datasets.iteritems():
     klass = data_params['class']
     loader = klass(data_params['path'])
     data_args = data_params['args']
-    data = loader.load_data()
+    load_args = data_args.get('load', {})
+    data = loader.load_data(load_args)
 
     # test all vector models
     for embedder_model in data_args['models']:
