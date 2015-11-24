@@ -234,7 +234,7 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
         logger.debug("Was trying to create results directory, but it may already exist",
             exc_info=True)
     with open(metadata_path, "w") as f:
-        json.dump(run_metadata, f)
+        json.dump(run_metadata, f, indent=2)
 
     logger.info("Getting backend...")
     be = gen_backend(backend='gpu', batch_size=batch_size, device_id=gpu_id, rng_seed=rng_seed)
