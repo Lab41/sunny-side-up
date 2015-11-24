@@ -320,6 +320,19 @@ def transform_for_vectors(txt):
 def normalize_imdb(txt):
     return data_utils.normalize(txt, encoding=None)
 
+def reverse(txt):
+    return txt[::-1]
+
+def reverse_one_hot(txt):
+    return data_utils.to_one_hot(reverse(txt))
+
+def do_evaluation(results_dir):
+    # import here to shield matplotlib dependency
+    from src.datasets.examples import plot_costs
+    plot_costs.plot_costs(os.path.join(results_dir,"metrics_costs.json"), results_dir)
+    # calculate precisions, recalls, etc.
+
+
 def main():
     model_defaults = {
         'imdb': {
