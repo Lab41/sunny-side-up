@@ -112,7 +112,7 @@ def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_rec
     nr_yielded = 0
     for table_path in data_sets[which_set]:
 
-        with open(table_path, 'rb') as f:
+        with open(table_path, 'rbU') as f:
             csv_reader = csv.reader(f, dialect=csv.excel)
 
             logging.debug("In file {}".format(table_path))
