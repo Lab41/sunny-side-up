@@ -104,16 +104,17 @@ class DiskDataIterator(NervanaObject):
             bsz = i2 - i1
             # TODO: implement wraparound. as of now, partial batches are discarded
             X, y = next(self.datagen)
-            # logger.debug("\nX labels shape: {}, X' shape: {}"
-            #             "\nXbuf shape: {}, Xbuf flat shape: {}"
-            #             "\nY labels shape: {}, Y buffer shape: {}, Y input shape: {}".format(
-            #        self.xlabels.shape,
-            #        X.T.shape,
-            #        self.Xbuf.shape,
-            #        self.Xbuf_flat.shape,
-            #        self.ylabels.shape,
-            #        self.ybuf.shape,
-            #        y.shape))
+            if batch_i % 10 == 0:
+                logger.debug("\nX labels shape: {}, X' shape: {}"
+                         "\nXbuf shape: {}, Xbuf flat shape: {}"
+                         "\nY labels shape: {}, Y buffer shape: {}, Y input shape: {}".format(
+                    self.xlabels.shape,
+                    X.T.shape,
+                    self.Xbuf.shape,
+                    self.Xbuf_flat.shape,
+                    self.ylabels.shape,
+                    self.ybuf.shape,
+                    y.shape))
             # This is where data is copied from host memory
             # to the backend. For some reason, it is
             # best to transpose it. X is expected to 
