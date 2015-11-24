@@ -62,7 +62,7 @@ def lstm_model_draft(nvocab=67, hidden_size=20, embedding_dim=60):
         ]
     return layers
 
-def lstm_model(hidden_size=300, noutput=2):
+def lstm_model(hidden_size=200, noutput=2):
     layers = [
         neon.layers.LSTM(hidden_size,
                          init=neon.initializers.GlorotUniform(),
@@ -184,6 +184,7 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
         nr_epochs=30,
         nr_to_save=5,
         save_freq=2,
+        hidden_size=200,
         crepe_variant=None,
         warm_start_path=None,
         max_records=None,
@@ -216,7 +217,12 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
         'momentum_coef'     : momentum_coef,
         'model_type'        : model_type,
         'model_variant'     : crepe_variant,
+        'rng_seed'          : rng_seed,
     }
+    if model_type=='lstm':
+        run_metadata['hidden_size'] = hidden_size
+    elif model_type=='cnn':
+        run_metadata['model_variant'] = crepe_variant
     try:
         os.mkdir(working_dir)
     except OSError:
@@ -267,7 +273,7 @@ def do_model(dataset_name, working_dir, results_path, data_path, hdf5_path,
     if model_type=='cnn':
         model_layers = crepe_model(nvocab=vocab_size,nframes=nframes,variant=crepe_variant,batch_norm=True)
     elif model_type=='lstm':
-        model_layers = lstm_model()
+        model_layers = lstm_model(hidden_size=hidden_size)
 
     mlp = neon.models.Model(model_layers)
 
@@ -366,12 +372,12 @@ def main():
     if not args.hdf5_path:
         args.hdf5_path = os.path.join(args.working_dir, model_defaults[dataset_name]['hdf5_name'])
 
+    # dataset-specific arguments to do_model
     model_args = { 
         'sentiment140' : {
-            'max_length'        : 150,
             'min_length'        : 70,
+            'max_length'        : 150,
             'normalizer_fun'    : normalize_tweet,
-            'transformer_fun'   : data_utils.to_one_hot,
             'variant'           : 'tweet_character',
             },
         'imdb' : {
