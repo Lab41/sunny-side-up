@@ -59,7 +59,7 @@ def check_for_csvs(data_path):
             return False
     return True
 
-def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_records=None, rng_seed=None, min_length=None, max_length=None, pad_out=False):
+def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_records=None, rng_seed=None, min_length=None, max_length=None, pad_out=False, keep_retweets=False):
     """
     Load data from Open Weiboscope corpus of Sina Weibo posts. Options are available for encoding
     of returned text data. 
@@ -134,6 +134,7 @@ def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_rec
                     post_deleted = records_split[9] != ''
                    
                     if not post_retweeted:
+                    if keep_retweets or not post_retweeted:
                         if form=='hanzi':
                             record_txt, sentiment = enforce_length(
                                 post_text, min_length, max_length, 
@@ -222,5 +223,5 @@ class OpenWeibo:
         self.file_path = file_path
         download_data(file_path)
 
-    def load_data(self):
-        return load_data(self.file_path)
+    def load_data(self, which_set='train', form='pinyin', train_pct=1.0, nr_records=None, rng_seed=None, min_length=None, max_length=None, pad_out=False, keep_retweets=False):
+        return load_data(self.file_path, which_set=which_set, form=form, train_pct=train_pct, nr_records=nr_records, rng_seed=rng_seed, min_length=min_length, max_length=max_length, pad_out=pad_out, keep_retweets=keep_retweets)
