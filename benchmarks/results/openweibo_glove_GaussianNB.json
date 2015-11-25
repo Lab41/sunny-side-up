@@ -1,0 +1,67 @@
+{
+    "classifier": "GaussianNB",
+    "data": {
+        "negative": "259819.0",
+        "positive": "17862.0",
+        "source": "openweibo",
+        "testsize": "277681",
+        "time_in_seconds_loading": "12188.695802"
+    },
+    "data_args": {
+        "embed": {
+            "type": "averaged"
+        },
+        "shuffle_after_load": true
+    },
+    "embedding": {
+        "model": "glove",
+        "subset": "glove.twitter.27B.200d"
+    },
+    "metrics": {
+        "FN": "7338",
+        "FP": "124345",
+        "TN": "135474",
+        "TP": "10524",
+        "accuracy": "0.525775980352",
+        "f1": "0.137810922472",
+        "precision": "0.0780312747926",
+        "recall": "0.589183742022",
+        "time_in_seconds_testing": "1.064527",
+        "time_in_seconds_training": "1.37853"
+    }
+}
+{
+    "classifier": "GaussianNB",
+    "data": {
+        "negative": "160117.0",
+        "positive": "159883.0",
+        "source": "openweibo",
+        "testsize": "320000",
+        "time_in_seconds_loading": "203.597981"
+    },
+    "data_args": {
+        "embed": {
+            "type": "averaged"
+        },
+        "models": [
+            "glove"
+        ],
+        "shuffle_after_load": true
+    },
+    "embedding": {
+        "model": "glove",
+        "subset": "glove.twitter.27B.200d"
+    },
+    "metrics": {
+        "FN": "51382",
+        "FP": "108763",
+        "TN": "51354",
+        "TP": "108501",
+        "accuracy": "0.499546875",
+        "f1": "0.575377770471",
+        "precision": "0.499397046911",
+        "recall": "0.678627496357",
+        "time_in_seconds_testing": "1.346344",
+        "time_in_seconds_training": "1.543608"
+    }
+}

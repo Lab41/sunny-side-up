@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import re
 from glove.glove import Glove
 from gensim.models import Doc2Vec
 from model_downloader import ModelDownloader
@@ -20,18 +21,14 @@ class WordVectorEmbedder:
         if self.model_type == 'word2vec':
 
             # default model
-            if model_fullpath is None:
+            if model_fullpath is None or re.search('GoogleNews-vectors-negative300.bin', model_fullpath):
                 model_dir       = '/data'
                 model_group     = 'google-news'
                 model_subset    = 'GoogleNews-vectors-negative300.bin'
                 model_args      = { 'binary': True }
 
             # setup importer and converter
-            binary = model_args.get('binary', False)
-            if binary:
-                self.model_import_method = Doc2Vec.load_word2vec_format
-            else:
-                self.model_import_method = Doc2Vec.load
+            self.model_import_method = Doc2Vec.load_word2vec_format
             self.word_vector = self.word_vector_word2vec
 
         elif self.model_type == 'glove':
@@ -124,7 +121,7 @@ class WordVectorEmbedder:
             else:
                 padding_length = num_features - len(vectors)
                 for i in xrange(padding_length):
-                    vectors.append(np.zeros(num_features*self.num_features()))
+                    vectors.append(np.zeros(self.num_features()))
 
         # return ndarray of embedded words
         return np.array(vectors)

@@ -15,21 +15,24 @@ neg_label = 0
 
 
 
-def load_data(file_dir="./.downloads", download_dir="./.downloads"):
+def load_data(file_dir="./.downloads", download_dir="./.downloads", rng_seed=None):
 
     imdb_loader = IMDB(file_dir, download_dir)
-    return imdb_loader.load_data()
+    return imdb_loader.load_data(file_dir=file_dir, download_dir=download_dir, rng_seed=rng_seed)
 
 
 class IMDB:
 
-    def __init__(self, file_dir="./.downloads", download_dir="./.downloads"):
+    def __init__(self, file_dir="./.downloads", download_dir="./.downloads", rng_seed=None):
 
         # download the data
         imdb_root = self.download_data(file_dir, download_dir)
 
-        # get the data and shuffle it
+        # get the data
         self.data = self.load_datafiles(imdb_root)
+
+        # shuffle the data
+        random.seed(rng_seed)
         random.shuffle(self.data)
 
         # setup the number of samples
