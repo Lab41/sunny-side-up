@@ -53,7 +53,7 @@ class DataSampler:
         else:
             return 0
 
-    def sample_balanced(self, min_samples=None, shuffle=True, sample_after_load=False):
+    def sample_balanced(self, min_samples=None, shuffle=True, sample_after_load=False, rng_seed=None):
         '''
             Returns dataset with equal numbers of each label
 
@@ -100,6 +100,7 @@ class DataSampler:
         min_current_samples = self.min_current_samples()
 
         # process each label type via either sampling or N-first
+        random.seed(rng_seed)
         for sentiment in self.samples.iterkeys():
 
             # randomly sample among all possible

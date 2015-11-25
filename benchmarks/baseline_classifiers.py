@@ -46,7 +46,8 @@ datasets =  {
                 'sentiment140': {
                                     'class':    Sentiment140,
                                     'path':     os.path.join(dir_data, 'sentiment140.csv'),
-                                    'args':     { 'embed':      {   'type': 'averaged' },
+                                    'args':     { 'load':       {   'rng_seed': 13337 },
+                                                  'embed':      {   'type': 'averaged' },
                                                   'normalize':  {   'min_length': 70,
                                                                     'max_length': 150,
                                                                     'reverse': False,
@@ -62,7 +63,8 @@ datasets =  {
                 'imdb':         {
                                     'class':    IMDB,
                                     'path':     os.path.join(dir_data, 'imdb'),
-                                    'args':     { 'embed':      {   'type': 'averaged' },
+                                    'args':     { 'load':       {   'rng_seed': 13337 },
+                                                  'embed':      {   'type': 'averaged' },
                                                   'normalize':  {   'encoding': None,
                                                                     'reverse': False,
                                                                     'pad_out': False,
@@ -79,7 +81,8 @@ datasets =  {
                 'amazon':       {
                                     'class':    AmazonReviews,
                                     'path':     os.path.join(dir_data, 'amazonreviews.gz'),
-                                    'args':     { 'embed':      {   'type': 'averaged' },
+                                    'args':     { 'load':       {   'rng_seed': 13337 },
+                                                  'embed':      {   'type': 'averaged' },
                                                   'normalize':  {   'encoding': None,
                                                                     'reverse': False,
                                                                     'min_length': 0,
@@ -97,7 +100,8 @@ datasets =  {
                 'openweibo':    {
                                     'class':    OpenWeibo,
                                     'path':     os.path.join(dir_data, 'openweibo'),
-                                    'args':     { 'embed':      {   'type': 'averaged' },
+                                    'args':     { 'load':       {   'rng_seed': 13337 },
+                                                  'embed':      {   'type': 'averaged' },
                                                   'shuffle_after_load': True,
                                                   'models': [
                                                         'glove',
@@ -110,7 +114,9 @@ datasets =  {
                 'openweibo':    {
                                     'class':    OpenWeibo,
                                     'path':     os.path.join(dir_data, 'openweibocensored'),
-                                    'args':     { 'load': { 'form': 'hanzi' },
+                                    'args':     { 'load':   {   'form': 'hanzi',
+                                                                'randomseed': 13337
+                                                            },
                                                   'embed':      {   'type': 'averaged' },
                                                   'shuffle_after_load': True,
                                                   'models': [
@@ -277,9 +283,8 @@ for data_source, data_params in datasets.iteritems():
             labels = []
 
             # get equal-sized subsets of each class
-            min_samples = data_args['min_samples'] if data_args.has_key('min_samples') else None
             data_sampler = DataSampler(klass, file_path=data_params['path'], num_classes=2)
-            data = data_sampler.sample_balanced(min_samples)
+            data = data_sampler.sample_balanced(min_samples=data_args.get('min_samples', None), rng_seed=data_args.get('load', {}).get('rng_seed', None))
 
             # load dataset
             logger.info("processing {} samples from {}...".format(len(data), data_params['path']))
