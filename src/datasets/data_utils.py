@@ -272,19 +272,23 @@ def normalize(txt, vocab=None, replace_char=' ',
     @Raises:
         DataException, TextTooShortException
     '''
+
+    # store length for multiple comparisons
+    txt_len = len(txt)
+
     # reject txt if too short
-    if len(txt) < min_length:
-        raise TextTooShortException("Too short: {}".format(len(txt)))
+    if txt_len < min_length:
+        raise TextTooShortException("Too short: {}".format(txt_len))
     # truncate if too long
     if truncate_left:
         txt = txt[-max_length:]
-    else:    
-        txt = txt[0:max_length]
+    else:
+        txt = txt[:max_length]
     # change case
-    if to_lower==True:
+    if to_lower:
         txt = txt.lower()
     # Reverse order
-    if reverse == True:
+    if reverse:
         txt = txt[::-1]
     # replace chars
     if vocab is not None:
@@ -293,8 +297,8 @@ def normalize(txt, vocab=None, replace_char=' ',
     if encoding is not None:
         txt = txt.encode(encoding, errors="ignore")
     # pad out if needed
-    if pad_out==True:
-        txt = replace_char * (max_length - len(txt)) + txt        
+    if pad_out and max_length>txt_len:
+        txt = replace_char * (max_length - txt_len) + txt
     return txt
 
 zhang_lecun_vocab=list("abcdefghijklmnopqrstuvwxyz0123456789,;.!?:'\"/|_@#$%^&*~`+-=<>()[]{}")
