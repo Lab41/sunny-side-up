@@ -93,7 +93,9 @@ datasets =  {
                                                   'models': [
                                                         'glove',
                                                         'word2vec',
-                                                        { 'word2vec': '/data/amazon/amazon_800000.bin' }
+                                                        {
+                                                            'word2vec':   {   'model': '/data/amazon/amazon_800000.bin' }
+                                                        }
                                                   ]
                                                 }
                                 },
@@ -106,7 +108,9 @@ datasets =  {
                                                   'models': [
                                                         'glove',
                                                         'word2vec',
-                                                        { 'word2vec': '/data/openweibo/openweibo_800000.bin' }
+                                                        {
+                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_800000.bin' }
+                                                        }
                                                   ]
                                                 }
                                 }
@@ -122,7 +126,9 @@ datasets =  {
                                                   'models': [
                                                         'glove',
                                                         'word2vec',
-                                                        { 'word2vec': '/data/openweibocensored/openweibo_hanzi.bin' }# TODO
+                                                        {
+                                                            'word2vec':   {   'model': '/data/openweibocensored/openweibo_hanzi.bin' } #TODO
+                                                        }
                                                   ]
                                                 }
                                 }
@@ -220,24 +226,37 @@ for data_source, data_params in datasets.iteritems():
     for embedder_model in data_args['models']:
 
         # identify prebuilt model if exists
-        prebuilt_model_path = None
+        prebuilt_path_model = None
         if isinstance(embedder_model, dict):
-            embedder_model, prebuilt_model_path = embedder_model.items().pop()
+            embedder_model, prebuilt_model_params = embedder_model.items().pop()
+            prebuilt_path_model = prebuilt_model_params.get('model')
 
         # initialize word vector embedder
-        embedder = WordVectorEmbedder(embedder_model, prebuilt_model_path)
+        embedder = WordVectorEmbedder(embedder_model, prebuilt_path_model)
 
         # load pre-sampled data from disk
-        if prebuilt_model_path:
+        if prebuilt_path_model:
+
+            # training data (custom or default)
+            if prebuilt_model_params.get('train', None):
+                prebuilt_path_train = prebuilt_model_params.get('train')
+            else:
+                prebuilt_path_train = WordVectorBuilder.filename_train(prebuilt_path_model)
+
+            # testing data (custom or default)
+            if prebuilt_model_params.get('test', None):
+                prebuilt_path_test = prebuilt_model_params.get('test')
+            else:
+                prebuilt_path_test = WordVectorBuilder.filename_test(prebuilt_path_model)
 
             # import pickled data
-            with open(WordVectorBuilder.filename_train(prebuilt_model_path), 'rb') as f:
+            with open(prebuilt_path_train, 'rb') as f:
                 data_train = pickle.load(f)
-            with open(WordVectorBuilder.filename_test(prebuilt_model_path), 'rb') as f:
+            with open(prebuilt_path_test, 'rb') as f:
                 data_test = pickle.load(f)
 
             # update embedder parameters
-            model_path_dir, model_path_filename, model_path_filext = WordVectorBuilder.filename_components(prebuilt_model_path)
+            model_path_dir, model_path_filename, model_path_filext = WordVectorBuilder.filename_components(prebuilt_path_model)
             embedder.model_group = model_path_filename
             embedder.model_subset = model_path_filename
 
@@ -249,7 +268,7 @@ for data_source, data_params in datasets.iteritems():
 
             # initialize timer
             seconds_loading = 0
-            logger.info("processing {} samples from {}...".format(len(data_train)+len(data_test), prebuilt_model_path))
+            logger.info("processing {} samples from {}...".format(len(data_train)+len(data_test), prebuilt_path_model))
 
             # load training dataset
             profile_results = timed_dataload(data_train, data_args, values_train, labels_train)
