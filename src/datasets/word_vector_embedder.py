@@ -142,7 +142,7 @@ class WordVectorEmbedder:
         # choose model
         if self.model_type == 'glove':
             word_ids = [self.model.dictionary[word] for word in words if word in self.word_set]
-            return np.mean(self.model.word_vectors[word_ids], axis=0)
+            return np.nan_to_num(np.mean(self.model.word_vectors[word_ids], axis=0))
         else:
 
             # process valid words
@@ -153,7 +153,7 @@ class WordVectorEmbedder:
                 vectors = self.word_vector(valid_words)
 
                 # find the average/paragraph vector
-                return np.mean(vectors, axis=0)
+                return np.nan_to_num(np.mean(vectors, axis=0))
 
             else:
                 raise TextTooShortException()

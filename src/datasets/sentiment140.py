@@ -12,9 +12,9 @@ sentiment_binary = {0: 0, 4: 1}
 
 
 # backwards-compatibility
-def load_data(file_path="./.downloads/sentiment140.csv", feat_extractor=None, verbose=False, return_iter=True):
+def load_data(file_path="./.downloads/sentiment140.csv", feat_extractor=None, verbose=False, return_iter=True, rng_seed=None):
     loader = Sentiment140(file_path)
-    return loader.load_data(feat_extractor=feat_extractor, verbose=verbose, return_iter=return_iter)
+    return loader.load_data(feat_extractor=feat_extractor, verbose=verbose, return_iter=return_iter, rng_seed=rng_seed)
 
 def to_txt(write_path, read_path=None, verbose=False):
     loader = Sentiment140(read_path)
@@ -56,7 +56,7 @@ class Sentiment140:
                 shutil.move(os.path.join(file_dir, filename), file_path)
 
 
-    def load_data(self, feat_extractor=None, verbose=False, return_iter=True):
+    def load_data(self, feat_extractor=None, verbose=False, return_iter=True, rng_seed=None):
         ''' Function that takes in a path to the StanfordTweetData CSV
             file, opens it, and adds tweet strings and their respective
             sentiments to a list
@@ -124,6 +124,7 @@ class Sentiment140:
         twitter_csv.close()
 
         # shuffle dataset
+        random.seed(rng_seed)
         random.shuffle(tweet_to_sentiment)
 
         # return list or iterator

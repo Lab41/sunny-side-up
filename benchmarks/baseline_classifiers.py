@@ -46,7 +46,8 @@ datasets =  {
                 'sentiment140': {
                                     'class':    Sentiment140,
                                     'path':     os.path.join(dir_data, 'sentiment140.csv'),
-                                    'args':     { 'embed':      {   'type': 'averaged' },
+                                    'args':     { 'load':       {   'rng_seed': 13337 },
+                                                  'embed':      {   'type': 'averaged' },
                                                   'normalize':  {   'min_length': 70,
                                                                     'max_length': 150,
                                                                     'reverse': False,
@@ -62,7 +63,8 @@ datasets =  {
                 'imdb':         {
                                     'class':    IMDB,
                                     'path':     os.path.join(dir_data, 'imdb'),
-                                    'args':     { 'embed':      {   'type': 'averaged' },
+                                    'args':     { 'load':       {   'rng_seed': 13337 },
+                                                  'embed':      {   'type': 'averaged' },
                                                   'normalize':  {   'encoding': None,
                                                                     'reverse': False,
                                                                     'pad_out': False,
@@ -79,7 +81,8 @@ datasets =  {
                 'amazon':       {
                                     'class':    AmazonReviews,
                                     'path':     os.path.join(dir_data, 'amazonreviews.gz'),
-                                    'args':     { 'embed':      {   'type': 'averaged' },
+                                    'args':     { 'load':       {   'rng_seed': 13337 },
+                                                  'embed':      {   'type': 'averaged' },
                                                   'normalize':  {   'encoding': None,
                                                                     'reverse': False,
                                                                     'min_length': 0,
@@ -90,19 +93,42 @@ datasets =  {
                                                   'models': [
                                                         'glove',
                                                         'word2vec',
-                                                        { 'word2vec': '/data/amazon/amazon_800000.bin' }
+                                                        {
+                                                            'word2vec':   {   'model': '/data/amazon/amazon_800000.bin' }
+                                                        }
                                                   ]
                                                 }
                                 },
                 'openweibo':    {
                                     'class':    OpenWeibo,
                                     'path':     os.path.join(dir_data, 'openweibo'),
-                                    'args':     { 'embed':      {   'type': 'averaged' },
+                                    'args':     { 'load':       {   'rng_seed': 13337 },
+                                                  'embed':      {   'type': 'averaged' },
                                                   'shuffle_after_load': True,
                                                   'models': [
                                                         'glove',
                                                         'word2vec',
-                                                        { 'word2vec': '/data/openweibo/openweibo_800000.bin' }
+                                                        {
+                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_800000.bin' }
+                                                        }
+                                                  ]
+                                                }
+                                }
+,
+                'openweibo':    {
+                                    'class':    OpenWeibo,
+                                    'path':     os.path.join(dir_data, 'openweibocensored'),
+                                    'args':     { 'load':   {   'form': 'hanzi',
+                                                                'randomseed': 13337
+                                                            },
+                                                  'embed':      {   'type': 'averaged' },
+                                                  'shuffle_after_load': True,
+                                                  'models': [
+                                                        'glove',
+                                                        'word2vec',
+                                                        {
+                                                            'word2vec':   {   'model': '/data/openweibocensored/openweibo_hanzi.bin' } #TODO
+                                                        }
                                                   ]
                                                 }
                                 }
@@ -162,7 +188,10 @@ def timed_dataload(data, args, values, labels):
                 text_normalized = text
 
             # tokenize
-            tokens = data_utils.tokenize(text_normalized)
+            if data_args.get('load', {}).get('form', None) == 'hanzi':
+                tokens = data_utils.tokenize_hanzi(text_normalized)
+            else:
+                tokens = data_utils.tokenize(text_normalized)
 
             # choose embedding type
             vector = None
@@ -190,30 +219,44 @@ for data_source, data_params in datasets.iteritems():
     klass = data_params['class']
     loader = klass(data_params['path'])
     data_args = data_params['args']
-    data = loader.load_data()
+    load_args = data_args.get('load', {})
+    data = loader.load_data(load_args)
 
     # test all vector models
     for embedder_model in data_args['models']:
 
         # identify prebuilt model if exists
-        prebuilt_model_path = None
+        prebuilt_path_model = None
         if isinstance(embedder_model, dict):
-            embedder_model, prebuilt_model_path = embedder_model.items().pop()
+            embedder_model, prebuilt_model_params = embedder_model.items().pop()
+            prebuilt_path_model = prebuilt_model_params.get('model')
 
         # initialize word vector embedder
-        embedder = WordVectorEmbedder(embedder_model, prebuilt_model_path)
+        embedder = WordVectorEmbedder(embedder_model, prebuilt_path_model)
 
         # load pre-sampled data from disk
-        if prebuilt_model_path:
+        if prebuilt_path_model:
+
+            # training data (custom or default)
+            if prebuilt_model_params.get('train', None):
+                prebuilt_path_train = prebuilt_model_params.get('train')
+            else:
+                prebuilt_path_train = WordVectorBuilder.filename_train(prebuilt_path_model)
+
+            # testing data (custom or default)
+            if prebuilt_model_params.get('test', None):
+                prebuilt_path_test = prebuilt_model_params.get('test')
+            else:
+                prebuilt_path_test = WordVectorBuilder.filename_test(prebuilt_path_model)
 
             # import pickled data
-            with open(WordVectorBuilder.filename_train(prebuilt_model_path), 'rb') as f:
+            with open(prebuilt_path_train, 'rb') as f:
                 data_train = pickle.load(f)
-            with open(WordVectorBuilder.filename_test(prebuilt_model_path), 'rb') as f:
+            with open(prebuilt_path_test, 'rb') as f:
                 data_test = pickle.load(f)
 
             # update embedder parameters
-            model_path_dir, model_path_filename, model_path_filext = WordVectorBuilder.filename_components(prebuilt_model_path)
+            model_path_dir, model_path_filename, model_path_filext = WordVectorBuilder.filename_components(prebuilt_path_model)
             embedder.model_group = model_path_filename
             embedder.model_subset = model_path_filename
 
@@ -225,7 +268,7 @@ for data_source, data_params in datasets.iteritems():
 
             # initialize timer
             seconds_loading = 0
-            logger.info("processing {} samples from {}...".format(len(data_train)+len(data_test), prebuilt_model_path))
+            logger.info("processing {} samples from {}...".format(len(data_train)+len(data_test), prebuilt_path_model))
 
             # load training dataset
             profile_results = timed_dataload(data_train, data_args, values_train, labels_train)
@@ -259,9 +302,8 @@ for data_source, data_params in datasets.iteritems():
             labels = []
 
             # get equal-sized subsets of each class
-            min_samples = data_args['min_samples'] if data_args.has_key('min_samples') else None
             data_sampler = DataSampler(klass, file_path=data_params['path'], num_classes=2)
-            data = data_sampler.sample_balanced(min_samples)
+            data = data_sampler.sample_balanced(min_samples=data_args.get('min_samples', None), rng_seed=data_args.get('load', {}).get('rng_seed', None))
 
             # load dataset
             logger.info("processing {} samples from {}...".format(len(data), data_params['path']))
