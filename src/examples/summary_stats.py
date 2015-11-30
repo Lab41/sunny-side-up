@@ -28,17 +28,23 @@ def summary_metrics(json_path):
     return best_metrics
 
 def summary_times(epochtimes_json_path, traintimes_json_path):
-    train_times = json.load(open(traintimes_json_path))
-    epoch_times = json.load(open(epochtimes_json_path))
-    data_loading_time = epoch_times[0]['start'] - train_times['start']
-    epoch_training_times = [ e['end'] - e['start'] for e in epoch_times ]
-    epoch_testing_times = [ epoch_times[i]['start'] - epoch_times[i-1]['end'] for i in range(1, len(epoch_times)) ]
-    return { 
-            'training_per_epoch_secs'       : epoch_training_times,
-            'testing_per_epoch_secs'        : epoch_testing_times,
-            'data_loading_secs'             : data_loading_time,
-            'total_time'                    : train_times['end'] - train_times['start']
-           }
+    result_dict = dict()
+    with open(epochtimes_json_path) as epoch_times_file: 
+        epoch_times = json.load(epoch_times_file)
+        epoch_training_times = [ e['end'] - e['start'] for e in epoch_times ]
+        epoch_testing_times = [ epoch_times[i]['start'] - epoch_times[i-1]['end'] for i in range(1, len(epoch_times)) ]
+        num_epochs = len(epoch_times)
+        result_dict['training_per_epoch_secs'] = epoch_training_times
+        result_dict['testing_per_epoch_secs'] = epoch_testing_times
+
+        try:
+            with open(traintimes_json_path) as train_times_file:
+                train_times = json.load(train_times_file)
+                result_dict['total_time'] = train_times['end'] - train_times['start']
+                result_dict['data_loading_secs'] = epoch_times[0]['start'] - train_times['start']
+        except IOError:
+            result_dict['total_time'] = epoch_times[num_epochs-1]['end'] - epoch_times[0]['start']
+    return result_dict 
 
 def main(confusions, epoch_times, train_times):
     results_hash = { 'metrics' : summary_metrics(confusions),
