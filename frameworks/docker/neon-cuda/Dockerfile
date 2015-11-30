@@ -119,6 +119,7 @@ RUN pip install -U six
 
 # add gensim 
 RUN pip install gensim
+RUN pip install nltk
 
 # add python
 #RUN cd /tmp && \
@@ -139,6 +140,9 @@ RUN cd /tmp && \
 RUN echo "\ndeb http://archive.ubuntu.com/ubuntu/ vivid main" >> /etc/apt/sources.list && \
     apt-get update && \
     apt-get install python-six
+# remove vivid repositories
+RUN sed -i '$d' /etc/apt/sources.list && \
+    apt-get update
 
 # default to shell in root dir
 WORKDIR /root

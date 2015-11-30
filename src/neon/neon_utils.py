@@ -8,12 +8,12 @@ import json
 import time
 import datetime
 import logging
-logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
 import numpy as np
 import neon
+import neon.callbacks
+import neon.callbacks.callbacks
+import neon.transforms.cost
 #import matplotlib
 #import sklearn.metrics
 
@@ -54,7 +54,7 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         path_part, ext = os.path.splitext(path_base)
         full_path = "{}{}{}".format(path_part, path_decorator, ext)
         with open(full_path, "w") as f:
-            json.dump(obj, f)
+            json.dump(obj, f, sort_keys=True, indent=2)
 
     def on_train_begin(self, epochs):
         # get start time for training
@@ -85,7 +85,7 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         # save total cost to placeholder to compute difference in next batch
         self.old_cost[:] = self.model.total_cost
         # serialize every so often
-        if len(self.costs[epoch]) % 500 == 0:
+        if len(self.costs[epoch]) % 100 == 0:
             self.write_to_json(self.costs, self.save_path, "_costs")
 
     def on_epoch_begin(self, epoch):
@@ -93,25 +93,25 @@ class NeonCallback(neon.callbacks.callbacks.Callback):
         self.epoch_times.append({})
         self.epoch_times[epoch]['start'] = time.time()
 
-
     def on_epoch_end(self, epoch):
         """Get train/test accuracy, produce
         epoch-wide charts of loss per minibatch"""
         # Get end time for training
         self.epoch_times[epoch]['end'] = time.time()
         # get accuracy scores
-        logger.info("Computing training accuracy")
-        train_accuracy = self.model.eval(self.train_data, neon.transforms.Accuracy())
-        logger.info("Computing testing accuracy")
-        test_accuracy = self.model.eval(self.test_data, neon.transforms.Accuracy())
         logger.info("Computing confusions")
         test_confusion = self.conf_matrix_binary.get(self.model, self.test_data)
+        # Training accuracy is really slow
+        #logger.info("Computing training accuracy")
+        #train_accuracy = self.model.eval(self.train_data, neon.transforms.Accuracy()).tolist()
+        logger.info("Computing testing accuracy")
+        #test_accuracy = self.model.eval(self.test_data, neon.transforms.Accuracy()).tolist()
+        test_accuracy = float(test_confusion['tn'] + test_confusion['tp']) / float(sum(test_confusion.values()))
         # append and serialize to disk
-        self.train_accuracies.append(train_accuracy)
+        #self.train_accuracies.append(train_accuracy)
         self.test_accuracies.append(test_accuracy)
         self.test_confusions.append(test_confusion)
-        train_test_acc = { 'train': self.train_accuracies,
-                           'test' : self.test_accuracies }
+        train_test_acc = { 'test' : self.test_accuracies }
         self.write_to_json(train_test_acc, self.save_path, "_accuracies")
         self.write_to_json(self.test_confusions, self.save_path, "_confusions")
         # finish writing costs to disk
@@ -158,14 +158,26 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
             dict: Returns the metric
         """
         # convert back from onehot and compare
-        self.preds[:] = self.be.argmax(y, axis=0)
-        self.hyps[:] = self.be.argmax(t, axis=0)
+        #logger.debug("Fitting a ... {} shaped thing".format(y.shape))
+        # if outputs are arrays
+        if y.shape[0] > 1:
+            self.preds[:] = self.be.argmax(y, axis=0)
+            self.hyps[:] = self.be.argmax(t, axis=0)
+        # if outputs are scalars
+        else:
+            # in case of single-neuron output (not onehot)
+            self.preds[:] = y
+            self.preds[:] = np.around(self.preds.get())
+            self.hyps[:] = t
+
         self.matches[:] = self.be.equal(self.preds, self.hyps)
 
         conf_matrix = dict()
         predictions = self.preds.get().astype(bool)
         truth = self.hyps.get().astype(bool)
         matches = self.matches.get().astype(bool)
+
+        #logger.debug("predictions: {}\ntruth: {}\nmatches: {}".format(predictions, truth, matches))
         
         # true positives
         conf_matrix['tp'] = np.sum(matches & truth)
@@ -181,14 +193,56 @@ class ConfusionMatrixBinary(neon.transforms.cost.Metric):
         return conf_matrix
 
     def get(self, model, data):
+        """
+        neon's ordinary metric interface is too convoluted for ordinary
+        mortals, so this function takes a model and some data
+        and calculates the accuracy on that data.
+        """
         data.reset()
         conf_matrix = {'tp':0, 'fp':0, 'tn':0, 'fn':0}
         running_sums = [0,0]
         for x,t in data:
             y = model.fprop(x, inference=True)
+            #answers_sample = y.get()[:,:10].tolist()
+            #truth_sample = t.get()[:,:10].tolist()
+            #answers_sample = answers_sample + truth_sample
+            #answers_sample = zip(*answers_sample)
+            #logger.debug(answers_sample)
             new_conf_matrix = self(y, t)
             conf_matrix = { a: conf_matrix[a] + new_conf_matrix[a] for a in conf_matrix.keys() }
             running_sums[0] += np.sum([1 for a in np.nditer(t.get()) if a == 1.])
             running_sums[1] += np.sum([1 for a in np.nditer(t.get()) if a == 0.])
         return conf_matrix
 
+
+class Accuracy(neon.transforms.cost.Metric):
+    """
+    Compute the accuracy error metric
+    """
+    def __init__(self):
+        self.preds = self.be.iobuf(1)
+        self.hyps = self.be.iobuf(1)
+        self.outputs = self.preds  # Contains per record metric
+        self.metric_names = ['Accuracy']
+
+    def __call__(self, y, t):
+        """
+        Compute the accuracy error metric
+
+        Args:
+            y (Tensor or OpTree): Output of previous layer or model
+            t (Tensor or OpTree): True targets corresponding to y
+
+        Returns:
+            float: Returns the metric
+        """
+        if y.shape[0] == 1:
+            # use labels
+            self.preds[:] = np.around(y.get())
+            self.hyps[:] = np.around(t.get())
+        else:
+            # convert back from onehot
+            self.preds[:] = self.be.argmax(y, axis=0)
+            self.hyps[:] = self.be.argmax(t, axis=0)
+        self.outputs[:] = self.be.equal(self.preds, self.hyps)
+        return self.outputs.get().mean()

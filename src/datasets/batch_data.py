@@ -152,6 +152,8 @@ def batch_data(data_loader, batch_size=128, normalizer_fun=None,
 
             logger.debug("Nr Yielded: {}, Max: {}".format(
                 nr_yielded, max_records))
+            logger.debug("Batch shape (docs): {}".format(docs_np.shape))
+
             yield docs_np, labels_np
 
 
@@ -278,18 +280,20 @@ class H5Iterator:
             next_data = self.data[which_index]
             if next_data.shape == (1,):
                 next_data = bytes(next_data[0])
-                logger.debug("Going from singleton to string: '{}...'".format(next_data[::-1][:50]))
+                #logger.debug("Going from singleton to string: '{}...'".format(next_data[::-1][:50]))
             else:
-                logger.debug("H5 record shape: {}".format(next_data.shape))
+                #logger.debug("H5 record shape: {}".format(next_data.shape))
+                pass
 
             # take label out of container if singleton
             next_label = self.labels[which_index]
             if next_label.shape == (1,):
                 next_label = next_label[0]
-                logger.debug("Going from singleton to numeric type: {}".format(type(next_label)))
+                #logger.debug("Going from singleton to numeric type: {}".format(type(next_label)))
                 #logger.debug("Shape: {}".format(next_label.shape))
             else:
-                logger.debug("H5 record shape: {}".format(next_label.shape))
+                #logger.debug("H5 record shape: {}".format(next_label.shape))
+                pass
             yield (next_data, next_label)
 
 def pick_splits(splits):
