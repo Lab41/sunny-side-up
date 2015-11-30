@@ -15,9 +15,7 @@ if [ -e '/dev/nvidia1' ]; then
    CMDSTR="${CMDSTR} --device /dev/nvidia1:/dev/nvidia1 "
 fi
 # mount point, image, and command
-CMDSTR="${CMDSTR} --volume $(pwd):/root/data "
-CMDSTR="${CMDSTR} --volume ${FSERVER}:/root/data/fs4 "
-CMDSTR="${CMDSTR}  '$__image' bash"
-eval "$CMDSTR"
+CMDSTR="${CMDSTR} --volume $(pwd):/root/data '$__image' bash"
 
+eval "$CMDSTR"
 
