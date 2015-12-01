@@ -228,7 +228,7 @@ def mkdir_p(path):
 
 def tokenize_hanzi(txt):
     import jieba
-    tokens_hanzi = [tkn[0] for tkn in jieba.tokenize(txt)]
+    return [tkn[0] for tkn in jieba.tokenize(txt)]
 
 
 def tokenize(txt):
