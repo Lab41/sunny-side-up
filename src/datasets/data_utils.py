@@ -53,7 +53,7 @@ class DataSampler:
         else:
             return 0
 
-    def sample_balanced(self, min_samples=None, shuffle=True, sample_after_load=False, rng_seed=None):
+    def sample_balanced(self, min_samples=None, shuffle=True, sample_after_load=False, rng_seed=None, load_data_args={}):
         '''
             Returns dataset with equal numbers of each label
 
@@ -76,7 +76,7 @@ class DataSampler:
         self.samples = {}
 
         # process all samples
-        for text,sentiment in self.klass(self.file_path).load_data():
+        for text,sentiment in self.klass(self.file_path).load_data(load_data_args):
 
             # calculate minimum samples in each category
             min_current_samples = self.min_current_samples()
