@@ -119,7 +119,7 @@ datasets =  {
                                     'class':    OpenWeibo,
                                     'path':     os.path.join(dir_data, 'openweibocensored'),
                                     'args':     { 'load':   {   'form': 'hanzi',
-                                                                'randomseed': 13337
+                                                                'rng_seed': 13337
                                                             },
                                                   'embed':      {   'type': 'averaged' },
                                                   'shuffle_after_load': True,
@@ -127,7 +127,7 @@ datasets =  {
                                                         'glove',
                                                         'word2vec',
                                                         {
-                                                            'word2vec':   {   'model': '/data/openweibocensored/openweibo_hanzi.bin' } #TODO
+                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_hanzi_CLEAN_vocab31357747.bin' }
                                                         }
                                                   ]
                                                 }
