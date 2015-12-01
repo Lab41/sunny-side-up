@@ -257,7 +257,6 @@ for data_source, data_params in datasets.iteritems():
 
             # update embedder parameters
             model_path_dir, model_path_filename, model_path_filext = WordVectorBuilder.filename_components(prebuilt_path_model)
-            embedder.model_group = model_path_filename
             embedder.model_subset = model_path_filename
 
             # initialize lists (will be converted later into numpy arrays)
