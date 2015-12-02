@@ -220,7 +220,7 @@ for data_source, data_params in datasets.iteritems():
     loader = klass(data_params['path'])
     data_args = data_params['args']
     load_args = data_args.get('load', {})
-    data = loader.load_data(load_args)
+    data = loader.load_data(**load_args)
 
     # test all vector models
     for embedder_model in data_args['models']:
