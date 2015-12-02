@@ -76,7 +76,7 @@ class DataSampler:
         self.samples = {}
 
         # process all samples
-        for text,sentiment in self.klass(self.file_path).load_data(load_data_args):
+        for text,sentiment in self.klass(self.file_path).load_data(**load_data_args):
 
             # calculate minimum samples in each category
             min_current_samples = self.min_current_samples()
