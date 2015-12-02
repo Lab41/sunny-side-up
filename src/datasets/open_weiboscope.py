@@ -234,3 +234,32 @@ class OpenWeibo:
 
     def load_data(self, which_set='train', form='pinyin', train_pct=1.0, nr_records=None, rng_seed=None, min_length=None, max_length=None, pad_out=False, keep_retweets=False, label_type='deleted'):
         return load_data(self.file_path, which_set=which_set, form=form, train_pct=train_pct, nr_records=nr_records, rng_seed=rng_seed, min_length=min_length, max_length=max_length, pad_out=pad_out, keep_retweets=keep_retweets, label_type=label_type)
+
+
+class OpenWeiboIterator:
+    '''
+        Iterator for text in (text,sentiment) tuples returned by a generator
+    '''
+    def __init__(self, dirname, form):
+        self.counter = 0
+        self.data = OpenWeibo(dirname).load_data(form=form, keep_retweets=True)
+
+        # setup tokenizer
+        if form == 'hanzi':
+            self.tokenize_text = tokenize_hanzi
+        else:
+            self.tokenize_text = tokenize
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        text,sentiment = self.data.next()
+
+        # increment and output progress of counter
+        self.counter += 1
+        if self.counter % 10000 == 0:
+            print("Iterator at {}".format(self.counter))
+
+        # return tokenized text
+        return self.tokenize_text(text)
