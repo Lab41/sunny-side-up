@@ -10,6 +10,8 @@ import data_utils
 from zipfile import ZipFile
 from data_utils import get_file, to_one_hot, syslogger
 
+download_all_csvs = False
+
 # update field size
 csv.field_size_limit(sys.maxsize)
 
@@ -54,10 +56,11 @@ def check_for_csvs(data_path):
     """Search in data_path for all the CSVs
     from the Open Weiboscope data. If any 
     are not present, return False"""
-    
-    for csv_path in [ os.path.join(data_path, "week{}.csv").format(a) for a in [ str(b) for b in range(1, 52) ] ]:
-        if not os.path.isfile(csv_path):
-            return False
+
+    if download_all_csvs:
+        for csv_path in [ os.path.join(data_path, "week{}.csv").format(a) for a in [ str(b) for b in range(1, 52) ] ]:
+            if not os.path.isfile(csv_path):
+                return False
     return True
 
 def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_records=None, rng_seed=None, min_length=None, max_length=None, pad_out=False, keep_retweets=False, label_type='deleted'):
