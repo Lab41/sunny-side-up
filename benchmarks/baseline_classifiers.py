@@ -206,7 +206,7 @@ def timed_dataload(data, args, embedder, values, labels):
                 text_normalized = text
 
             # tokenize
-            if data_args.get('load', {}).get('form', None) == 'hanzi':
+            if args.get('load', {}).get('form', None) == 'hanzi':
                 tokens = data_utils.tokenize_hanzi(text_normalized)
             else:
                 tokens = data_utils.tokenize(text_normalized)
