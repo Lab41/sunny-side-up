@@ -65,3 +65,49 @@
         "time_in_seconds_training": "436.555546"
     }
 }
+{
+    "classifier": "LogisticRegression",
+    "data": {
+        "negative": "5596.0",
+        "positive": "5453.0",
+        "source": "openweibo",
+        "testsize": "11049",
+        "time_in_seconds_loading": "60.035951"
+    },
+    "data_args": {
+        "embed": {
+            "type": "averaged"
+        },
+        "load": {
+            "form": "hanzi",
+            "rng_seed": 13337,
+            "label_type": "denied"
+        },
+        "models": [
+            "glove",
+            "word2vec",
+            {
+                "word2vec": {
+                    "model": "/data/openweibo/openweibo_fullset_hanzi_CLEAN_vocab31357747.bin"
+                }
+            }
+        ],
+        "shuffle_after_load": true
+    },
+    "embedding": {
+        "model": "glove",
+        "subset": "glove.twitter.27B.200d"
+    },
+    "metrics": {
+        "FN": "1323",
+        "FP": "1450",
+        "TN": "4146",
+        "TP": "4130",
+        "accuracy": "0.749027061273",
+        "f1": "0.748663101604",
+        "precision": "0.740143369176",
+        "recall": "0.757381258023",
+        "time_in_seconds_testing": "0.007756",
+        "time_in_seconds_training": "6.624252"
+    }
+}
