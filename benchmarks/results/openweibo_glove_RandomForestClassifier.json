@@ -65,3 +65,94 @@
         "time_in_seconds_training": "220.749996"
     }
 }
+{
+    "classifier": "RandomForestClassifier",
+    "data": {
+        "negative": "5596.0",
+        "positive": "5453.0",
+        "source": "openweibo",
+        "testsize": "11049",
+        "time_in_seconds_loading": "60.035951"
+    },
+    "data_args": {
+        "embed": {
+            "type": "averaged"
+        },
+        "load": {
+            "form": "hanzi",
+            "rng_seed": 13337,
+            "label_type": "denied"
+        },
+        "models": [
+            "glove",
+            "word2vec",
+            {
+                "word2vec": {
+                    "model": "/data/openweibo/openweibo_fullset_hanzi_CLEAN_vocab31357747.bin"
+                }
+            }
+        ],
+        "shuffle_after_load": true
+    },
+    "embedding": {
+        "model": "glove",
+        "subset": "glove.twitter.27B.200d"
+    },
+    "metrics": {
+        "FN": "501",
+        "FP": "1162",
+        "TN": "4434",
+        "TP": "4952",
+        "accuracy": "0.849488641506",
+        "f1": "0.85622892712",
+        "precision": "0.809944389925",
+        "recall": "0.908123968458",
+        "time_in_seconds_testing": "0.134445",
+        "time_in_seconds_training": "1.745911"
+    }
+}
+{
+    "classifier": "RandomForestClassifier",
+    "data": {
+        "negative": "159621.0",
+        "positive": "160379.0",
+        "source": "openweibo",
+        "testsize": "320000",
+        "time_in_seconds_loading": "1672.550472"
+    },
+    "data_args": {
+        "embed": {
+            "type": "averaged"
+        },
+        "load": {
+            "form": "hanzi",
+            "rng_seed": 13337
+        },
+        "models": [
+            "glove",
+            "word2vec",
+            {
+                "word2vec": {
+                    "model": "/data/openweibo/openweibo_fullset_hanzi_CLEAN_vocab31357747.bin"
+                }
+            }
+        ],
+        "shuffle_after_load": true
+    },
+    "embedding": {
+        "model": "glove",
+        "subset": "glove.twitter.27B.200d"
+    },
+    "metrics": {
+        "FN": "52535",
+        "FP": "63853",
+        "TN": "95768",
+        "TP": "107844",
+        "accuracy": "0.6362875",
+        "f1": "0.649513966682",
+        "precision": "0.628106489921",
+        "recall": "0.672432176282",
+        "time_in_seconds_testing": "0.832305",
+        "time_in_seconds_training": "63.510721"
+    }
+}
