@@ -281,18 +281,42 @@ for data_source, data_params in datasets.iteritems():
             # store loading time
             seconds_loading += profile_results.timer.total_tt
 
+            # shuffle if necessary
+            if data_args['shuffle_after_load']:
+
+                # store new lists
+                values_train_shuffled = []
+                labels_train_shuffled = []
+                values_test_shuffled = []
+                labels_test_shuffled = []
+
+                # generate subsample of random indices out of total available
+                random.seed(data_args.get('load', {}).get('rng_seed', None))
+                indices_train = range(len(values_train))
+                indices_test = range(len(values_test))
+                random.shuffle(indices_train)
+                random.shuffle(indices_test)
+
+                # keep entries at those random indices
+                for i in indices_train:
+                    values_train_shuffled.append(values_train[i])
+                    labels_train_shuffled.append(labels_train[i])
+                for i in indices_test:
+                    values_test_shuffled.append(values_test[i])
+                    labels_test_shuffled.append(labels_test[i])
+
+                # keep shuffled lists
+                values_train = values_train_shuffled
+                labels_train = labels_train_shuffled
+                values_test = values_test_shuffled
+                labels_test = labels_test_shuffled
+
+
             # create numpy arrays for classifier input
             values_train = np.array(values_train, dtype='float32')
             labels_train = np.array(labels_train, dtype='float32')
             values_test = np.array(values_test, dtype='float32')
             labels_test = np.array(labels_test, dtype='float32')
-
-            # shuffle if necessary
-            if data_args['shuffle_after_load']:
-                np.random.shuffle(values_train)
-                np.random.shuffle(labels_train)
-                np.random.shuffle(values_test)
-                np.random.shuffle(labels_test)
 
         else:
 
@@ -311,15 +335,31 @@ for data_source, data_params in datasets.iteritems():
             # store loading time
             seconds_loading = profile_results.timer.total_tt
 
+            # shuffle if necessary
+            if data_args['shuffle_after_load']:
+
+                # store new lists
+                values_shuffled = []
+                labels_shuffled = []
+
+                # generate subsample of random indices out of total available
+                random.seed(data_args.get('load', {}).get('rng_seed', None))
+                indices = range(len(values))
+                random.shuffle(indices)
+
+                # keep entries at those random indices
+                for i in indices:
+                    values_shuffled.append(values[i])
+                    labels_shuffled.append(labels[i])
+
+                # keep shuffled lists
+                values = values_shuffled
+                labels = labels_shuffled
+
             # convert into nparray for sklearn
             values = np.array(values, dtype="float32")
             labels = np.array(labels, dtype="float32")
             logger.info("Loaded {} samples...".format(len(values)))
-
-            # shuffle if necessary
-            if data_args['shuffle_after_load']:
-                np.random.shuffle(values)
-                np.random.shuffle(labels)
 
             # split into training and test data
             logger.info("splitting dataset into training and testing sets...")
