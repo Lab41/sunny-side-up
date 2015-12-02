@@ -375,8 +375,8 @@ for data_source, data_params in datasets.iteritems():
                 labels = labels_shuffled
 
             # convert into nparray for sklearn
-            values = np.array(values, dtype="float32")
-            labels = np.array(labels, dtype="float32")
+            values = np.nan_to_num(np.array(values, dtype="float32"))
+            labels = np.nan_to_num(np.array(labels, dtype="float32"))
             logger.info("Loaded {} samples...".format(len(values)))
 
             # split into training and test data
@@ -398,13 +398,11 @@ for data_source, data_params in datasets.iteritems():
             logger.info("Training %s classifier..." % classifier.__class__.__name__)
             profile_results = timed_training(classifier, values_train, labels_train)
             seconds_training = profile_results.timer.total_tt
-
             # profiled testing
             logger.info("Testing %s classifier..." % classifier.__class__.__name__)
             profile_results = timed_testing(classifier, values_test)
             predictions = profile_results.results
             seconds_testing = profile_results.timer.total_tt
-
             # calculate metrics
             data_size           = len(labels_test)
             data_positive       = np.sum(labels_test)
@@ -418,7 +416,6 @@ for data_source, data_params in datasets.iteritems():
             precision           = metrics.precision_score(labels_test, predictions)
             recall              = metrics.recall_score(labels_test, predictions)
             f1                  = metrics.f1_score(labels_test, predictions)
-
             # build results object
             results = { 'classifier':   str(classifier.__class__.__name__),
                         'data':    {    'source':                   str(data_source),
@@ -443,11 +440,9 @@ for data_source, data_params in datasets.iteritems():
                                         'time_in_seconds_testing':  str(seconds_testing)
                                     }
                        }
-
             # ensure output directory exists
             if not os.path.isdir(dir_results):
                 data_utils.mkdir_p(dir_results)
-
             # save json file
             filename_results = "{}_{}_{}.json".format(data_source, embedder_model, classifier.__class__.__name__)
             logger.info("Saving results to {}...".format(filename_results))
