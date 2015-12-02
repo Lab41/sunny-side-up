@@ -170,7 +170,7 @@ def timed_testing(classifier, values):
     return classifier.predict(values)
 
 @timed
-def timed_dataload(data, args, values, labels):
+def timed_dataload(data, args, embedder, values, labels):
 
     # use separate counter to account for invalid input along the way
     counter = 0
@@ -270,13 +270,13 @@ for data_source, data_params in datasets.iteritems():
             logger.info("processing {} samples from {}...".format(len(data_train)+len(data_test), prebuilt_path_model))
 
             # load training dataset
-            profile_results = timed_dataload(data_train, data_args, values_train, labels_train)
+            profile_results = timed_dataload(data_train, data_args, embedder, values_train, labels_train)
 
             # store loading time
             seconds_loading += profile_results.timer.total_tt
 
             # load training dataset
-            profile_results = timed_dataload(data_test, data_args, values_test, labels_test)
+            profile_results = timed_dataload(data_test, data_args, embedder, values_test, labels_test)
 
             # store loading time
             seconds_loading += profile_results.timer.total_tt
@@ -306,7 +306,7 @@ for data_source, data_params in datasets.iteritems():
 
             # load dataset
             logger.info("processing {} samples from {}...".format(len(data), data_params['path']))
-            profile_results = timed_dataload(data, data_args, values, labels)
+            profile_results = timed_dataload(data, data_args, embedder, values, labels)
 
             # store loading time
             seconds_loading = profile_results.timer.total_tt
