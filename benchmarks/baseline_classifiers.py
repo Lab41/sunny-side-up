@@ -119,6 +119,24 @@ datasets =  {
                                     'class':    OpenWeibo,
                                     'path':     os.path.join(dir_data, 'openweibocensored'),
                                     'args':     { 'load':   {   'form': 'hanzi',
+                                                                'rng_seed': 13337,
+                                                                'label_type': 'denied'
+                                                            },
+                                                  'embed':      {   'type': 'averaged' },
+                                                  'shuffle_after_load': True,
+                                                  'models': [
+                                                        'glove',
+                                                        'word2vec',
+                                                        {
+                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_hanzi_CLEAN_vocab31357747.bin' }
+                                                        }
+                                                  ]
+                                                }
+                                },
+                'openweibo':    {
+                                    'class':    OpenWeibo,
+                                    'path':     os.path.join(dir_data, 'openweibo'),
+                                    'args':     { 'load':   {   'form': 'hanzi',
                                                                 'rng_seed': 13337
                                                             },
                                                   'embed':      {   'type': 'averaged' },
