@@ -1,6 +1,5 @@
 from gensim.models import Word2Vec, Doc2Vec
 from src.datasets.open_weiboscope import OpenWeibo, OpenWeiboIterator
-from src.datasets.data_utils import tokenize, tokenize_hanzi
 import cPickle as pickle
 import random
 
