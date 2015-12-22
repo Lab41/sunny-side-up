@@ -149,7 +149,87 @@ datasets =  {
                                                         }
                                                   ]
                                                 }
+                                },
+                { 'openweibo':    {
+                                    'class':    OpenWeibo,
+                                    'path':     os.path.join(dir_data, 'openweibo'),
+                                    'args':     { 'load':   {   'form': 'hanzi',
+                                                                'rng_seed': 13337
+                                                            },
+                                                  'embed':      {   'type': 'averaged' },
+                                                  'shuffle_after_load': True,
+                                                  'models': [
+                                                        {
+                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_min10_hanzi_vocab2548911_binary_CLEAN.bin',
+                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
+                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin',
+                                                                              'args': { 'binary': 'True' }
+                                                                          }
+                                                        },
+                                                        {
+                                                            'word2vec':   {   'model': '/data/GoogleNews-vectors-negative300.bin.gz',
+                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
+                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin'
+                                                                          }
+                                                        },
+                                                        {
+                                                            'glove':      {
+                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
+                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin'
+                                                                          }
+                                                        },
+                                                       {
+                                                            'word2vec':      {
+                                                                              'model': '/data/sentiment140_800000.bin',
+                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
+                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin'
+                                                                          }
+                                                        }
+                                                  ]
+                                                }
                                 }
+                },
+                { 'openweibo':    {
+                                    'class':    OpenWeibo,
+                                    'path':     os.path.join(dir_data, 'openweibo'),
+                                    'args':     { 'load':   {   'form': 'hanzi',
+                                                                'rng_seed': 13337,
+                                                                'label_type': 'denied'
+                                                            },
+                                                  'embed':      {   'type': 'averaged' },
+                                                  'shuffle_after_load': True,
+                                                  'models': [
+                                                        {
+                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_min10_hanzi_vocab2548911_binary_CLEAN.bin',
+                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
+                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
+                                                                              'args': { 'binary': 'True' }
+                                                                          }
+                                                        },
+                                                        {
+                                                            'word2vec':   {   'model': '/data/GoogleNews-vectors-negative300.bin.gz',
+                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
+                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
+                                                                              'args': { 'binary': 'True' }
+                                                                          }
+                                                        },
+                                                        {
+                                                            'glove':      {
+                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
+                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
+                                                                          }
+                                                        },
+                                                       {
+                                                            'word2vec':      {
+                                                                              'model': '/data/sentiment140_800000.bin',
+                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
+                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
+                                                                          }
+                                                        }
+                                                  ]
+                                                }
+                                }
+                }
             }
 
 
