@@ -7,6 +7,7 @@ import csv
 import logging
 import numpy as np
 import data_utils
+from data_utils import tokenize, tokenize_hanzi
 from zipfile import ZipFile
 from data_utils import get_file, to_one_hot, syslogger
 
