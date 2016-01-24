@@ -12,12 +12,11 @@ class WordVectorEmbedder:
     '''
 
 
-    def __init__(self, model_type, model_fullpath=None, model_group=None, model_subset=None):
+    def __init__(self, model_type, model_fullpath=None, model_group=None, model_subset=None, model_args={}):
         '''
             initialize a model from a saved object file
         '''
         self.model_type = model_type
-        model_args          = {}
         if self.model_type == 'word2vec':
 
             # default model

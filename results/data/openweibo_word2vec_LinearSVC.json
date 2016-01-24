@@ -219,3 +219,94 @@
         "time_in_seconds_training": "125.12555"
     }
 }
+{
+    "classifier": "LinearSVC",
+    "data": {
+        "negative": "5516.0",
+        "positive": "5533.0",
+        "source": "openweibo",
+        "testsize": "11049",
+        "time_in_seconds_loading": "71.612071"
+    },
+    "data_args": {
+        "embed": {
+            "type": "averaged"
+        },
+        "load": {
+            "form": "hanzi",
+            "rng_seed": 13337,
+            "label_type": "denied"
+        },
+        "models": [
+            "glove",
+            "word2vec",
+            {
+                "word2vec": {
+                    "model": "/data/openweibo/openweibo_fullset_hanzi_CLEAN_vocab31357747.bin"
+                }
+            }
+        ],
+        "shuffle_after_load": true
+    },
+    "embedding": {
+        "model": "word2vec",
+        "subset": "openweibo_fullset_hanzi_CLEAN_vocab31357747"
+    },
+    "metrics": {
+        "FN": "917",
+        "FP": "718",
+        "TN": "4798",
+        "TP": "4616",
+        "accuracy": "0.852022807494",
+        "f1": "0.8495444925",
+        "precision": "0.865391826022",
+        "recall": "0.834267124526",
+        "time_in_seconds_testing": "0.007178",
+        "time_in_seconds_training": "2.774802"
+    }
+}
+{
+    "classifier": "LinearSVC",
+    "data": {
+        "negative": "159921.0",
+        "positive": "160069.0",
+        "source": "openweibo",
+        "testsize": "319990",
+        "time_in_seconds_loading": "2072.291479"
+    },
+    "data_args": {
+        "embed": {
+            "type": "averaged"
+        },
+        "load": {
+            "form": "hanzi",
+            "rng_seed": 13337
+        },
+        "models": [
+            "glove",
+            "word2vec",
+            {
+                "word2vec": {
+                    "model": "/data/openweibo/openweibo_fullset_hanzi_CLEAN_vocab31357747.bin"
+                }
+            }
+        ],
+        "shuffle_after_load": true
+    },
+    "embedding": {
+        "model": "word2vec",
+        "subset": "openweibo_fullset_hanzi_CLEAN_vocab31357747"
+    },
+    "metrics": {
+        "FN": "57919",
+        "FP": "61330",
+        "TN": "98591",
+        "TP": "102150",
+        "accuracy": "0.627335229226",
+        "f1": "0.631434496784",
+        "precision": "0.624847076095",
+        "recall": "0.638162292511",
+        "time_in_seconds_testing": "1.185077",
+        "time_in_seconds_training": "175.470436"
+    }
+}

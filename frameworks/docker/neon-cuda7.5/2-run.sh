@@ -1,21 +1,21 @@
 #!/bin/bash
 
-# choose Docker image to use 
+# choose Docker image to use
 __image=lab41/neon-cuda7.5
-#__image=lab41/neon-cuda
 
 # put together docker cmd with variable number of devices
-CMDSTR="docker run -it --device /dev/nvidiactl:/dev/nvidiactl --device /dev/nvidia-uvm:/dev/nvidia-uvm "
-# device 0
-if [ -e '/dev/nvidia0' ]; then
-   CMDSTR="${CMDSTR} --device /dev/nvidia0:/dev/nvidia0 "
-fi
-# device 1
-if [ -e '/dev/nvidia1' ]; then
-   CMDSTR="${CMDSTR} --device /dev/nvidia1:/dev/nvidia1 "
-fi
-# mount point, image, and command
-CMDSTR="${CMDSTR} --volume $(pwd):/root/data '$__image' bash"
+CMDSTR="docker run  -it \
+                    --volume ${pwd}:/root/data \
+                    --device /dev/nvidiactl:/dev/nvidiactl --device /dev/nvidia-uvm:/dev/nvidia-uvm"
 
+# attach GPU devices
+for GPUDEV in $(ls /dev/nvidia[0-9]*); do
+    CMDSTR="${CMDSTR} --device ${GPUDEV}:${GPUDEV}"
+done
+
+# specify image (and optional) command
+CMDSTR="${CMDSTR} '$__image' bash"
+
+# start container
+echo -e "evaluating $CMDSTR"
 eval "$CMDSTR"
-
