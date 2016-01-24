@@ -65,3 +65,49 @@
         "time_in_seconds_training": "1.543608"
     }
 }
+{
+    "classifier": "GaussianNB",
+    "data": {
+        "negative": "5596.0",
+        "positive": "5453.0",
+        "source": "openweibo",
+        "testsize": "11049",
+        "time_in_seconds_loading": "60.035951"
+    },
+    "data_args": {
+        "embed": {
+            "type": "averaged"
+        },
+        "load": {
+            "form": "hanzi",
+            "rng_seed": 13337,
+            "label_type": "denied"
+        },
+        "models": [
+            "glove",
+            "word2vec",
+            {
+                "word2vec": {
+                    "model": "/data/openweibo/openweibo_fullset_hanzi_CLEAN_vocab31357747.bin"
+                }
+            }
+        ],
+        "shuffle_after_load": true
+    },
+    "embedding": {
+        "model": "glove",
+        "subset": "glove.twitter.27B.200d"
+    },
+    "metrics": {
+        "FN": "1212",
+        "FP": "3098",
+        "TN": "2498",
+        "TP": "4241",
+        "accuracy": "0.609919449724",
+        "f1": "0.663070669168",
+        "precision": "0.577871644638",
+        "recall": "0.777737025491",
+        "time_in_seconds_testing": "0.091644",
+        "time_in_seconds_training": "0.073674"
+    }
+}
