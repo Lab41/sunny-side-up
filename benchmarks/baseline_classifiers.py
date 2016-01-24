@@ -119,7 +119,8 @@ datasets =  {
                                     'class':    OpenWeibo,
                                     'path':     os.path.join(dir_data, 'openweibocensored'),
                                     'args':     { 'load':   {   'form': 'hanzi',
-                                                                'randomseed': 13337
+                                                                'rng_seed': 13337,
+                                                                'label_type': 'denied'
                                                             },
                                                   'embed':      {   'type': 'averaged' },
                                                   'shuffle_after_load': True,
@@ -127,11 +128,108 @@ datasets =  {
                                                         'glove',
                                                         'word2vec',
                                                         {
-                                                            'word2vec':   {   'model': '/data/openweibocensored/openweibo_hanzi.bin' } #TODO
+                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_hanzi_CLEAN_vocab31357747.bin' }
+                                                        }
+                                                  ]
+                                                }
+                                },
+                'openweibo':    {
+                                    'class':    OpenWeibo,
+                                    'path':     os.path.join(dir_data, 'openweibo'),
+                                    'args':     { 'load':   {   'form': 'hanzi',
+                                                                'rng_seed': 13337
+                                                            },
+                                                  'embed':      {   'type': 'averaged' },
+                                                  'shuffle_after_load': True,
+                                                  'models': [
+                                                        'glove',
+                                                        'word2vec',
+                                                        {
+                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_hanzi_CLEAN_vocab31357747.bin' }
+                                                        }
+                                                  ]
+                                                }
+                                },
+                { 'openweibo':    {
+                                    'class':    OpenWeibo,
+                                    'path':     os.path.join(dir_data, 'openweibo'),
+                                    'args':     { 'load':   {   'form': 'hanzi',
+                                                                'rng_seed': 13337
+                                                            },
+                                                  'embed':      {   'type': 'averaged' },
+                                                  'shuffle_after_load': True,
+                                                  'models': [
+                                                        {
+                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_min10_hanzi_vocab2548911_binary_CLEAN.bin',
+                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
+                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin',
+                                                                              'args': { 'binary': 'True' }
+                                                                          }
+                                                        },
+                                                        {
+                                                            'word2vec':   {   'model': '/data/GoogleNews-vectors-negative300.bin.gz',
+                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
+                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin'
+                                                                          }
+                                                        },
+                                                        {
+                                                            'glove':      {
+                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
+                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin'
+                                                                          }
+                                                        },
+                                                       {
+                                                            'word2vec':      {
+                                                                              'model': '/data/sentiment140_800000.bin',
+                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
+                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin'
+                                                                          }
                                                         }
                                                   ]
                                                 }
                                 }
+                },
+                { 'openweibo':    {
+                                    'class':    OpenWeibo,
+                                    'path':     os.path.join(dir_data, 'openweibo'),
+                                    'args':     { 'load':   {   'form': 'hanzi',
+                                                                'rng_seed': 13337,
+                                                                'label_type': 'denied'
+                                                            },
+                                                  'embed':      {   'type': 'averaged' },
+                                                  'shuffle_after_load': True,
+                                                  'models': [
+                                                        {
+                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_min10_hanzi_vocab2548911_binary_CLEAN.bin',
+                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
+                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
+                                                                              'args': { 'binary': 'True' }
+                                                                          }
+                                                        },
+                                                        {
+                                                            'word2vec':   {   'model': '/data/GoogleNews-vectors-negative300.bin.gz',
+                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
+                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
+                                                                              'args': { 'binary': 'True' }
+                                                                          }
+                                                        },
+                                                        {
+                                                            'glove':      {
+                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
+                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
+                                                                          }
+                                                        },
+                                                       {
+                                                            'word2vec':      {
+                                                                              'model': '/data/sentiment140_800000.bin',
+                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
+                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
+                                                                          }
+                                                        }
+                                                  ]
+                                                }
+                                }
+                }
             }
 
 
@@ -170,7 +268,7 @@ def timed_testing(classifier, values):
     return classifier.predict(values)
 
 @timed
-def timed_dataload(data, args, values, labels):
+def timed_dataload(data, args, embedder, values, labels):
 
     # use separate counter to account for invalid input along the way
     counter = 0
@@ -188,7 +286,7 @@ def timed_dataload(data, args, values, labels):
                 text_normalized = text
 
             # tokenize
-            if data_args.get('load', {}).get('form', None) == 'hanzi':
+            if args.get('load', {}).get('form', None) == 'hanzi':
                 tokens = data_utils.tokenize_hanzi(text_normalized)
             else:
                 tokens = data_utils.tokenize(text_normalized)
@@ -213,187 +311,217 @@ def timed_dataload(data, args, values, labels):
 
 
 # iterate all datasources
-for data_source, data_params in datasets.iteritems():
+for dataset in datasets:
+    for data_source, data_params in dataset.iteritems():
 
-    # prepare data loader
-    klass = data_params['class']
-    loader = klass(data_params['path'])
-    data_args = data_params['args']
-    load_args = data_args.get('load', {})
-    data = loader.load_data(load_args)
+        # prepare data loader
+        klass = data_params['class']
+        loader = klass(data_params['path'])
+        data_args = data_params['args']
+        load_args = data_args.get('load', {})
+        data = loader.load_data(**load_args)
 
-    # test all vector models
-    for embedder_model in data_args['models']:
+        # test all vector models
+        for embedder_model in data_args['models']:
 
-        # identify prebuilt model if exists
-        prebuilt_path_model = None
-        if isinstance(embedder_model, dict):
-            embedder_model, prebuilt_model_params = embedder_model.items().pop()
-            prebuilt_path_model = prebuilt_model_params.get('model')
+            # identify prebuilt model if exists
+            if isinstance(embedder_model, dict):
 
-        # initialize word vector embedder
-        embedder = WordVectorEmbedder(embedder_model, prebuilt_path_model)
+                # initialize word vector embedder
+                embedder_model, prebuilt_model_params = embedder_model.items().pop()
+                prebuilt_path_model = prebuilt_model_params.get('model', None)
+                model_args = prebuilt_model_params.get('args', {})
+                embedder = WordVectorEmbedder(embedder_model, model_fullpath=prebuilt_path_model, model_args=model_args)
 
-        # load pre-sampled data from disk
-        if prebuilt_path_model:
+                # update embedder parameters
+                if prebuilt_path_model:
+                    model_path_dir, model_path_filename, model_path_filext = WordVectorBuilder.filename_components(prebuilt_path_model)
+                    embedder.model_subset = model_path_filename
 
-            # training data (custom or default)
-            if prebuilt_model_params.get('train', None):
-                prebuilt_path_train = prebuilt_model_params.get('train')
+                # training data (custom or default)
+                if prebuilt_model_params.get('train', None):
+                    prebuilt_path_train = prebuilt_model_params.get('train')
+                else:
+                    prebuilt_path_train = WordVectorBuilder.filename_train(prebuilt_path_model)
+                with open(prebuilt_path_train, 'rb') as f:
+                    data_train = pickle.load(f)
+
+                # testing data (custom or default)
+                if prebuilt_model_params.get('test', None):
+                    prebuilt_path_test = prebuilt_model_params.get('test')
+                else:
+                    prebuilt_path_test = WordVectorBuilder.filename_test(prebuilt_path_model)
+                with open(prebuilt_path_test, 'rb') as f:
+                    data_test = pickle.load(f)
+
+                # initialize lists (will be converted later into numpy arrays)
+                values_train = []
+                labels_train = []
+                values_test = []
+                labels_test = []
+
+                # initialize timer
+                seconds_loading = 0
+                logger.info("processing {} samples from {}...".format(len(data_train)+len(data_test), prebuilt_path_model))
+
+                # load training dataset
+                profile_results = timed_dataload(data_train, data_args, embedder, values_train, labels_train)
+                seconds_loading += profile_results.timer.total_tt
+
+                # load training dataset
+                profile_results = timed_dataload(data_test, data_args, embedder, values_test, labels_test)
+                seconds_loading += profile_results.timer.total_tt
+
+                # shuffle if necessary
+                if data_args['shuffle_after_load']:
+
+                    # store new lists
+                    values_train_shuffled = []
+                    labels_train_shuffled = []
+                    values_test_shuffled = []
+                    labels_test_shuffled = []
+
+                    # generate subsample of random indices out of total available
+                    random.seed(data_args.get('load', {}).get('rng_seed', None))
+                    indices_train = range(len(values_train))
+                    indices_test = range(len(values_test))
+                    random.shuffle(indices_train)
+                    random.shuffle(indices_test)
+
+                    # keep entries at those random indices
+                    for i in indices_train:
+                        values_train_shuffled.append(values_train[i])
+                        labels_train_shuffled.append(labels_train[i])
+                    for i in indices_test:
+                        values_test_shuffled.append(values_test[i])
+                        labels_test_shuffled.append(labels_test[i])
+
+                    # keep shuffled lists
+                    values_train = values_train_shuffled
+                    labels_train = labels_train_shuffled
+                    values_test = values_test_shuffled
+                    labels_test = labels_test_shuffled
+
+
+                # create numpy arrays for classifier input
+                values_train = np.array(values_train, dtype='float32')
+                labels_train = np.array(labels_train, dtype='float32')
+                values_test = np.array(values_test, dtype='float32')
+                labels_test = np.array(labels_test, dtype='float32')
+
             else:
-                prebuilt_path_train = WordVectorBuilder.filename_train(prebuilt_path_model)
 
-            # testing data (custom or default)
-            if prebuilt_model_params.get('test', None):
-                prebuilt_path_test = prebuilt_model_params.get('test')
-            else:
-                prebuilt_path_test = WordVectorBuilder.filename_test(prebuilt_path_model)
+                # initialize word vector embedder
+                embedder = WordVectorEmbedder(embedder_model)
 
-            # import pickled data
-            with open(prebuilt_path_train, 'rb') as f:
-                data_train = pickle.load(f)
-            with open(prebuilt_path_test, 'rb') as f:
-                data_test = pickle.load(f)
+                # initialize lists (will be converted later into numpy arrays)
+                values = []
+                labels = []
 
-            # update embedder parameters
-            model_path_dir, model_path_filename, model_path_filext = WordVectorBuilder.filename_components(prebuilt_path_model)
-            embedder.model_group = model_path_filename
-            embedder.model_subset = model_path_filename
+                # get equal-sized subsets of each class
+                data_sampler = DataSampler(klass, file_path=data_params['path'], num_classes=2)
+                data = data_sampler.sample_balanced(min_samples=data_args.get('min_samples', None), rng_seed=data_args.get('load', {}).get('rng_seed', None))
 
-            # initialize lists (will be converted later into numpy arrays)
-            values_train = []
-            labels_train = []
-            values_test = []
-            labels_test = []
+                # load dataset
+                logger.info("processing {} samples from {}...".format(len(data), data_params['path']))
+                profile_results = timed_dataload(data, data_args, embedder, values, labels)
 
-            # initialize timer
-            seconds_loading = 0
-            logger.info("processing {} samples from {}...".format(len(data_train)+len(data_test), prebuilt_path_model))
+                # store loading time
+                seconds_loading = profile_results.timer.total_tt
 
-            # load training dataset
-            profile_results = timed_dataload(data_train, data_args, values_train, labels_train)
+                # shuffle if necessary
+                if data_args['shuffle_after_load']:
 
-            # store loading time
-            seconds_loading += profile_results.timer.total_tt
+                    # store new lists
+                    values_shuffled = []
+                    labels_shuffled = []
 
-            # load training dataset
-            profile_results = timed_dataload(data_test, data_args, values_test, labels_test)
+                    # generate subsample of random indices out of total available
+                    random.seed(data_args.get('load', {}).get('rng_seed', None))
+                    indices = range(len(values))
+                    random.shuffle(indices)
 
-            # store loading time
-            seconds_loading += profile_results.timer.total_tt
+                    # keep entries at those random indices
+                    for i in indices:
+                        values_shuffled.append(values[i])
+                        labels_shuffled.append(labels[i])
 
-            # create numpy arrays for classifier input
-            values_train = np.array(values_train, dtype='float32')
-            labels_train = np.array(labels_train, dtype='float32')
-            values_test = np.array(values_test, dtype='float32')
-            labels_test = np.array(labels_test, dtype='float32')
+                    # keep shuffled lists
+                    values = values_shuffled
+                    labels = labels_shuffled
 
-            # shuffle if necessary
-            if data_args['shuffle_after_load']:
-                np.random.shuffle(values_train)
-                np.random.shuffle(labels_train)
-                np.random.shuffle(values_test)
-                np.random.shuffle(labels_test)
+                # convert into nparray for sklearn
+                values = np.nan_to_num(np.array(values, dtype="float32"))
+                labels = np.nan_to_num(np.array(labels, dtype="float32"))
+                logger.info("Loaded {} samples...".format(len(values)))
 
-        else:
-
-            # initialize lists (will be converted later into numpy arrays)
-            values = []
-            labels = []
-
-            # get equal-sized subsets of each class
-            data_sampler = DataSampler(klass, file_path=data_params['path'], num_classes=2)
-            data = data_sampler.sample_balanced(min_samples=data_args.get('min_samples', None), rng_seed=data_args.get('load', {}).get('rng_seed', None))
-
-            # load dataset
-            logger.info("processing {} samples from {}...".format(len(data), data_params['path']))
-            profile_results = timed_dataload(data, data_args, values, labels)
-
-            # store loading time
-            seconds_loading = profile_results.timer.total_tt
-
-            # convert into nparray for sklearn
-            values = np.array(values, dtype="float32")
-            labels = np.array(labels, dtype="float32")
-            logger.info("Loaded {} samples...".format(len(values)))
-
-            # shuffle if necessary
-            if data_args['shuffle_after_load']:
-                np.random.shuffle(values)
-                np.random.shuffle(labels)
-
-            # split into training and test data
-            logger.info("splitting dataset into training and testing sets...")
-            labels_train, labels_dev, labels_test = data_utils.split_data(labels, train=data_fraction_train, dev=0, test=data_fraction_test)
-            values_train, values_dev, values_test = data_utils.split_data(values, train=data_fraction_train, dev=0, test=data_fraction_test)
+                # split into training and test data
+                logger.info("splitting dataset into training and testing sets...")
+                labels_train, labels_dev, labels_test = data_utils.split_data(labels, train=data_fraction_train, dev=0, test=data_fraction_test)
+                values_train, values_dev, values_test = data_utils.split_data(values, train=data_fraction_train, dev=0, test=data_fraction_test)
 
 
-        # calculate distribution
-        dist = Counter()
-        dist.update(labels_test)
+            # calculate distribution
+            dist = Counter()
+            dist.update(labels_test)
 
 
-        # setup classifier
-        logger.info("Training on {}, Testing on {}...".format(len(values_train), len(values_test)))
-        for classifier_name,classifier in classifiers():
+            # setup classifier
+            logger.info("Training on {}, Testing on {}...".format(len(values_train), len(values_test)))
+            for classifier_name,classifier in classifiers():
 
-            # profiled training
-            logger.info("Training %s classifier..." % classifier.__class__.__name__)
-            profile_results = timed_training(classifier, values_train, labels_train)
-            seconds_training = profile_results.timer.total_tt
-
-            # profiled testing
-            logger.info("Testing %s classifier..." % classifier.__class__.__name__)
-            profile_results = timed_testing(classifier, values_test)
-            predictions = profile_results.results
-            seconds_testing = profile_results.timer.total_tt
-
-            # calculate metrics
-            data_size           = len(labels_test)
-            data_positive       = np.sum(labels_test)
-            data_negative       = data_size - data_positive
-            confusion_matrix    = metrics.confusion_matrix(labels_test, predictions)
-            TN                  = confusion_matrix[0][0]
-            FP                  = confusion_matrix[0][1]
-            FN                  = confusion_matrix[1][0]
-            TP                  = confusion_matrix[1][1]
-            accuracy            = metrics.accuracy_score(labels_test, predictions)
-            precision           = metrics.precision_score(labels_test, predictions)
-            recall              = metrics.recall_score(labels_test, predictions)
-            f1                  = metrics.f1_score(labels_test, predictions)
-
-            # build results object
-            results = { 'classifier':   str(classifier.__class__.__name__),
-                        'data':    {    'source':                   str(data_source),
-                                        'testsize':                 str(data_size),
-                                        'positive':                 str(data_positive),
-                                        'negative':                 str(data_negative),
-                                        'time_in_seconds_loading':  str(seconds_loading)
-                                   },
-                        'embedding': {  'model':                    str(embedder_model),
-                                        'subset':                   str(embedder.model_subset)
-                                    },
-                        'data_args':    data_args,
-                        'metrics': {    'TP':                       str(TP),
-                                        'FP':                       str(FP),
-                                        'TN':                       str(TN),
-                                        'FN':                       str(FN),
-                                        'accuracy':                 str(accuracy),
-                                        'precision':                str(precision),
-                                        'recall':                   str(recall),
-                                        'f1':                       str(f1),
-                                        'time_in_seconds_training': str(seconds_training),
-                                        'time_in_seconds_testing':  str(seconds_testing)
-                                    }
-                       }
-
-            # ensure output directory exists
-            if not os.path.isdir(dir_results):
-                data_utils.mkdir_p(dir_results)
-
-            # save json file
-            filename_results = "{}_{}_{}.json".format(data_source, embedder_model, classifier.__class__.__name__)
-            logger.info("Saving results to {}...".format(filename_results))
-            with open(os.path.join(dir_results,filename_results), 'a') as outfile:
-                json.dump(results, outfile, sort_keys=True, indent=4, separators=(',', ': '))
-                outfile.write('\n')
+                # profiled training
+                logger.info("Training %s classifier..." % classifier.__class__.__name__)
+                profile_results = timed_training(classifier, values_train, labels_train)
+                seconds_training = profile_results.timer.total_tt
+                # profiled testing
+                logger.info("Testing %s classifier..." % classifier.__class__.__name__)
+                profile_results = timed_testing(classifier, values_test)
+                predictions = profile_results.results
+                seconds_testing = profile_results.timer.total_tt
+                # calculate metrics
+                data_size           = len(labels_test)
+                data_positive       = np.sum(labels_test)
+                data_negative       = data_size - data_positive
+                confusion_matrix    = metrics.confusion_matrix(labels_test, predictions)
+                TN                  = confusion_matrix[0][0]
+                FP                  = confusion_matrix[0][1]
+                FN                  = confusion_matrix[1][0]
+                TP                  = confusion_matrix[1][1]
+                accuracy            = metrics.accuracy_score(labels_test, predictions)
+                precision           = metrics.precision_score(labels_test, predictions)
+                recall              = metrics.recall_score(labels_test, predictions)
+                f1                  = metrics.f1_score(labels_test, predictions)
+                # build results object
+                results = { 'classifier':   str(classifier.__class__.__name__),
+                            'data':    {    'source':                   str(data_source),
+                                            'testsize':                 str(data_size),
+                                            'positive':                 str(data_positive),
+                                            'negative':                 str(data_negative),
+                                            'time_in_seconds_loading':  str(seconds_loading)
+                                       },
+                            'embedding': {  'model':                    str(embedder_model),
+                                            'subset':                   str(embedder.model_subset)
+                                        },
+                            'data_args':    data_args,
+                            'metrics': {    'TP':                       str(TP),
+                                            'FP':                       str(FP),
+                                            'TN':                       str(TN),
+                                            'FN':                       str(FN),
+                                            'accuracy':                 str(accuracy),
+                                            'precision':                str(precision),
+                                            'recall':                   str(recall),
+                                            'f1':                       str(f1),
+                                            'time_in_seconds_training': str(seconds_training),
+                                            'time_in_seconds_testing':  str(seconds_testing)
+                                        }
+                           }
+                # ensure output directory exists
+                if not os.path.isdir(dir_results):
+                    data_utils.mkdir_p(dir_results)
+                # save json file
+                filename_results = "{}_{}_{}.json".format(data_source, embedder_model, classifier.__class__.__name__)
+                logger.info("Saving results to {}...".format(filename_results))
+                with open(os.path.join(dir_results,filename_results), 'a') as outfile:
+                    json.dump(results, outfile, sort_keys=True, indent=4, separators=(',', ': '))
+                    outfile.write('\n')

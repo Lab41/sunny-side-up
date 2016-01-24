@@ -7,7 +7,11 @@ import csv
 import logging
 import numpy as np
 import data_utils
+from data_utils import tokenize, tokenize_hanzi
+from zipfile import ZipFile
 from data_utils import get_file, to_one_hot, syslogger
+
+download_all_csvs = False
 
 # update field size
 csv.field_size_limit(sys.maxsize)
@@ -53,10 +57,11 @@ def check_for_csvs(data_path):
     """Search in data_path for all the CSVs
     from the Open Weiboscope data. If any 
     are not present, return False"""
-    
-    for csv_path in [ os.path.join(data_path, "week{}.csv").format(a) for a in [ str(b) for b in range(1, 52) ] ]:
-        if not os.path.isfile(csv_path):
-            return False
+
+    if download_all_csvs:
+        for csv_path in [ os.path.join(data_path, "week{}.csv").format(a) for a in [ str(b) for b in range(1, 52) ] ]:
+            if not os.path.isfile(csv_path):
+                return False
     return True
 
 def load_data(file_path, which_set='train', form='pinyin', train_pct=1.0, nr_records=None, rng_seed=None, min_length=None, max_length=None, pad_out=False, keep_retweets=False, label_type='deleted'):
@@ -230,3 +235,32 @@ class OpenWeibo:
 
     def load_data(self, which_set='train', form='pinyin', train_pct=1.0, nr_records=None, rng_seed=None, min_length=None, max_length=None, pad_out=False, keep_retweets=False, label_type='deleted'):
         return load_data(self.file_path, which_set=which_set, form=form, train_pct=train_pct, nr_records=nr_records, rng_seed=rng_seed, min_length=min_length, max_length=max_length, pad_out=pad_out, keep_retweets=keep_retweets, label_type=label_type)
+
+
+class OpenWeiboIterator:
+    '''
+        Iterator for text in (text,sentiment) tuples returned by a generator
+    '''
+    def __init__(self, dirname, form):
+        self.counter = 0
+        self.data = OpenWeibo(dirname).load_data(form=form, keep_retweets=True)
+
+        # setup tokenizer
+        if form == 'hanzi':
+            self.tokenize_text = tokenize_hanzi
+        else:
+            self.tokenize_text = tokenize
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        text,sentiment = self.data.next()
+
+        # increment and output progress of counter
+        self.counter += 1
+        if self.counter % 10000 == 0:
+            print("Iterator at {}".format(self.counter))
+
+        # return tokenized text
+        return self.tokenize_text(text)
