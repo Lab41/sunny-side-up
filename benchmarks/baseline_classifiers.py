@@ -23,6 +23,7 @@ from src.datasets.imdb import IMDB
 from src.datasets.sentiment140 import Sentiment140
 from src.datasets.amazon_reviews import AmazonReviews
 from src.datasets.open_weiboscope import OpenWeibo
+from src.datasets.arabic_twitter import ArabicTwitter
 from src.datasets.word_vector_embedder import WordVectorEmbedder
 
 data_fraction_test = 0.20
@@ -43,189 +44,229 @@ except NameError:
 
 # data inputs
 datasets =  {
-                'sentiment140': {
-                                    'class':    Sentiment140,
-                                    'path':     os.path.join(dir_data, 'sentiment140.csv'),
-                                    'args':     { 'load':       {   'rng_seed': 13337 },
-                                                  'embed':      {   'type': 'averaged' },
-                                                  'normalize':  {   'min_length': 70,
-                                                                    'max_length': 150,
-                                                                    'reverse': False,
-                                                                    'pad_out': False
-                                                                },
-                                                  'shuffle_after_load': False,
-                                                  'models': [
-                                                        'glove',
-                                                        'word2vec'
-                                                  ]
-                                                }
-                                },
-                'imdb':         {
-                                    'class':    IMDB,
-                                    'path':     os.path.join(dir_data, 'imdb'),
-                                    'args':     { 'load':       {   'rng_seed': 13337 },
-                                                  'embed':      {   'type': 'averaged' },
-                                                  'normalize':  {   'encoding': None,
-                                                                    'reverse': False,
-                                                                    'pad_out': False,
-                                                                    'min_length': 0,
-                                                                    'max_length': 9999999
-                                                                },
-                                                  'shuffle_after_load': False,
-                                                  'models': [
-                                                        'glove',
-                                                        'word2vec'
-                                                  ]
-                                                }
-                                },
-                'amazon':       {
-                                    'class':    AmazonReviews,
-                                    'path':     os.path.join(dir_data, 'amazonreviews.gz'),
-                                    'args':     { 'load':       {   'rng_seed': 13337 },
-                                                  'embed':      {   'type': 'averaged' },
-                                                  'normalize':  {   'encoding': None,
-                                                                    'reverse': False,
-                                                                    'min_length': 0,
-                                                                    'max_length': 9999999,
-                                                                    'pad_out': False
-                                                                },
-                                                  'shuffle_after_load': True,
-                                                  'models': [
-                                                        'glove',
-                                                        'word2vec',
-                                                        {
-                                                            'word2vec':   {   'model': '/data/amazon/amazon_800000.bin' }
-                                                        }
-                                                  ]
-                                                }
-                                },
-                'openweibo':    {
-                                    'class':    OpenWeibo,
-                                    'path':     os.path.join(dir_data, 'openweibo'),
-                                    'args':     { 'load':       {   'rng_seed': 13337 },
-                                                  'embed':      {   'type': 'averaged' },
-                                                  'shuffle_after_load': True,
-                                                  'models': [
-                                                        'glove',
-                                                        'word2vec',
-                                                        {
-                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_800000.bin' }
-                                                        }
-                                                  ]
-                                                }
-                                }
-,
-                'openweibo':    {
-                                    'class':    OpenWeibo,
-                                    'path':     os.path.join(dir_data, 'openweibocensored'),
-                                    'args':     { 'load':   {   'form': 'hanzi',
-                                                                'rng_seed': 13337,
-                                                                'label_type': 'denied'
-                                                            },
-                                                  'embed':      {   'type': 'averaged' },
-                                                  'shuffle_after_load': True,
-                                                  'models': [
-                                                        'glove',
-                                                        'word2vec',
-                                                        {
-                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_hanzi_CLEAN_vocab31357747.bin' }
-                                                        }
-                                                  ]
-                                                }
-                                },
-                'openweibo':    {
-                                    'class':    OpenWeibo,
-                                    'path':     os.path.join(dir_data, 'openweibo'),
-                                    'args':     { 'load':   {   'form': 'hanzi',
+#                'sentiment140': {
+#                                    'class':    Sentiment140,
+#                                    'path':     os.path.join(dir_data, 'sentiment140.csv'),
+#                                    'args':     { 'load':       {   'rng_seed': 13337 },
+#                                                  'embed':      {   'type': 'averaged' },
+#                                                  'normalize':  {   'min_length': 70,
+#                                                                    'max_length': 150,
+#                                                                    'reverse': False,
+#                                                                    'pad_out': False
+#                                                                },
+#                                                  'shuffle_after_load': False,
+#                                                  'models': [
+#                                                        'glove',
+#                                                        'word2vec'
+#                                                  ]
+#                                                }
+#                                },
+#                'imdb':         {
+#                                    'class':    IMDB,
+#                                    'path':     os.path.join(dir_data, 'imdb'),
+#                                    'args':     { 'load':       {   'rng_seed': 13337 },
+#                                                  'embed':      {   'type': 'averaged' },
+#                                                  'normalize':  {   'encoding': None,
+#                                                                    'reverse': False,
+#                                                                    'pad_out': False,
+#                                                                    'min_length': 0,
+#                                                                    'max_length': 9999999
+#                                                                },
+#                                                  'shuffle_after_load': False,
+#                                                  'models': [
+#                                                        'glove',
+#                                                        'word2vec'
+#                                                  ]
+#                                                }
+#                                },
+#                'amazon':       {
+#                                    'class':    AmazonReviews,
+#                                    'path':     os.path.join(dir_data, 'amazonreviews.gz'),
+#                                    'args':     { 'load':       {   'rng_seed': 13337 },
+#                                                  'embed':      {   'type': 'averaged' },
+#                                                  'normalize':  {   'encoding': None,
+#                                                                    'reverse': False,
+#                                                                    'min_length': 0,
+#                                                                    'max_length': 9999999,
+#                                                                    'pad_out': False
+#                                                                },
+#                                                  'shuffle_after_load': True,
+#                                                  'models': [
+#                                                        'glove',
+#                                                        'word2vec',
+#                                                        {
+#                                                            'word2vec':   {   'model': '/data/amazon/amazon_800000.bin' }
+#                                                        }
+#                                                  ]
+#                                                }
+#                                },
+#                'openweibo':    {
+#                                    'class':    OpenWeibo,
+#                                    'path':     os.path.join(dir_data, 'openweibo'),
+#                                    'args':     { 'load':       {   'rng_seed': 13337 },
+#                                                  'embed':      {   'type': 'averaged' },
+#                                                  'shuffle_after_load': True,
+#                                                  'models': [
+#                                                        'glove',
+#                                                        'word2vec',
+#                                                        {
+#                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_800000.bin' }
+#                                                        }
+#                                                  ]
+#                                                }
+#                                }
+#,
+#                'openweibo':    {
+#                                    'class':    OpenWeibo,
+#                                    'path':     os.path.join(dir_data, 'openweibocensored'),
+#                                    'args':     { 'load':   {   'form': 'hanzi',
+#                                                                'rng_seed': 13337,
+#                                                                'label_type': 'denied'
+#                                                            },
+#                                                  'embed':      {   'type': 'averaged' },
+#                                                  'shuffle_after_load': True,
+#                                                  'models': [
+#                                                        'glove',
+#                                                        'word2vec',
+#                                                        {
+#                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_hanzi_CLEAN_vocab31357747.bin' }
+#                                                        }
+#                                                  ]
+#                                                }
+#                                },
+#                'openweibo':    {
+#                                    'class':    OpenWeibo,
+#                                    'path':     os.path.join(dir_data, 'openweibo'),
+#                                    'args':     { 'load':   {   'form': 'hanzi',
+#                                                                'rng_seed': 13337
+#                                                            },
+#                                                  'embed':      {   'type': 'averaged' },
+#                                                  'shuffle_after_load': True,
+#                                                  'models': [
+#                                                        'glove',
+#                                                        'word2vec',
+#                                                        {
+#                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_hanzi_CLEAN_vocab31357747.bin' }
+#                                                        }
+#                                                  ]
+#                                                }
+#                                },
+#                { 'openweibo':    {
+#                                    'class':    OpenWeibo,
+#                                    'path':     os.path.join(dir_data, 'openweibo'),
+#                                    'args':     { 'load':   {   'form': 'hanzi',
+#                                                                'rng_seed': 13337
+#                                                            },
+#                                                  'embed':      {   'type': 'averaged' },
+#                                                  'shuffle_after_load': True,
+#                                                  'models': [
+#                                                        {
+#                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_min10_hanzi_vocab2548911_binary_CLEAN.bin',
+#                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
+#                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin',
+#                                                                              'args': { 'binary': 'True' }
+#                                                                          }
+#                                                        },
+#                                                        {
+#                                                            'word2vec':   {   'model': '/data/GoogleNews-vectors-negative300.bin.gz',
+#                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
+#                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin'
+#                                                                          }
+#                                                        },
+#                                                        {
+#                                                            'glove':      {
+#                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
+#                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin'
+#                                                                          }
+#                                                        },
+#                                                       {
+#                                                            'word2vec':      {
+#                                                                              'model': '/data/sentiment140_800000.bin',
+#                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
+#                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin'
+#                                                                          }
+#                                                        }
+#                                                  ]
+#                                                }
+#                                }
+#                },
+#                { 'openweibo':    {
+#                                    'class':    OpenWeibo,
+#                                    'path':     os.path.join(dir_data, 'openweibo'),
+#                                    'args':     { 'load':   {   'form': 'hanzi',
+#                                                                'rng_seed': 13337,
+#                                                                'label_type': 'denied'
+#                                                            },
+#                                                  'embed':      {   'type': 'averaged' },
+#                                                  'shuffle_after_load': True,
+#                                                  'models': [
+#                                                        {
+#                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_min10_hanzi_vocab2548911_binary_CLEAN.bin',
+#                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
+#                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
+#                                                                              'args': { 'binary': 'True' }
+#                                                                          }
+#                                                        },
+#                                                        {
+#                                                            'word2vec':   {   'model': '/data/GoogleNews-vectors-negative300.bin.gz',
+#                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
+#                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
+#                                                                              'args': { 'binary': 'True' }
+#                                                                          }
+#                                                        },
+#                                                        {
+#                                                            'glove':      {
+#                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
+#                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
+#                                                                          }
+#                                                        },
+#                                                       {
+#                                                            'word2vec':      {
+#                                                                              'model': '/data/sentiment140_800000.bin',
+#                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
+#                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
+#                                                                          }
+#                                                        }
+#                                                  ]
+#                                                }
+#                                }
+#                },
+                { 'arabic_twitter':    {
+                                    'class':    ArabicTwitter,
+                                    'path':     os.path.join(dir_data, 'arabic_twitter'),
+                                    'args':     { 'load':   {   'form': 'arabic',
                                                                 'rng_seed': 13337
                                                             },
                                                   'embed':      {   'type': 'averaged' },
                                                   'shuffle_after_load': True,
                                                   'models': [
-                                                        'glove',
-                                                        'word2vec',
                                                         {
-                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_hanzi_CLEAN_vocab31357747.bin' }
-                                                        }
-                                                  ]
-                                                }
-                                },
-                { 'openweibo':    {
-                                    'class':    OpenWeibo,
-                                    'path':     os.path.join(dir_data, 'openweibo'),
-                                    'args':     { 'load':   {   'form': 'hanzi',
-                                                                'rng_seed': 13337
-                                                            },
-                                                  'embed':      {   'type': 'averaged' },
-                                                  'shuffle_after_load': True,
-                                                  'models': [
-                                                        {
-                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_min10_hanzi_vocab2548911_binary_CLEAN.bin',
-                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
-                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin',
+                                                            'word2vec':   {   'model': '/data/arabic_twitter/arabic_tweets_min10vocab_vocab1520226.bin',
+                                                                              'train': '/data/arabic_twitter/arabic_twitter_598315_samples_train.bin',
+                                                                              'test': '/data/arabic_twitter/arabic_twitter_598315_samples_test.bin',
                                                                               'args': { 'binary': 'True' }
                                                                           }
                                                         },
-                                                        {
-                                                            'word2vec':   {   'model': '/data/GoogleNews-vectors-negative300.bin.gz',
-                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
-                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin'
-                                                                          }
-                                                        },
-                                                        {
-                                                            'glove':      {
-                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
-                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin'
-                                                                          }
-                                                        },
-                                                       {
-                                                            'word2vec':      {
-                                                                              'model': '/data/sentiment140_800000.bin',
-                                                                              'train': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_train.bin',
-                                                                              'test': '/data/openweibo/openweibo_hanzi_deleted_800000_samples_test.bin'
-                                                                          }
-                                                        }
-                                                  ]
-                                                }
-                                }
-                },
-                { 'openweibo':    {
-                                    'class':    OpenWeibo,
-                                    'path':     os.path.join(dir_data, 'openweibo'),
-                                    'args':     { 'load':   {   'form': 'hanzi',
-                                                                'rng_seed': 13337,
-                                                                'label_type': 'denied'
-                                                            },
-                                                  'embed':      {   'type': 'averaged' },
-                                                  'shuffle_after_load': True,
-                                                  'models': [
-                                                        {
-                                                            'word2vec':   {   'model': '/data/openweibo/openweibo_fullset_min10_hanzi_vocab2548911_binary_CLEAN.bin',
-                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
-                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
-                                                                              'args': { 'binary': 'True' }
-                                                                          }
-                                                        },
-                                                        {
-                                                            'word2vec':   {   'model': '/data/GoogleNews-vectors-negative300.bin.gz',
-                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
-                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
-                                                                              'args': { 'binary': 'True' }
-                                                                          }
-                                                        },
-                                                        {
-                                                            'glove':      {
-                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
-                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
-                                                                          }
-                                                        },
-                                                       {
-                                                            'word2vec':      {
-                                                                              'model': '/data/sentiment140_800000.bin',
-                                                                              'train': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_train.bin',
-                                                                              'test': '/data/openweibocensored/openweibo_hanzi_censored_27622_samples_test.bin',
-                                                                          }
-                                                        }
+#                                                        {
+#                                                            'word2vec':   {   'model': '/data/GoogleNews-vectors-negative300.bin.gz',
+#                                                                              'train': '/data/arabic_twitter/arabic_twitter_598315_samples_train.bin',
+#                                                                              'test': '/data/arabic_twitter/arabic_twitter_598315_samples_test.bin',
+#                                                                              'args': { 'binary': 'True' }
+#                                                                          }
+#                                                        },
+#                                                        {
+#                                                            'glove':      {
+#                                                                              'train': '/data/arabic_twitter/arabic_twitter_598315_samples_train.bin',
+#                                                                              'test': '/data/arabic_twitter/arabic_twitter_598315_samples_test.bin',
+#                                                                          }
+#                                                        },
+#                                                       {
+#                                                            'word2vec':      {
+#                                                                              'model': '/data/sentiment140_800000.bin',
+#                                                                              'train': '/data/arabic_twitter/arabic_twitter_598315_samples_train.bin',
+#                                                                              'test': '/data/arabic_twitter/arabic_twitter_598315_samples_test.bin',
+#                                                                          }
+#                                                        }
                                                   ]
                                                 }
                                 }
@@ -268,7 +309,7 @@ def timed_testing(classifier, values):
     return classifier.predict(values)
 
 @timed
-def timed_dataload(data, args, embedder, values, labels):
+def timed_dataload(loader, data, args, embedder, values, labels):
 
     # use separate counter to account for invalid input along the way
     counter = 0
@@ -288,6 +329,9 @@ def timed_dataload(data, args, embedder, values, labels):
             # tokenize
             if args.get('load', {}).get('form', None) == 'hanzi':
                 tokens = data_utils.tokenize_hanzi(text_normalized)
+            elif args.get('load', {}).get('form', None) == 'arabic':
+                text_stripped = loader.twitter_strip(text_normalized)
+                tokens = loader.tokenize_arabic(text_stripped)
             else:
                 tokens = data_utils.tokenize(text_normalized)
 
@@ -365,11 +409,11 @@ for dataset in datasets:
                 logger.info("processing {} samples from {}...".format(len(data_train)+len(data_test), prebuilt_path_model))
 
                 # load training dataset
-                profile_results = timed_dataload(data_train, data_args, embedder, values_train, labels_train)
+                profile_results = timed_dataload(loader, data_train, data_args, embedder, values_train, labels_train)
                 seconds_loading += profile_results.timer.total_tt
 
                 # load training dataset
-                profile_results = timed_dataload(data_test, data_args, embedder, values_test, labels_test)
+                profile_results = timed_dataload(loader, data_test, data_args, embedder, values_test, labels_test)
                 seconds_loading += profile_results.timer.total_tt
 
                 # shuffle if necessary
@@ -424,7 +468,7 @@ for dataset in datasets:
 
                 # load dataset
                 logger.info("processing {} samples from {}...".format(len(data), data_params['path']))
-                profile_results = timed_dataload(data, data_args, embedder, values, labels)
+                profile_results = timed_dataload(loader, data, data_args, embedder, values, labels)
 
                 # store loading time
                 seconds_loading = profile_results.timer.total_tt
