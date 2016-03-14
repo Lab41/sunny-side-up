@@ -5,12 +5,12 @@ Lab41's foray into Sentiment Analysis with Deep Learning.  In addition to checki
 > Try them, try them, and you may! Try them and you may, I say.
 
 ## Table of Contents
-- [Blog Overviews](#Blog-Overviews)
-- [Docker Environments](#Docker-Environments)
-- [Binary Classification with Word Vectors](#Binary-Classification-with-Word-Vectors)
+- [Blog Overviews](#blog-overviews)
+- [Docker Environments](#docker-environments)
+- [Binary Classification with Word Vectors](#binary-classification-with-word-vectors)
   - Word Vector Models
   - Training and Testing Data
-- [Binary Classification via Deep Learning](#Binary-Classification-via-Deep-Learning)
+- [Binary Classification via Deep Learning](#binary-classification-via-deep-learning)
   - CNN
   - LSTM
 
@@ -24,7 +24,6 @@ Lab41's foray into Sentiment Analysis with Deep Learning.  In addition to checki
 - [Learning About Deep Learning!](http://www.lab41.org/learning-about-deep-learning/) - September 2015
 
 ### Docker Environments
-```frameworks/docker```:
 - ```lab41/itorch-[cpu|cuda]```: [iTorch](https://github.com/facebook/iTorch) IPython kernel for [Torch](http://torch.ch/) scientific computing GPU framework
 - ```lab41/keras-[cpu|cuda|cuda-jupyter]```: [Keras](http://keras.io/) neural network library (CPU or GPU backend from command line or within Jupyter notebook)
 - ```lab41/neon-[cuda|cuda7.5]```: [neon](https://github.com/NervanaSystems/neon) Deep Learning framework (with CUDA backend) by [Nervana](http://www.nervanasys.com/)
