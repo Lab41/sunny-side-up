@@ -105,7 +105,7 @@ class ArabicTwitter:
         # return stripped text
         return stripped
 
-    def load_data(self):
+    def load_data(self, rng_seed=13337, form='arabic'):
         """
         Load data from Arabic Twitter corpus from public API.
 
