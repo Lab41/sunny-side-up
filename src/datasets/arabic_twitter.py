@@ -11,6 +11,7 @@ from zipfile import ZipFile
 from data_utils import get_file, to_one_hot
 import jpype
 import glob
+import nltk
 
 # update field size
 csv.field_size_limit(sys.maxsize)
@@ -31,19 +32,22 @@ class ArabicTwitter:
         self.samples = 0
         self.file_path = file_path
 
-        # initialize jvm with stanford nlp
-        if not jpype.isJVMStarted():
-            jpype.startJVM(jpype.getDefaultJVMPath(), '-ea', '-Djava.class.path=/data/stanford-segmenter-2015-04-20/stanford-segmenter-3.5.2.jar:%s/stanford-parser.jar' % os.environ["STANFORD_PARSER_HOME"])
+        # setup optional stanford tokenizer
+        if os.environ.get('ARABIC_TOKENIZER', 'nltk') == 'stanford':
 
-        # import java base classes
-        self.String = jpype.java.lang.String
-        self.StringReader = jpype.JClass('java.io.StringReader')
-        self.BufferedReader = jpype.JClass('java.io.BufferedReader')
-        self.InputStreamReader = jpype.JClass('java.io.InputStreamReader')
-        self.StringBufferInputStream = jpype.JClass("java.io.StringBufferInputStream")
+            # initialize jvm with stanford nlp
+            if not jpype.isJVMStarted():
+                jpype.startJVM(jpype.getDefaultJVMPath(), '-ea', '-Djava.class.path=/data/stanford-segmenter-2015-04-20/stanford-segmenter-3.5.2.jar:%s/stanford-parser.jar' % os.environ["STANFORD_PARSER_HOME"])
 
-        # import java stanford-nlp classes
-        self.tokenizerFactory = jpype.JClass("edu.stanford.nlp.international.arabic.process.ArabicTokenizer").factory()
+            # import java base classes
+            self.String = jpype.java.lang.String
+            self.StringReader = jpype.JClass('java.io.StringReader')
+            self.BufferedReader = jpype.JClass('java.io.BufferedReader')
+            self.InputStreamReader = jpype.JClass('java.io.InputStreamReader')
+            self.StringBufferInputStream = jpype.JClass("java.io.StringBufferInputStream")
+
+            # import java stanford-nlp classes
+            self.tokenizerFactory = jpype.JClass("edu.stanford.nlp.international.arabic.process.ArabicTokenizer").factory()
 
     def load_data_raw(self, file_path=None):
 
@@ -69,16 +73,24 @@ class ArabicTwitter:
 
         # attempt to tokenize
         try:
-            # parser needs unicode literal
+
+            # model unicode literal
             text_u = unicode(text, 'raw_unicode_escape')
 
-            # tokenize input
-            bufferedReader = self.BufferedReader(self.InputStreamReader(self.StringBufferInputStream(self.String(text_u)), "UTF-8"))
-            line = bufferedReader.readLine()
-            tokenizedLine = self.tokenizerFactory.getTokenizer(self.StringReader(line)).tokenize()
+            if os.environ.get('ARABIC_TOKENIZER', 'nltk') == 'stanford':
 
-            # return utf-8 encoded tokens
-            tokens = [tok.toString().encode('utf-8') for tok in tokenizedLine]
+                # tokenize input
+                bufferedReader = self.BufferedReader(self.InputStreamReader(self.StringBufferInputStream(self.String(text_u)), "UTF-8"))
+                line = bufferedReader.readLine()
+                tokenizedLine = self.tokenizerFactory.getTokenizer(self.StringReader(line)).tokenize()
+
+                # return utf-8 encoded tokens
+                tokens = [tok.toString().encode('utf-8') for tok in tokenizedLine]
+
+            else:
+
+                # use NLTK
+                tokens = nltk.tokenize.wordpunct_tokenize(text_u)
 
         except UnicodeDecodeError as e:
             logger.debug(e)
