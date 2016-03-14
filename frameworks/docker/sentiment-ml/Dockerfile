@@ -56,6 +56,9 @@ RUN cd /usr/lib && \
     rm stanford-parser-full-2015-04-20.zip
 ENV STANFORD_PARSER_HOME /usr/lib/stanford-parser-full-2015-04-20
 
+# setup NLTK parser
+RUN python -m nltk.downloader punkt
+
 # setup data volume
 VOLUME ["/data"]
 WORKDIR /data
