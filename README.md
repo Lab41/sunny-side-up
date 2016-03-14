@@ -5,12 +5,12 @@ Lab41's foray into Sentiment Analysis with Deep Learning.  In addition to checki
 > Try them, try them, and you may! Try them and you may, I say.
 
 ## Table of Contents
-- [Blog Overviews](#Blog-Overviews)
-- [Docker Environments](#Docker-Environments)
-- [Binary Classification with Word Vectors](#Binary-Classification-with-Word-Vectors)
+- [Blog Overviews](#blog-overviews)
+- [Docker Environments](#docker-environments)
+- [Binary Classification with Word Vectors](#binary-classification-with-word-vectors)
   - Word Vector Models
   - Training and Testing Data
-- [Binary Classification via Deep Learning](#Binary-Classification-via-Deep-Learning)
+- [Binary Classification via Deep Learning](#binary-classification-via-deep-learning)
   - CNN
   - LSTM
 
