@@ -43,8 +43,8 @@ except NameError:
     dir_results = os.path.join(dir_data, 'results')
 
 # data inputs
-datasets =  {
-#                'sentiment140': {
+datasets =  [
+#                { 'sentiment140': {
 #                                    'class':    Sentiment140,
 #                                    'path':     os.path.join(dir_data, 'sentiment140.csv'),
 #                                    'args':     { 'load':       {   'rng_seed': 13337 },
@@ -60,8 +60,9 @@ datasets =  {
 #                                                        'word2vec'
 #                                                  ]
 #                                                }
-#                                },
-#                'imdb':         {
+#                                }
+#                },
+#                { 'imdb':         {
 #                                    'class':    IMDB,
 #                                    'path':     os.path.join(dir_data, 'imdb'),
 #                                    'args':     { 'load':       {   'rng_seed': 13337 },
@@ -78,8 +79,9 @@ datasets =  {
 #                                                        'word2vec'
 #                                                  ]
 #                                                }
-#                                },
-#                'amazon':       {
+#                                }
+#                },
+#                { 'amazon':       {
 #                                    'class':    AmazonReviews,
 #                                    'path':     os.path.join(dir_data, 'amazonreviews.gz'),
 #                                    'args':     { 'load':       {   'rng_seed': 13337 },
@@ -99,8 +101,9 @@ datasets =  {
 #                                                        }
 #                                                  ]
 #                                                }
-#                                },
-#                'openweibo':    {
+#                                }
+#                },
+#                { 'openweibo':    {
 #                                    'class':    OpenWeibo,
 #                                    'path':     os.path.join(dir_data, 'openweibo'),
 #                                    'args':     { 'load':       {   'rng_seed': 13337 },
@@ -115,8 +118,8 @@ datasets =  {
 #                                                  ]
 #                                                }
 #                                }
-#,
-#                'openweibo':    {
+#                },
+#                { 'openweibo':    {
 #                                    'class':    OpenWeibo,
 #                                    'path':     os.path.join(dir_data, 'openweibocensored'),
 #                                    'args':     { 'load':   {   'form': 'hanzi',
@@ -133,8 +136,9 @@ datasets =  {
 #                                                        }
 #                                                  ]
 #                                                }
-#                                },
-#                'openweibo':    {
+#                                }
+#                },
+#                { 'openweibo':    {
 #                                    'class':    OpenWeibo,
 #                                    'path':     os.path.join(dir_data, 'openweibo'),
 #                                    'args':     { 'load':   {   'form': 'hanzi',
@@ -150,7 +154,8 @@ datasets =  {
 #                                                        }
 #                                                  ]
 #                                                }
-#                                },
+#                                }
+#                },
 #                { 'openweibo':    {
 #                                    'class':    OpenWeibo,
 #                                    'path':     os.path.join(dir_data, 'openweibo'),
@@ -240,39 +245,45 @@ datasets =  {
                                                   'embed':      {   'type': 'averaged' },
                                                   'shuffle_after_load': True,
                                                   'models': [
-                                                        {
-                                                            'word2vec':   {   'model': '/data/arabic_twitter/arabic_tweets_min10vocab_vocab1520226.bin',
-                                                                              'train': '/data/arabic_twitter/arabic_twitter_598315_samples_train.bin',
-                                                                              'test': '/data/arabic_twitter/arabic_twitter_598315_samples_test.bin',
-                                                                              'args': { 'binary': 'True' }
-                                                                          }
-                                                        },
 #                                                        {
-#                                                            'word2vec':   {   'model': '/data/GoogleNews-vectors-negative300.bin.gz',
-#                                                                              'train': '/data/arabic_twitter/arabic_twitter_598315_samples_train.bin',
-#                                                                              'test': '/data/arabic_twitter/arabic_twitter_598315_samples_test.bin',
+#                                                            'word2vec':   {   'model': '/data/arabic_tweets/arabic_tweets_min10vocab_vocab1520226.bin',
+#                                                                              'train': '/data/arabic_tweets/arabic_twitter_emojis_767203_samples_train.bin',
+#                                                                              'test': '/data/arabic_tweets/arabic_twitter_emojis_767203_samples_test.bin',
 #                                                                              'args': { 'binary': 'True' }
 #                                                                          }
 #                                                        },
-#                                                        {
-#                                                            'glove':      {
-#                                                                              'train': '/data/arabic_twitter/arabic_twitter_598315_samples_train.bin',
-#                                                                              'test': '/data/arabic_twitter/arabic_twitter_598315_samples_test.bin',
-#                                                                          }
-#                                                        },
-#                                                       {
-#                                                            'word2vec':      {
-#                                                                              'model': '/data/sentiment140_800000.bin',
-#                                                                              'train': '/data/arabic_twitter/arabic_twitter_598315_samples_train.bin',
-#                                                                              'test': '/data/arabic_twitter/arabic_twitter_598315_samples_test.bin',
-#                                                                          }
-#                                                        }
+                                                        {
+                                                            'word2vec':   {   'model': '/data/GoogleNews-vectors-negative300.bin.gz',
+                                                                              'train': '/data/arabic_tweets/arabic_twitter_emojis_767203_samples_train.bin',
+                                                                              'test': '/data/arabic_tweets/arabic_twitter_emojis_767203_samples_test.bin',
+                                                                              'args': { 'binary': 'True' }
+                                                                          }
+                                                        },
+                                                        {
+                                                            'glove':      {
+                                                                              'train': '/data/arabic_tweets/arabic_twitter_emojis_767203_samples_train.bin',
+                                                                              'test': '/data/arabic_tweets/arabic_twitter_emojis_767203_samples_test.bin',
+                                                                          }
+                                                        },
+                                                       {
+                                                            'word2vec':      {
+                                                                              'model': '/data/sentiment140_800000.bin',
+                                                                              'train': '/data/arabic_tweets/arabic_twitter_emojis_767203_samples_train.bin',
+                                                                              'test': '/data/arabic_tweets/arabic_twitter_emojis_767203_samples_test.bin',
+                                                                          }
+                                                        },
+                                                        {
+                                                            'word2vec':   {   'model': '/data/arabic_tweets/arabic_tweets_NLTK_min10vocab_vocab981429.bin',
+                                                                              'train': '/data/arabic_tweets/arabic_twitter_emojis_767203_samples_train.bin',
+                                                                              'test': '/data/arabic_tweets/arabic_twitter_emojis_767203_samples_test.bin',
+                                                                              'args': { 'binary': 'True' }
+                                                                          }
+                                                        }
                                                   ]
                                                 }
                                 }
                 }
-            }
-
+            ]
 
 
 
@@ -293,8 +304,8 @@ def classifiers():
            ("RandomForests", RandomForestClassifier(n_jobs=-1,
                                                     n_estimators = 15,
                                                     max_features = 'sqrt')),
-           ("Gaussian NaiveBayes", GaussianNB()),
-           ("LinearSVM", svm.LinearSVC())]
+           ("Gaussian NaiveBayes", GaussianNB())] #,
+           #("LinearSVM", svm.LinearSVC())]
 
 
 
