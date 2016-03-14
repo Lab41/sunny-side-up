@@ -16,12 +16,14 @@ Lab41's foray into Sentiment Analysis with Deep Learning.  In addition to checki
 
 
 ### Blog Overviews
-- [Can Word Vectors Help Predict Whether Your Chinese Tweet Gets Censored?](http://www.lab41.org/will-your-chinese-tweet-get-censored/) - March 2016
-- [One More Reason Not To Be Scared of Deep Learning](http://www.lab41.org/one-more-reason-not-to-be-scared-of-deep-learning/) - March 2016
-- [Some Tips for Debugging in Deep Learning](http://www.lab41.org/some-tips-for-debugging-in-deep-learning-2/) - January 2016
-- [Faster On-Ramp to Deep Learning With Jupyter-driven Docker Containers](http://www.lab41.org/faster-on-ramp-to-deep-learning-with-jupyter-driven-docker-containers/) - November 2015
-- [A Tour of Sentiment Analysis Techniques: Getting a Baseline for Sunny Side Up](http://www.lab41.org/a-tour-of-sentiment-analysis-techniques-getting-a-baseline-for-sunny-side-up/) - November 2015
-- [Learning About Deep Learning!](http://www.lab41.org/learning-about-deep-learning/) - September 2015
+|       |      |
+|-------|------|
+| [Can Word Vectors Help Predict Whether Your Chinese Tweet Gets Censored?](http://www.lab41.org/will-your-chinese-tweet-get-censored/) | March 2016 ||
+| [One More Reason Not To Be Scared of Deep Learning](http://www.lab41.org/one-more-reason-not-to-be-scared-of-deep-learning/) | March 2016|
+| [Some Tips for Debugging in Deep Learning](http://www.lab41.org/some-tips-for-debugging-in-deep-learning-2/) | January 2016|
+| [Faster On-Ramp to Deep Learning With Jupyter-driven Docker Containers](http://www.lab41.org/faster-on-ramp-to-deep-learning-with-jupyter-driven-docker-containers/) | November 2015|
+| [A Tour of Sentiment Analysis Techniques: Getting a Baseline for Sunny Side Up](http://www.lab41.org/a-tour-of-sentiment-analysis-techniques-getting-a-baseline-for-sunny-side-up/) | November 2015|
+| [Learning About Deep Learning!](http://www.lab41.org/learning-about-deep-learning/) | September 2015 |
 
 ### Docker Environments
 - ```lab41/itorch-[cpu|cuda]```: [iTorch](https://github.com/facebook/iTorch) IPython kernel for [Torch](http://torch.ch/) scientific computing GPU framework
@@ -120,13 +122,13 @@ model.add(Activation('relu'))
 model.add(Convolution2D(nb_feature_maps, nb_feature_maps, filter_size_row, filter_size_col, border_mode='full')) # reshaped to 32 x maxlen x 256 (32 x 100 x 256)
 model.add(Activation('relu'))
 model.add(MaxPooling2D(poolsize=(2, 2))) # reshaped to 32 x maxlen/2 x 256/2 (32 x 50 x 128)
-#model.add(Dropout(0.25))
+model.add(Dropout(0.25))
 
 # convolution stack with regularization
 model.add(Convolution2D(nb_feature_maps, nb_feature_maps, filter_size_row, filter_size_col)) # reshaped to 32 x 50 x 128
 model.add(Activation('relu'))
 model.add(MaxPooling2D(poolsize=(2, 2))) # reshaped to 32 x maxlen/2/2 x 256/2/2 (32 x 25 x 64)
-#model.add(Dropout(0.25))
+model.add(Dropout(0.25))
 
 # fully-connected layer
 model.add(Flatten())
