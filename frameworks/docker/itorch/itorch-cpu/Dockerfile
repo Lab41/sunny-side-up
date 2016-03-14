@@ -51,36 +51,25 @@ RUN cd /tmp && \
     make install
 
 # update ipython
+ENV testvar 2
 RUN apt-get remove --purge --assume-yes ipython && \
-    pip install ipython jinja2 tornado jsonschema terminado
+    pip install ipython jinja2 tornado jsonschema terminado jupyter
 ENV IPYTHONDIR /ipython
 RUN mkdir /ipython && \
     ipython profile create nbserver
 
+# install itorch dependencies and packages
+RUN sudo apt-get install --assume-yes libssl-dev
+RUN luarocks install luacrypto
+RUN luarocks install uuid
+RUN luarocks install lzmq
+RUN luarocks install itorch
+RUN luarocks install unsup
+RUN luarocks install graph
+RUN luarocks install nngraph
+
 # download tutorials
 RUN git clone https://github.com/torch/tutorials.git
-
-
-# install iTorch
-RUN bash -l -c "git clone https://github.com/facebook/iTorch.git && \
-                cd iTorch && \
-                luarocks make"
-
-# install unsupervised learning package
-RUN bash -l -c "git clone https://github.com/koraykv/unsup.git && \
-                cd unsup && \
-                luarocks make"
-
-# setup graph package
-RUN apt-get install --assume-yes graphviz
-RUN bash -l -c "git clone https://github.com/torch/graph.git && \
-                cd graph && \
-                luarocks make rocks/graph-scm-1.rockspec"
-
-# setup nngraph package
-RUN bash -l -c "git clone https://github.com/torch/nngraph.git && \
-                cd nngraph && \
-                luarocks make"
 
 # expose iTorch notebook
 EXPOSE 8888
